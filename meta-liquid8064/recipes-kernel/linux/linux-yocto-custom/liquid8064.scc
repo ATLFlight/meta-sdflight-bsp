@@ -1,0 +1,21 @@
+#
+# The top-level 'feature' for the liquid8064 custom kernel.
+#
+# Essentially this is a convenient top-level container or starting
+# point for adding lower-level config fragements and features.
+#
+
+# liquid8064.cfg in the linux-yocto-custom subdir is just a
+# convenient place for adding random config fragments.
+
+kconf hardware liquid8064.cfg
+
+# These are used by yocto-kernel to add config fragments and features.
+# Don't remove if you plan on using yocto-kernel with this BSP.
+
+kconf hardware liquid8064-user-config.cfg
+include liquid8064-user-patches.scc
+
+# There are config fragments needed by the Clarence system
+kconf hardware ltp.cfg
+kconf hardware panics.cfg
