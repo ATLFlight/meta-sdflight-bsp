@@ -9,13 +9,15 @@ oe_mkimage () {
 	      --output ${DEPLOY_DIR_IMAGE}/$1 
 }
 
-COMPRESSIONTYPES += "img"
+COMPRESSIONTYPES += "lk"
 
-COMPRESS_DEPENDS.img = ""
-COMPRESS_CMD_img = "oe_mkimage boot.img"
+COMPRESS_DEPENDS.lk = "android_tools-native"
+COMPRESS_CMD_lk = "oe_mkimage ${IMAGE_NAME}"
 
+#COMPRESS_DEPENDS_gz.lk = "android_tools-native"
+#COMPRESS_CMD_gz.lk = "${COMPRESS_CMD_gz}; oe_mkimage boot.img"
 #COMPRESS_DEPENDS_gz.u-boot = "u-boot-mkimage-native"
 #COMPRESS_CMD_gz.u-boot      = "${COMPRESS_CMD_gz}; oe_mkimage ${IMAGE_NAME}.rootfs.${type}.gz gzip"
 
-IMAGE_TYPES += "ext4.img"
+IMAGE_TYPES += "ext4.lk"
 
