@@ -13,7 +13,7 @@
 #   configuration will result in build or boot errors. This is not a
 #   bug.
 #
-# Notes:
+# Notes:n
 #
 #   patches: patches can be merged into to the source git tree itself,
 #            added via the SRC_URI, or controlled via a BSP
@@ -29,7 +29,22 @@
 
 inherit kernel
 require linux-caf.inc
-inherit image_types_img
+
+DEPENDS += "android_tools-native"
+
+do_lk_mkimage() {
+  # Make bootimage
+  ver=`sed -r 's/#define UTS_RELEASE "(.*)"/\1/' ${WORKDIR}/image/usr/src/kernel/include/generated/utsrelease.h`
+  # Updated base address according to new memory map.
+  ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-liquid8064-standard-build/arch/arm/boot/zImage \
+	--ramdisk /dev/null \
+        --cmdline "noinitrd console=ttyHSL0,115200,n8 root=/dev/mmcblk0p13 rw rootwait" \
+	--base 0x80200000 \
+        --pagesize 2048 \
+	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img
+}
+
+addtask lk_mkimage after do_install before do_populate_sysroot
 
 KTAG_DEFAULT = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
 KTAG_liquid8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
@@ -45,19 +60,16 @@ SRC_URI += "file://liquid8064.scc \
             file://liquid8064-user-config.cfg \
             file://liquid8064-user-patches.scc \
            "
-
 LINUX_VERSION ?= "3.4"
 LINUX_VERSION_EXTENSION ?= "-liquid8064"
 
 # tag: AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241
 SRCREV="960880659d78027b3fc0274d3acf64b3c5b34bf8"
-#SRCREV="AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
 
 PR = "r0"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
 COMPATIBLE_MACHINE_liquid8064 = "liquid8064"
 
-KERNEL_IMAGETYPE = "lkImage"
-GCCVERSION="4.8%"
+GCCVERSION="4.7%"
 
