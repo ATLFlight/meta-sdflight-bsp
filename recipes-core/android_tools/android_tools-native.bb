@@ -1,8 +1,6 @@
 inherit native autotools gettext
 
-PR = "r0"
-PV="1.1.36"
-PN = "android_tools"
+
 
 DESCRIPTION = "Tools and libraries from Android"
 LICENSE = "Apache-2.0 & BSD"
@@ -13,6 +11,10 @@ file://libmincrypt/NOTICE;md5=c19179f3430fd533888100ab6616e114 \
 file://logcat/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e \
 file://adb/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e"
 HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
+
+PR = "r0"
+PV="1.1.36"
+PN = "android_tools"
 
 PROVIDES = "android_tools-native"
 
