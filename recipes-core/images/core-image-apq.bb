@@ -14,14 +14,16 @@ fixup_sysroot() {
     install ${WORKDIR}/prima-init.sh ${IMAGE_ROOTFS}/etc/network/prima-init.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/serial-console.conf ${IMAGE_ROOTFS}/etc/init/serial-console.conf
+    install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
     install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}/etc/network/interfaces
     install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}/etc/wpa_supplicant/wpa_supplicant.conf
     install -m 644 -D ${WORKDIR}/authorized_keys ${IMAGE_ROOTFS}/root/.ssh/authorized_keys
-    install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
-    echo "ttyHLS0" >> ${IMAGE_ROOTFS}/etc/securetty
+    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}/etc/clarence-version
+    echo "ttyHSL0" >> ${IMAGE_ROOTFS}/etc/securetty
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}/etc/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
+
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"
@@ -41,3 +43,4 @@ SRC_URI += " \
    file://wpa_supplicant.conf \
    file://udev_files_to_keep.grep \
    "
+
