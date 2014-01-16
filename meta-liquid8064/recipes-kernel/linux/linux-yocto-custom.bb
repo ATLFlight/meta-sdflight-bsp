@@ -44,7 +44,7 @@ do_lk_mkimage() {
 	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img
 }
 
-addtask lk_mkimage after do_install before do_populate_sysroot
+addtask lk_mkimage after do_populate_sysroot
 
 KTAG_DEFAULT = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
 KTAG_liquid8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"

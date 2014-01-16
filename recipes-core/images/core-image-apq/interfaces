@@ -1,0 +1,30 @@
+################################################################################
+## Author: Rahul Anand (ranand@qti.qualcomm.com)
+##
+## /etc/network/interfaces
+## This file is auto-generated after multistrap, and configures the 
+## network interfaces for the Dragon Board 8060A Ubuntu install.
+################################################################################
+
+# Loopback interface
+auto lo
+iface lo inet loopback
+
+# Ethernet interface on the Dragon Board
+auto eth0
+iface eth0 inet dhcp
+
+# The wlan0 interface requires some work before it can be
+# brought up. This work is done in /etc/network/prima-init.sh
+# and then we allow wpa_supplicant to manage the interface,
+# using the wpa-roam option below
+#auto wlan0
+iface wlan0 inet manual 
+        pre-up /etc/network/prima-init.sh
+        wpa-debug-level 3
+        wpa-logfile /var/log/wpa_supp_log.txt
+        wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+
+# This allows DHCP to be run for wlan0 (actually all interfaces).
+iface default inet dhcp
+ 
