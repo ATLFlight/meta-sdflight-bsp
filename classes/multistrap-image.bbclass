@@ -7,9 +7,10 @@ do_rootfs[recrdeptask] += "do_packagedata"
 # Must call real_do_rootfs() from inside here, rather than as a separate
 # task, so that we have a single fakeroot context for the whole process.
 do_rootfs[umask] = "022"
-do_rootfs() {
+fakeroot do_rootfs() {
 	APT_CONFIG=${WORKDIR}/apt.conf /usr/sbin/multistrap -f ${WORKDIR}/multistrap.conf -d ${IMAGE_ROOTFS}
 
+	PATH=/usr/bin:$PATH
 	# Create the image directory
 	mkdir -p ${DEPLOY_DIR_IMAGE}
 
