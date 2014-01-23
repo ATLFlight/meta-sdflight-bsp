@@ -11,7 +11,6 @@ IMAGE_ROOTFS_SIZE = "8192"
 
 fixup_sysroot() {
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
-    install ${WORKDIR}/prima-init.sh ${IMAGE_ROOTFS}/etc/network/prima-init.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/serial-console.conf ${IMAGE_ROOTFS}/etc/init/serial-console.conf
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
@@ -38,7 +37,6 @@ SRC_URI += " \
    file://init \
    file://interfaces \
    file://multistrap.conf \
-   file://prima-init.sh \
    file://serial-console.conf \
    file://wpa_supplicant.conf \
    file://udev_files_to_keep.grep \
