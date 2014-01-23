@@ -26,7 +26,6 @@
 #   example feature addition:
 #            SRC_URI += "file://feature.scc"
 #
-
 inherit kernel
 require linux-caf.inc
 
