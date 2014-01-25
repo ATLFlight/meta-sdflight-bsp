@@ -9,6 +9,22 @@ IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
 IMAGE_ROOTFS_SIZE = "8192"
 
+fixup_conf() {
+    # Convert flat directories to package repositories
+    CURDIR=`pwd`
+    for dir in `ls ${DEPLOY_DIR}/deb`
+      do
+         cd ${DEPLOY_DIR}/deb/${dir}
+         dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+         dpkg-scansources . /dev/null | gzip -9c > Sources.gz
+      done
+    cd ${CURDIR}
+    # Replace place holders with build system values.
+    sed -e "s|@DEPLOY_DIR@|${DEPLOY_DIR}|" -e "s|@MACHINE_ARCH@|${MACHINE_ARCH}|" -e "s|@WORKDIR@|${WORKDIR}|" -e "s|@TUNE_PKGARCH@|${TUNE_PKGARCH}|" -i ${WORKDIR}/multistrap.conf
+}
+
+MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
+
 fixup_sysroot() {
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
