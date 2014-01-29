@@ -18,6 +18,7 @@ SRC_URI += " \
 
 
 PACKAGES = "${PN}"
+PROVIDES += "virtual/wlan-module"
 
 FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/* \
