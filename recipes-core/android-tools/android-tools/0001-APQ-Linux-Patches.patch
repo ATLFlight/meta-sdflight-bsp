@@ -1,0 +1,240 @@
+From 8137d870dbae74aadd340f0081e85460fbfda141 Mon Sep 17 00:00:00 2001
+From: Gene Marsh <gmarsh@qti.qualcomm.com>
+Date: Tue, 28 Jan 2014 21:52:30 +0000
+Subject: APQ Linux Patches
+
+---
+ Makefile.am           |  3 +--
+ adb/Makefile.am       | 38 +++-----------------------------------
+ adb/start_adbd        | 13 ++++++++++++-
+ configure.ac          |  8 +-------
+ usb/Makefile.am       | 20 ++++++++++----------
+ usb/compositions/9025 | 16 +++++++++++++++-
+ usb/start_usb         | 14 +++++++++++++-
+ usb/target            |  3 +++
+ 8 files changed, 58 insertions(+), 57 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 769daa9..9f6158e 100755
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -3,8 +3,7 @@ BUILD_COMPONENTS :=
+ if USELIBCUTILS
+ BUILD_COMPONENTS += libcutils
+ endif
+-BUILD_COMPONENTS += liblog logcat libzipfile
+ 
+-BUILD_COMPONENTS += adb libmincrypt fastboot usb
++BUILD_COMPONENTS += adb usb
+ 
+ SUBDIRS := $(BUILD_COMPONENTS)
+diff --git a/adb/Makefile.am b/adb/Makefile.am
+index 5dc9966..8d94dc1 100755
+--- a/adb/Makefile.am
++++ b/adb/Makefile.am
+@@ -1,39 +1,7 @@
+-bin_PROGRAMS = adbd adb
++initddir = /etc/init.d
++initd_SCRIPTS = start_adbd
+ 
+-# adb host tool for linux
+-# =========================================================
+-adb_SOURCES := \
+-	adb.c \
+-	console.c \
+-	transport.c \
+-	transport_local.c \
+-	transport_usb.c \
+-	commandline.c \
+-	adb_client.c \
+-	sockets.c \
+-	services.c \
+-	file_sync_client.c  \
+-	utils.c \
+-	usb_vendors.c \
+-	fdevent.c \
+-	usb_linux.c \
+-	get_my_path_linux.c
+-
+-adb_CFLAGS = -O2 \
+-	-g \
+-	-DADB_HOST=1 \
+-	-Wall \
+-	-Wno-unused-parameter \
+-	-D_XOPEN_SOURCE \
+-	-D_GNU_SOURCE \
+-	-I../include \
+-	-include ../include/arch/linux-arm/OEConfig.h
+-
+-adb_LDFLAGS = -lpthread -all-static
+-
+-adb_LDADD = ../libcutils/libcutils.a
+-adb_LDADD += ../libzipfile/libzipfile.a
+-adb_LDADD += -lz
++bin_PROGRAMS = adbd
+ 
+ # adbd device daemon
+ # =========================================================
+diff --git a/adb/start_adbd b/adb/start_adbd
+index c4b1feb..7b03786 100644
+--- a/adb/start_adbd
++++ b/adb/start_adbd
+@@ -1,4 +1,15 @@
+ #! /bin/sh
++### BEGIN INIT INFO
++# Provides:          start_adbd
++# Required-Start:    start_usb
++# Required-Stop:     start_usb
++# Should-Start:
++# Should-Stop:
++# Default-Start:     2 3 4 5
++# Default-Stop:      0 1 6
++# Short-Description: Start android debug bridge deamon
++# Description:       This script enabls android debug bridge over usb.
++### END INIT INFO                                                       
+ #
+ # Copyright (c) 2011, The Linux Foundation. All rights reserved.
+ #
+@@ -38,7 +49,7 @@ fi
+ case "$1" in
+   start)
+         echo -n "Starting adbd: "
+-        start-stop-daemon -S -b -a /sbin/adbd
++        start-stop-daemon -S --exec /usr/bin/adbd -b start_adbd
+ 
+         if [ -e "/etc/adb_devid" ]
+         then
+diff --git a/configure.ac b/configure.ac
+index 1886c58..269def0 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -53,7 +53,7 @@
+           [HOST_OS= 'linux'])
+ 
+ 
+-  if test "x$HOST_OS" = "xlinux-gnueabi"; then
++  if test "x$HOST_OS" = "xlinux-gnueabihf"; then
+ 	HOST_OS=linux
+   else
+ 	AC_MSG_NOTICE([Unknown host OS $HOST_OS detected.])
+@@ -65,12 +65,6 @@
+           Makefile \
+           libcutils/Makefile \
+           libcutils/libcutils.pc \
+-          liblog/Makefile \
+-          logcat/Makefile \
+-          libmincrypt/Makefile \
+-          libmincrypt/libmincrypt.pc \
+-          libzipfile/Makefile \
+-          fastboot/Makefile \
+           adb/Makefile \
+           usb/Makefile
+   ])
+diff --git a/usb/Makefile.am b/usb/Makefile.am
+index e438691..30b3d8e 100755
+--- a/usb/Makefile.am
++++ b/usb/Makefile.am
+@@ -1,12 +1,12 @@
+-bin_PROGRAMS = usb_composition_switch
++usbdir = /usr/bin/usb
++compdir = /usr/bin/usb/compositions
++initddir = /etc/init.d
+ 
+-# Program to switch USB compositions
+-# =========================================================
+-usb_composition_switch_CC = @CC@
++usb_SCRIPTS = target
++comp_SCRIPTS = compositions/9025 compositions/empty compositions/hsic_next \
++	compositions/hsusb_next
++initd_SCRIPTS = start_usb
+ 
+-usb_composition_switch_SOURCES = usb_composition_switch.c
+-
+-usb_composition_switch_CFLAGS = -O2 \
+-				-g \
+-				-Wall \
+-				-Wno-unused-parameter
++install-data-hook:
++	test -L $(DESTDIR)$(usbdir)/boot_hsusb_composition || $(LN_S) $(compdir)/9025 $(DESTDIR)$(usbdir)/boot_hsusb_composition
++	test -L $(DESTDIR)$(usbdir)/boot_hsic_composition || $(LN_S) $(compdir)/empty $(DESTDIR)$(usbdir)/boot_hsic_composition
+diff --git a/usb/compositions/9025 b/usb/compositions/9025
+index af2ebea..fbc47e1 100755
+--- a/usb/compositions/9025
++++ b/usb/compositions/9025
+@@ -34,6 +34,17 @@ else
+ 	num="0"
+ fi
+ 
++run_8960 () {
++    echo 0 > /sys/class/android_usb/android$num/enable
++    echo 0x9025 > /sys/class/android_usb/android$num/idProduct
++    echo 0x05C6 > /sys/class/android_usb/android$num/idVendor
++    echo diag > /sys/class/android_usb/android0/f_diag/clients
++    echo smd,tty > /sys/class/android_usb/android0/f_serial/transports
++    echo smd,bam > /sys/class/android_usb/android0/f_rmnet/transports
++    echo diag,adb,serial,rmnet,mass_storage > /sys/class/android_usb/android$num/functions
++    echo 1 > /sys/class/android_usb/android$num/enable
++}
++
+ run_9x15() {
+ 	echo 0 > /sys/class/android_usb/android$num/enable
+ 	echo 0x9025 > /sys/class/android_usb/android$num/idProduct
+@@ -67,7 +78,10 @@ run_9x25_v2() {
+ 	echo 1 > /sys/class/android_usb/android$num/enable
+ }
+ 
+-case `source /usr/bin/usb/target` in
++case `/usr/bin/usb/target` in
++        *8960* )
++                run_8960 &
++                ;;
+ 	*9x15* )
+ 		run_9x15 &
+ 		;;
+diff --git a/usb/start_usb b/usb/start_usb
+index 2e3ce5e..4fcca8f 100755
+--- a/usb/start_usb
++++ b/usb/start_usb
+@@ -1,4 +1,16 @@
+ #!/bin/sh
++### BEGIN INIT INFO
++# Provides:          start_usb
++# Required-Start:
++# Required-Stop:
++# Should-Start:
++# Should-Stop:
++# Default-Start:     2 3 4 5
++# Default-Stop:      0 1 6
++# Short-Description: Configure usb composition for android debug bridge
++# Description:       This script configures usb composition to 9025 mode
++#                    i.e. diag,serial_smd,serial_tty,rmnet_bam,mass_storage,adb.
++### END INIT INFO                                                       
+ #
+ # Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ #
+@@ -33,7 +45,7 @@ case "$1" in
+ 
+         case $KERNEL in
+           3.*)
+-		case `source /usr/bin/usb/target` in
++		case `/usr/bin/usb/target` in
+ 			*9x15* )
+ 			# Nothing to do here for 9x15
+ 			;;
+diff --git a/usb/target b/usb/target
+index a6cb631..367383a 100644
+--- a/usb/target
++++ b/usb/target
+@@ -26,6 +26,9 @@
+ 
+ 
+ case `cat /sys/devices/system/soc/soc0/build_id` in
++        *8960* )
++                res="8960"
++                ;;
+ 	*9x15* )
+ 		res="9x15"
+ 		;;
+-- 
+1.8.1.2
+

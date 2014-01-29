@@ -1,4 +1,4 @@
-inherit native autotools gettext
+inherit autotools gettext
 
 
 
@@ -14,32 +14,26 @@ HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
 
 PR = "r0"
 PV="1.1.36"
-PN = "android_tools"
+PN = "android-tools"
 
-PROVIDES = "android_tools-native"
+PROVIDES = "android-tools"
+
+PACKAGES = "${PN}"
 
 SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
-SRC_URI += "file://Makefile.am \
-            file://Makefile_adb.am \
-            file://Makefile_mkbootimg.am \
-            file://Makefile_libmincrypt.am \
-	    file://configure.ac"
+SRC_URI += "file://0001-APQ-Linux-Patches.patch"
 
 SRCREV="1c246a945e1e2338d5a647379cd79ae2351f213b"
 
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"
 
-do_mv_git() {
-  rm -rf ${S}
-  mv ${WORKDIR}/git ${S}
-  cp ${WORKDIR}/configure.ac ${S}/configure.ac
-  cp ${WORKDIR}/Makefile.am ${S}
-  cp ${WORKDIR}/Makefile_adb.am ${S}/adb/Makefile.am
-  cp ${WORKDIR}/Makefile_mkbootimg.am ${S}/mkbootimg/Makefile.am
-  cp ${WORKDIR}/Makefile_libmincrypt.am ${S}/libmincrypt/Makefile.am
+do_unpack_append() {
+    import shutil
+    import os
+    s = d.getVar('S', True)
+    wd = d.getVar('WORKDIR',True)
+    if os.path.exists(s):
+        shutil.rmtree(s)
+    shutil.move(wd+'/git', s)
 }
-
-addtask mv_git after do_unpack before do_patch
-
-NATIVE_INSTALL_WORKS = "1"
 
