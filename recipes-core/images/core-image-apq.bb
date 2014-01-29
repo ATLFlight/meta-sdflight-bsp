@@ -58,3 +58,5 @@ SRC_URI += " \
    file://udev_files_to_keep.grep \
    "
 
+DEPENDS += "virtual/kernel virtual/wlan-module"
+DEPENDS += "reboot2fastboot android-tools"
