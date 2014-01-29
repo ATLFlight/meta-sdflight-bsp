@@ -15,7 +15,7 @@ fakeroot do_rootfs() {
 	${MULTISTRAP_PREPROCESS_COMMAND}
 
 	# Construct the user space.
-	APT_CONFIG=${WORKDIR}/apt.conf /usr/sbin/multistrap -f ${WORKDIR}/multistrap.conf -d ${IMAGE_ROOTFS}
+	APT_CONFIG=${WORKDIR}/apt.conf /usr/sbin/multistrap -f ${WORKDIR}/multistrap.conf -d ${IMAGE_ROOTFS} --tidy-up
 
 	# Create the image directory
 	mkdir -p ${DEPLOY_DIR_IMAGE}
