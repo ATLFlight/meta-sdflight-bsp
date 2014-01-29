@@ -1,7 +1,5 @@
 inherit native autotools gettext
 
-
-
 DESCRIPTION = "Tools and libraries from Android"
 LICENSE = "Apache-2.0 & BSD"
 LIC_FILES_CHKSUM = "file://libcutils/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e \
@@ -14,32 +12,26 @@ HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
 
 PR = "r0"
 PV="1.1.36"
-PN = "android_tools"
+PN = "android-tools-native"
 
-PROVIDES = "android_tools-native"
+PROVIDES = "android-tools-native"
 
 SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
-SRC_URI += "file://Makefile.am \
-            file://Makefile_adb.am \
-            file://Makefile_mkbootimg.am \
-            file://Makefile_libmincrypt.am \
-	    file://configure.ac"
+SRC_URI += "file://0002-APQ-Linux-Native-Patches.patch"
 
 SRCREV="1c246a945e1e2338d5a647379cd79ae2351f213b"
 
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"
 
-do_mv_git() {
-  rm -rf ${S}
-  mv ${WORKDIR}/git ${S}
-  cp ${WORKDIR}/configure.ac ${S}/configure.ac
-  cp ${WORKDIR}/Makefile.am ${S}
-  cp ${WORKDIR}/Makefile_adb.am ${S}/adb/Makefile.am
-  cp ${WORKDIR}/Makefile_mkbootimg.am ${S}/mkbootimg/Makefile.am
-  cp ${WORKDIR}/Makefile_libmincrypt.am ${S}/libmincrypt/Makefile.am
+do_unpack_append() {
+    import shutil
+    import os
+    s = d.getVar('S', True)
+    wd = d.getVar('WORKDIR',True)
+    if os.path.exists(s):
+        shutil.rmtree(s)
+    shutil.move(wd+'/git', s)
 }
-
-addtask mv_git after do_unpack before do_patch
 
 NATIVE_INSTALL_WORKS = "1"
 

@@ -29,7 +29,7 @@
 inherit kernel
 require linux-caf.inc
 
-DEPENDS += "android_tools-native"
+DEPENDS += "android-tools-native"
 
 do_lk_mkimage() {
   # Make bootimage
