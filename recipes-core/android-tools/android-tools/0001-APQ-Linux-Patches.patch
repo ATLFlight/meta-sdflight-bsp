@@ -1,31 +1,31 @@
-From 8137d870dbae74aadd340f0081e85460fbfda141 Mon Sep 17 00:00:00 2001
+From a9c647645486ffa0590f2962e23a22d213f77587 Mon Sep 17 00:00:00 2001
 From: Gene Marsh <gmarsh@qti.qualcomm.com>
-Date: Tue, 28 Jan 2014 21:52:30 +0000
+Date: Fri, 31 Jan 2014 22:18:10 +0000
 Subject: APQ Linux Patches
 
 ---
- Makefile.am           |  3 +--
+ Makefile.am           |  2 +-
  adb/Makefile.am       | 38 +++-----------------------------------
  adb/start_adbd        | 13 ++++++++++++-
- configure.ac          |  8 +-------
+ configure.ac          |  2 +-
+ libcutils/Makefile.am | 41 +++++++++++++++++++++++++++++++++++++++++
  usb/Makefile.am       | 20 ++++++++++----------
  usb/compositions/9025 | 16 +++++++++++++++-
  usb/start_usb         | 14 +++++++++++++-
  usb/target            |  3 +++
- 8 files changed, 58 insertions(+), 57 deletions(-)
+ 9 files changed, 99 insertions(+), 50 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index 769daa9..9f6158e 100755
+index 769daa9..584677e 100755
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -3,8 +3,7 @@ BUILD_COMPONENTS :=
- if USELIBCUTILS
+@@ -4,7 +4,7 @@ if USELIBCUTILS
  BUILD_COMPONENTS += libcutils
  endif
--BUILD_COMPONENTS += liblog logcat libzipfile
- 
--BUILD_COMPONENTS += adb libmincrypt fastboot usb
-+BUILD_COMPONENTS += adb usb
+ BUILD_COMPONENTS += liblog logcat libzipfile
+-
++ 
+ BUILD_COMPONENTS += adb libmincrypt fastboot usb
  
  SUBDIRS := $(BUILD_COMPONENTS)
 diff --git a/adb/Makefile.am b/adb/Makefile.am
@@ -105,7 +105,7 @@ index c4b1feb..7b03786 100644
          if [ -e "/etc/adb_devid" ]
          then
 diff --git a/configure.ac b/configure.ac
-index 1886c58..269def0 100755
+index 1886c58..7a9e0fe 100755
 --- a/configure.ac
 +++ b/configure.ac
 @@ -53,7 +53,7 @@
@@ -117,19 +117,55 @@ index 1886c58..269def0 100755
  	HOST_OS=linux
    else
  	AC_MSG_NOTICE([Unknown host OS $HOST_OS detected.])
-@@ -65,12 +65,6 @@
-           Makefile \
-           libcutils/Makefile \
-           libcutils/libcutils.pc \
--          liblog/Makefile \
--          logcat/Makefile \
--          libmincrypt/Makefile \
--          libmincrypt/libmincrypt.pc \
--          libzipfile/Makefile \
--          fastboot/Makefile \
-           adb/Makefile \
-           usb/Makefile
-   ])
+diff --git a/libcutils/Makefile.am b/libcutils/Makefile.am
+index 81c062f..bd6075b 100644
+--- a/libcutils/Makefile.am
++++ b/libcutils/Makefile.am
+@@ -1,3 +1,44 @@
++androidincludedir = $(includedir)/android
++
++androidinclude_HEADERS = $(abs_top_srcdir)/include/android/log.h
++
++cutilsincludedir = $(includedir)/cutils
++
++cutilsinclude_HEADERS = $(abs_top_srcdir)/include/cutils/abort_socket.h \
++	$(abs_top_srcdir)/include/cutils/array.h \
++	$(abs_top_srcdir)/include/cutils/ashmem.h \
++	$(abs_top_srcdir)/include/cutils/atomic-arm.h \
++	$(abs_top_srcdir)/include/cutils/atomic.h \
++	$(abs_top_srcdir)/include/cutils/atomic-inline.h \
++	$(abs_top_srcdir)/include/cutils/atomic-x86.h \
++	$(abs_top_srcdir)/include/cutils/compiler.h \
++	$(abs_top_srcdir)/include/cutils/config_utils.h \
++	$(abs_top_srcdir)/include/cutils/cpu_info.h \
++	$(abs_top_srcdir)/include/cutils/dir_hash.h \
++	$(abs_top_srcdir)/include/cutils/event_tag_map.h \
++	$(abs_top_srcdir)/include/cutils/hashmap.h \
++	$(abs_top_srcdir)/include/cutils/iosched_policy.h \
++	$(abs_top_srcdir)/include/cutils/jstring.h \
++	$(abs_top_srcdir)/include/cutils/logd.h \
++	$(abs_top_srcdir)/include/cutils/logger.h \
++	$(abs_top_srcdir)/include/cutils/log.h \
++	$(abs_top_srcdir)/include/cutils/logprint.h \
++	$(abs_top_srcdir)/include/cutils/memory.h \
++	$(abs_top_srcdir)/include/cutils/misc.h \
++	$(abs_top_srcdir)/include/cutils/mq.h \
++	$(abs_top_srcdir)/include/cutils/mspace.h \
++	$(abs_top_srcdir)/include/cutils/native_handle.h \
++	$(abs_top_srcdir)/include/cutils/open_memstream.h \
++	$(abs_top_srcdir)/include/cutils/process_name.h \
++	$(abs_top_srcdir)/include/cutils/properties.h \
++	$(abs_top_srcdir)/include/cutils/record_stream.h \
++	$(abs_top_srcdir)/include/cutils/sched_policy.h \
++	$(abs_top_srcdir)/include/cutils/selector.h \
++	$(abs_top_srcdir)/include/cutils/sockets.h \
++	$(abs_top_srcdir)/include/cutils/threads.h \
++	$(abs_top_srcdir)/include/cutils/tztime.h \
++	$(abs_top_srcdir)/include/cutils/uio.h \
++	$(abs_top_srcdir)/include/cutils/zygote.h
+ 
+ # NOTE: Only supports builds of shared/static libraries for the target
+ 
 diff --git a/usb/Makefile.am b/usb/Makefile.am
 index e438691..30b3d8e 100755
 --- a/usb/Makefile.am
