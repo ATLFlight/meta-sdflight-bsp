@@ -1,7 +1,3 @@
-inherit autotools gettext
-
-
-
 DESCRIPTION = "Tools and libraries from Android"
 LICENSE = "Apache-2.0 & BSD"
 LIC_FILES_CHKSUM = "file://libcutils/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e \
@@ -20,11 +16,14 @@ PROVIDES = "android-tools"
 
 PACKAGES = "${PN}"
 
+inherit autotools gettext
+
 SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
 SRC_URI += "file://0001-APQ-Linux-Patches.patch"
 
 SRCREV="1c246a945e1e2338d5a647379cd79ae2351f213b"
 
+EXTRA_OECONF = "--disable-shared"
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"
 
 do_unpack_append() {
