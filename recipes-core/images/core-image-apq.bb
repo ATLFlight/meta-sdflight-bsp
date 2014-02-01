@@ -1,8 +1,29 @@
+DESCRIPTION = "This recipe includes the core packages needed for an apq system."
+AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
+
 LICENSE = "BSD-3-Clause-Clear"
 LIC_FILES_CHKSUM = "file://../COPYING;md5=11c1d78c92548a586eafd0c08349534b"
 
 inherit image_types
 inherit multistrap-image
+
+SRC_URI += " \
+   file://apt.conf \
+   file://multistrap.conf \
+   file://COPYING \
+   file://authorized_keys \
+   file://config.sh \
+   file://fstab \
+   file://init \
+   file://interfaces \
+   file://multistrap.conf \
+   file://serial-console.conf \
+   file://wpa_supplicant.conf \
+   file://udev_files_to_keep.grep \
+   "
+
+DEPENDS += "virtual/kernel virtual/wlan-module"
+DEPENDS += "reboot2fastboot android-tools diag"
 
 #IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
@@ -42,21 +63,3 @@ fixup_sysroot() {
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"
-
-SRC_URI += " \
-   file://apt.conf \
-   file://multistrap.conf \
-   file://COPYING \
-   file://authorized_keys \
-   file://config.sh \
-   file://fstab \
-   file://init \
-   file://interfaces \
-   file://multistrap.conf \
-   file://serial-console.conf \
-   file://wpa_supplicant.conf \
-   file://udev_files_to_keep.grep \
-   "
-
-DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools"
