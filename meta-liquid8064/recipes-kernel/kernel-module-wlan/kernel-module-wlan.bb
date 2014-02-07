@@ -8,7 +8,7 @@ LICENSE = "GPLv2"
 
 LIC_FILES_CHKSUM = "file://../COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
-SRC_URI = "git://git.quicinc.com/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git"
+SRC_URI = "git://git.quicinc.com:29418/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=ssh"
 SRC_URI += " \
 	file://COPYING \
 	file://prima.patch \
