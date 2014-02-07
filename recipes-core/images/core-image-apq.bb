@@ -23,7 +23,7 @@ SRC_URI += " \
    "
 
 DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools diag"
+DEPENDS += "reboot2fastboot android-tools diag testtools"
 
 #IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
