@@ -1,3 +1,7 @@
+LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58 \
+                    file://${COREBASE}/meta-qr-linux/COPYING;md5=412f82c6beffca3d5c27eed8536154ab"
+
+
 # Images are generally built explicitly, do not need to be part of world.
 EXCLUDE_FROM_WORLD = "1"
 do_rootfs[dirs] = "${TOPDIR} ${WORKDIR}/intercept_scripts"

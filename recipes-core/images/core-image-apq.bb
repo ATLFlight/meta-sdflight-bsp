@@ -1,16 +1,12 @@
 DESCRIPTION = "This recipe includes the core packages needed for an apq system."
 AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
 
-LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://../COPYING;md5=11c1d78c92548a586eafd0c08349534b"
-
 inherit image_types
 inherit multistrap-image
 
 SRC_URI += " \
    file://apt.conf \
    file://multistrap.conf \
-   file://COPYING \
    file://authorized_keys \
    file://config.sh \
    file://fstab \

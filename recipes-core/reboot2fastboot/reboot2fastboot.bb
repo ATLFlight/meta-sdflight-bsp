@@ -2,7 +2,7 @@ inherit autotools
 
 DESCRIPTION = "reboot2fastboot causes target system to reboot into fastboot mode."
 LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://COPYING;md5=11c1d78c92548a586eafd0c08349534b"
+LIC_FILES_CHKSUM = "file://COPYING;md5=cc11e99d4e533c38781bc583ff279e4c"
 
 
 PR = "r0"
