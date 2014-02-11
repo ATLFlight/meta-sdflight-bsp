@@ -4,9 +4,9 @@ inherit module
 
 PR = "r0"
 
-LICENSE = "GPLv2"
+LICENSE = "ISC"
 
-LIC_FILES_CHKSUM = "file://../COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
+LIC_FILES_CHKSUM = "file://../COPYING;md5=552efe106a6bfffc3be6ad39e5273108"
 
 SRC_URI = "git://git.quicinc.com:29418/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=ssh"
 SRC_URI += " \
