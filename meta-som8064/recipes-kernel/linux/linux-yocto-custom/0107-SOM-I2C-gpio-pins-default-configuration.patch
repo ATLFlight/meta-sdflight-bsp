@@ -1,0 +1,54 @@
+From 3d9c1c414952f36373776c6539e3dffef63b7a4c Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+Date: Tue, 26 Nov 2013 18:59:30 -0800
+Subject: [PATCH] SOM I2C gpio pins default configuration
+
+---
+ arch/arm/mach-msm/board-8064-gpiomux.c | 29 ++++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index cf5e827..92bb2ee 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -624,9 +624,36 @@ static struct msm_gpiomux_config apq8064_hdmi_configs[] __initdata = {
+ 	},
+ };
+ 
+-/* SOM: Serial UART-2wire GSBI6 */
+ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 	{
++		.gpio      = 8,		/* GSBI3 QUP I2C_CLK */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
++		.gpio      = 9,		/* GSBI3 QUP I2C_DATA */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
++		.gpio      = 12,		/* GSBI4 QUP I2C_CLK */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
++		.gpio      = 13,		/* GSBI4 QUP I2C_DATA */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
+ 		.gpio      = 14,		/* GSBI6 UART TX */
+ 		.settings = {
+ 			[GPIOMUX_SUSPENDED] = &gsbi6_uart_config,
+-- 
+1.8.2.1
+

@@ -40,12 +40,12 @@ do_unpack_append() {
 
 module_do_compile() {
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-	CROSS_COMPILE=${CROSS_COMPILE} make -C ${STAGING_KERNEL_DIR}/source/../linux-liquid8064-standard-build ARCH=arm M=${S} O=${WORKDIR} -j4
+	CROSS_COMPILE=${CROSS_COMPILE} make -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} -j4
 }
 
 module_do_install() {
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-liquid8064-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
+	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
 
 	# Install firmware
 	mkdir -p ${D}/lib/firmware/wlan/prima

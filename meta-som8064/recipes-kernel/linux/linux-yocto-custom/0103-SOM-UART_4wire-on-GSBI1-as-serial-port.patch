@@ -1,0 +1,52 @@
+From 6edabdc8ad9f9d8d38c856c1c67cab01c8dbc6e6 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+Date: Tue, 5 Nov 2013 14:52:20 -0800
+Subject: [PATCH] SOM UART_4wire on GSBI1 as serial port
+
+---
+ arch/arm/mach-msm/board-8064-gpiomux.c | 12 ++++++++++++
+ arch/arm/mach-msm/board-8064.c         |  2 +-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 745d897..cf5e827 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -638,6 +638,18 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 			[GPIOMUX_SUSPENDED] = &gsbi6_uart_config,
+ 		},
+ 	},
++	{
++		.gpio      = 18,		/* GSBI1 UART TX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi1_uart_config,
++		},
++	},
++	{
++		.gpio      = 19,		/* GSBI1 UART RX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi1_uart_config,
++		},
++	},
+ };
+ 
+ static struct msm_gpiomux_config apq8064_gsbi_configs[] __initdata = {
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 49c6798..83f24e9 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2532,10 +2532,10 @@ static struct platform_device *common_devices[] __initdata = {
+ };
+ 
+ static struct platform_device *cdp_devices[] __initdata = {
++	&apq8064_device_uart_gsbi1,
+ #ifdef CONFIG_MACH_APQ8064_SOM
+ 	&apq8064_device_uart_gsbi6,
+ #else
+-	&apq8064_device_uart_gsbi1,
+ 	&apq8064_device_uart_gsbi7,
+ #endif
+ 	&msm_device_sps_apq8064,
+-- 
+1.8.2.1
+

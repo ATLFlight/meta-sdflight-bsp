@@ -1,0 +1,9 @@
+patch 0000-allow-uninitialized-warning.patch
+patch 0008-modified-drivers-bluetooth-Kconfig.patch
+patch 0101-SOM-bringup-with-basic-BSP-updates.patch
+patch 0102-SOM-USB2-bringup.patch
+patch 0103-SOM-UART_4wire-on-GSBI1-as-serial-port.patch
+patch 0104-SOM-Disable-Audio-devices.patch
+patch 0105-SOM-I2C-host-controller-configuration.patch
+patch 0107-SOM-I2C-gpio-pins-default-configuration.patch
+patch 0108-Patch-to-enable-HDMI-display.patch

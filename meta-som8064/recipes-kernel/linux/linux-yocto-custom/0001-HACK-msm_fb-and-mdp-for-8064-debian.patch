@@ -1,0 +1,71 @@
+From c50d7102a3292815075bfc58101deee8d4c2ee76 Mon Sep 17 00:00:00 2001
+From: Rohit Vaswani <rvaswani@codeaurora.org>
+Date: Fri, 28 Sep 2012 11:12:31 -0700
+Subject: [PATCH] HACK msm_fb and mdp for 8064 debian
+
+Change-Id: I4ec0aa03f1a40902e5086863eedfa21f21ac34e9
+Signed-off-by: Rohit Vaswani <rvaswani@codeaurora.org>
+---
+ arch/arm/configs/msm8960_defconfig | 31 ++++++++++++++-----------------
+ drivers/video/msm/mdp4_overlay.c   |  1 +
+ drivers/video/msm/mdss/mdss_fb.c   |  4 ++--
+ drivers/video/msm/msm_fb.c         |  1 +
+ drivers/video/msm/msm_fb_def.h     |  2 ++
+ 5 files changed, 20 insertions(+), 19 deletions(-)
+
+diff --git a/drivers/video/msm/mdp4_overlay.c b/drivers/video/msm/mdp4_overlay.c
+index a379e56..e9293b8 100644
+--- a/drivers/video/msm/mdp4_overlay.c
++++ b/drivers/video/msm/mdp4_overlay.c
+@@ -1095,6 +1095,7 @@ int mdp4_overlay_format2type(uint32 format)
+ 
+ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pipe)
+ {
++	pipe->src_format = MDP_BGRA_8888;
+ 	switch (pipe->src_format) {
+ 	case MDP_RGB_565:
+ 		pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
+diff --git a/drivers/video/msm/mdss/mdss_fb.c b/drivers/video/msm/mdss/mdss_fb.c
+index f668a84..371de54 100644
+--- a/drivers/video/msm/mdss/mdss_fb.c
++++ b/drivers/video/msm/mdss/mdss_fb.c
+@@ -1044,9 +1044,9 @@ static int mdss_fb_set_par(struct fb_info *info)
+ 	switch (var->bits_per_pixel) {
+ 	case 16:
+ 		if (var->red.offset == 0)
+-			mfd->fb_imgType = MDP_BGR_565;
++			mfd->fb_imgType	= MDP_BGR_565;
+ 		else
+-			mfd->fb_imgType	= MDP_RGB_565;
++			mfd->fb_imgType = MDP_RGB_565;
+ 		break;
+ 
+ 	case 24:
+diff --git a/drivers/video/msm/msm_fb.c b/drivers/video/msm/msm_fb.c
+index 8e400cd..b52ac85 100644
+--- a/drivers/video/msm/msm_fb.c
++++ b/drivers/video/msm/msm_fb.c
+@@ -980,6 +980,7 @@ static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 	case FB_BLANK_NORMAL:
+ 	case FB_BLANK_POWERDOWN:
+ 	default:
++		return 0;
+ 		if (mfd->panel_power_on) {
+ 			int curr_pwr_state;
+ 
+diff --git a/drivers/video/msm/msm_fb_def.h b/drivers/video/msm/msm_fb_def.h
+index dcd648b..31c6500 100644
+--- a/drivers/video/msm/msm_fb_def.h
++++ b/drivers/video/msm/msm_fb_def.h
+@@ -96,6 +96,8 @@ typedef unsigned int boolean;
+ #define MSMFB_DEFAULT_TYPE MDP_RGB_565
+ #endif
+ 
++//#define MSMFB_DEFAULT_TYPE MDP_RGB_565
++
+ #define outp32(addr, val) writel(val, addr)
+ #define outp16(addr, val) writew(val, addr)
+ #define outp8(addr, val) writeb(val, addr)
+-- 
+1.8.1.2
+
