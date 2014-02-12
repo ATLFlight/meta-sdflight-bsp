@@ -1,6 +1,9 @@
 DESCRIPTION = "This recipe includes the core packages needed for an apq system."
 AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
 
+LICENSE = "BSD-3-Clause-Clear" 
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=412f82c6beffca3d5c27eed8536154ab" 
+
 inherit image_types
 inherit multistrap-image
 
