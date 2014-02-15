@@ -73,7 +73,7 @@ loadKernelModules () {
    if [ $cfgModule -eq 0 ]
    then
       echo "INFO: Loading kernel module: cfg80211 ..."
-      insmod /lib/modules/3.4.0-caf-standard/kernel/net/wireless/cfg80211.ko > /dev/null 2>&1
+      modprobe cfg80211 > /dev/null 2>&1
       retVal=$?
    fi
    if [[ $retVal -ne 0 ]]
@@ -87,7 +87,7 @@ loadKernelModules () {
    if [ $wlanModule -eq 0 ]
    then
       echo "INFO: Loading kernel module: wlan ..."
-      insmod /lib/modules/3.4.0-caf-standard/extra/wlan.ko > /dev/null 2>&1
+      modprobe wlan > /dev/null 2>&1
       retVal=$?
    fi
    return $retVal
@@ -97,7 +97,7 @@ status=$?
 
 if [ $status -ne 0 ]
 then
-    echo "ERROR: Aborting WCN bringup"
+    echo "ERROR: Aborting wlan bringup"
     exit 1
 fi
 
