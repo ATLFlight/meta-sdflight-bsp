@@ -27,7 +27,8 @@ DEPENDS += "reboot2fastboot android-tools diag testtools"
 #IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
-IMAGE_ROOTFS_SIZE = "8192"
+#IMAGE_ROOTFS_SIZE_ext4 = "8192000"
+IMAGE_ROOTFS_EXTRA_SPACE = "200000"
 
 fixup_conf() {
     # Convert flat directories to package repositories
