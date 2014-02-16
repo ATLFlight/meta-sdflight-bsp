@@ -8,6 +8,7 @@ inherit image_types
 inherit multistrap-image
 
 SRC_URI += " \
+   file://adb.conf \
    file://apt.conf \
    file://multistrap.conf \
    file://authorized_keys \
@@ -50,6 +51,7 @@ fixup_sysroot() {
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/serial-console.conf ${IMAGE_ROOTFS}/etc/init/serial-console.conf
+    install -m 644 ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}/etc/init/adb.conf
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
     install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}/etc/network/interfaces
     install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}/etc/wpa_supplicant/wpa_supplicant.conf
