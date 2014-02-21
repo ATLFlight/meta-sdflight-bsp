@@ -64,7 +64,7 @@ do_kernel_checkout() {
 	# end debare
 
 	machine_branch="${@ get_machine_branch(d, "${KBRANCH}" )}"
-	machine_tag="${@ get_machine_tag(d, "${KTAG}" )}"
+        machine_tag="${@ get_machine_tag(d, "${KTAG}" )}"
 	# convert any remote branches to local tracking ones
 	for i in `git branch -a | grep remotes | grep -v HEAD`; do
 		b=`echo $i | cut -d' ' -f2 | sed 's%remotes/origin/%%'`;
@@ -92,9 +92,16 @@ do_lk_mkimage() {
   # Make bootimage
   ver=`sed -r 's/#define UTS_RELEASE "(.*)"/\1/' ${WORKDIR}/image/usr/src/kernel/include/generated/utsrelease.h`
   # Update base address according to new memory map.
+  if [ ! -z "${SERIAL_CONSOLES}" ] ; then
+      serialport=`echo "${SERIAL_CONSOLES}" | sed 's/.*\;//'`
+      baudrate=`echo "${SERIAL_CONSOLES}" | sed 's/\;.*//'`
+  else
+      serialport="ttyHSL0"
+      baudrate="115200"
+  fi
   ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-${MACHINE}-standard-build/arch/arm/boot/zImage \
 	--ramdisk /dev/null \
-        --cmdline "noinitrd console=${SERIAL_CONSOLE},115200,n8 root=/dev/mmcblk0p13 rw rootwait" \
+        --cmdline "noinitrd console=${serialport},${baudrate},n8 root=/dev/mmcblk0p13 rw rootwait" \
 	--base 0x80200000 \
         --pagesize 2048 \
 	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img

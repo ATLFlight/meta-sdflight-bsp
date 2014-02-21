@@ -17,6 +17,7 @@ LINUX_KERNEL_TYPE ?= "standard"
 
 # KMETA ?= ""
 KBRANCH ?= "jb_2.5"
+KTAG ?= "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
 KMACHINE ?= "${MACHINE}"
 SRCREV_FORMAT ?= "meta_machine" 
 
