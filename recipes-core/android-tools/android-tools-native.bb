@@ -17,7 +17,7 @@ PN = "android-tools-native"
 PROVIDES = "android-tools-native"
 
 SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
-SRC_URI += "file://0002-APQ-Linux-Native-Patches.patch"
+SRC_URI += "file://0002-QR-Linux-Native-Patches.patch"
 
 SRCREV="1c246a945e1e2338d5a647379cd79ae2351f213b"
 
