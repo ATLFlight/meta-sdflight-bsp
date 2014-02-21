@@ -13,7 +13,7 @@
 #   configuration will result in build or boot errors. This is not a
 #   bug.
 #
-# Notes:n
+# Notes:
 #
 #   patches: patches can be merged into to the source git tree itself,
 #            added via the SRC_URI, or controlled via a BSP
@@ -26,29 +26,22 @@
 #   example feature addition:
 #            SRC_URI += "file://feature.scc"
 #
-inherit kernel
-require linux-caf.inc
 
-DEPENDS += "android-tools-native"
-
-do_lk_mkimage() {
-  # Make bootimage
-  ver=`sed -r 's/#define UTS_RELEASE "(.*)"/\1/' ${WORKDIR}/image/usr/src/kernel/include/generated/utsrelease.h`
-  # Update base address according to new memory map.
-  ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-${MACHINE}-standard-build/arch/arm/boot/zImage \
-	--ramdisk /dev/null \
-        --cmdline "noinitrd console=ttyHSL0,115200,n8 root=/dev/mmcblk0p13 rw rootwait" \
-	--base 0x80200000 \
-        --pagesize 2048 \
-	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img
-}
-
-addtask lk_mkimage after do_deploy and before do_package
-
-KTAG_DEFAULT = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+KTAG_som8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+KBRANCH_som8064 = "linux-${MACHINE}"
 KBRANCH_DEFAULT = "linux-${MACHINE}"
 
+require include/linux-caf.inc
+
 SRC_URI = "git://codeaurora.org/kernel/msm.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git;bareclone=1"
+SRC_URI += "file://defconfig \
+            file://som8064.scc \
+            file://som8064.cfg \
+            file://som8064-user-config.cfg \
+            file://som8064-user-patches.scc \
+           "
+# tag: AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241
+SRCREV="960880659d78027b3fc0274d3acf64b3c5b34bf8"
 
 LINUX_VERSION ?= "3.4"
 LINUX_VERSION_EXTENSION ?= "-${MACHINE}"
@@ -58,3 +51,5 @@ PV = "${LINUX_VERSION}+git${SRCPV}"
 
 GCCVERSION="4.7%"
 
+COMPATIBLE_MACHINE_som8064 = "som8064"
+LINUX_VERSION_EXTENSION_som8064 = "-som8064"
