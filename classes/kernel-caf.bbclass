@@ -88,6 +88,9 @@ do_kernel_checkout() {
 	fi
 }
 
+LK_ROOT_DEV ?= "/dev/mmcblk0p13"
+LK_CMDLINE_OPTIONS ?= ""
+
 do_lk_mkimage() {
   # Make bootimage
   ver=`sed -r 's/#define UTS_RELEASE "(.*)"/\1/' ${WORKDIR}/image/usr/src/kernel/include/generated/utsrelease.h`
@@ -101,7 +104,7 @@ do_lk_mkimage() {
   fi
   ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-${MACHINE}-standard-build/arch/arm/boot/zImage \
 	--ramdisk /dev/null \
-        --cmdline "noinitrd console=${serialport},${baudrate},n8 root=/dev/mmcblk0p13 rw rootwait" \
+        --cmdline "noinitrd console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
 	--base 0x80200000 \
         --pagesize 2048 \
 	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img
