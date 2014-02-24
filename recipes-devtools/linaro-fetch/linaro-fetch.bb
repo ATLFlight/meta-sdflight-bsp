@@ -1,7 +1,7 @@
 inherit native
 
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=412f82c6beffca3d5c27eed8536154ab"
+LICENSE = "BSD-3-Clause-Clear"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=af4568eb99af15f8fbea8230e6762581"
 
 SRC_URI += "https://launchpad.net/linaro-toolchain-binaries/trunk/2013.04/+download/gcc-linaro-arm-linux-gnueabihf-4.7-2013.04-20130415_linux.tar.xz;md5sum=f4b054cb3f6a28465c102e79bf386530"
 SRC_URI += "file://COPYING"

@@ -1,6 +1,6 @@
 DESCRIPTION = "Serial port configuration"
 LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=412f82c6beffca3d5c27eed8536154ab"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=af4568eb99af15f8fbea8230e6762581"
 
 PR = "r0"
 PV = "1.0"
@@ -12,7 +12,6 @@ SERIAL_CONSOLE ?= "115200 ttyHSL0"
 SRC_URI = "file://serial-console.conf"
 
 PACKAGES = "${PN}"
-
 
 do_install() {
     if  [ ! -z "${SERIAL_CONSOLES}" ] ; then
