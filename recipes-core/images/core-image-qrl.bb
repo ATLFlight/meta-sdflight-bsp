@@ -2,7 +2,7 @@ DESCRIPTION = "This recipe includes the core packages needed for an apq system."
 AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
 
 LICENSE = "BSD-3-Clause-Clear" 
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=412f82c6beffca3d5c27eed8536154ab" 
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=af4568eb99af15f8fbea8230e6762581" 
 
 inherit image_types
 inherit multistrap-image
@@ -24,7 +24,7 @@ SRC_URI += " \
 DEPENDS += "virtual/kernel virtual/wlan-module"
 DEPENDS += "reboot2fastboot android-tools diag testtools serial-console"
 
-PV = "CLAR-0017"
+PV = "CLAR-0018"
 
 #IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
