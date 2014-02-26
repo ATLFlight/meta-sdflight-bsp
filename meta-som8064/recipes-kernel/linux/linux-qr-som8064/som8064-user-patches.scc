@@ -8,3 +8,6 @@ patch 0105-SOM-I2C-host-controller-configuration.patch
 patch 0107-SOM-I2C-gpio-pins-default-configuration.patch
 patch 0108-Patch-to-enable-HDMI-display.patch
 patch 0109-Configure-ball-gpio-default-state.patch
+patch 0110-HSIC-interface-configuration.patch
+patch 0111-SPI-controller-configuration.patch
+patch 0112-Slimbus-audio-codec-and-Mic-I2S-configuration.patch

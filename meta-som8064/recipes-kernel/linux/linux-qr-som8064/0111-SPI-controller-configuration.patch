@@ -1,0 +1,334 @@
+From f5b4f41e54aaf094c2be125963d3151b58f901bd Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Fri, 21 Feb 2014 12:56:46 -0800
+Subject: [PATCH] SPI controller configuration
+
+---
+ arch/arm/mach-msm/board-8064-gpiomux.c | 60 ++++++++++++++++++++++++++++-
+ arch/arm/mach-msm/board-8064.c         | 12 +++++-
+ arch/arm/mach-msm/board-8064.h         |  9 +++++
+ arch/arm/mach-msm/clock-8960.c         | 16 ++++++++
+ arch/arm/mach-msm/devices-8064.c       | 70 ++++++++++++++++++++++++++++++++++
+ arch/arm/mach-msm/devices.h            |  1 +
+ 6 files changed, 166 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 92bb2ee..a51ca80 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -46,7 +46,6 @@ static struct gpiomux_setting gpio_spi_cs2_config = {
+ 	.pull = GPIOMUX_PULL_NONE,
+ };
+ 
+-
+ struct msm_gpiomux_config apq8064_ethernet_configs[] = {
+ 	{
+ 		.gpio = 43,
+@@ -57,6 +56,19 @@ struct msm_gpiomux_config apq8064_ethernet_configs[] = {
+ 	},
+ };
+ #endif
++
++static struct gpiomux_setting som_gpio_spi_config = {
++	.func = GPIOMUX_FUNC_1,
++	.drv = GPIOMUX_DRV_12MA,
++	.pull = GPIOMUX_PULL_NONE,
++};
++
++static struct gpiomux_setting som_gpio_spi_cs_config = {
++	.func = GPIOMUX_FUNC_GPIO,
++	.drv = GPIOMUX_DRV_12MA,
++	.pull = GPIOMUX_PULL_NONE,
++};
++
+ /* Chip selects for SPI clients */
+ static struct gpiomux_setting gpio_spi_cs_config = {
+ 	.func = GPIOMUX_FUNC_GPIO,
+@@ -530,6 +542,7 @@ static struct gpiomux_setting hsic_sus_cfg = {
+ 	.dir = GPIOMUX_OUT_LOW,
+ };
+ 
++#ifndef CONFIG_MACH_APQ8064_SOM
+ static struct gpiomux_setting hsic_wakeup_act_cfg = {
+ 	.func = GPIOMUX_FUNC_GPIO,
+ 	.drv = GPIOMUX_DRV_8MA,
+@@ -543,6 +556,7 @@ static struct gpiomux_setting hsic_wakeup_sus_cfg = {
+ 	.pull = GPIOMUX_PULL_DOWN,
+ 	.dir = GPIOMUX_IN,
+ };
++#endif
+ 
+ static struct msm_gpiomux_config apq8064_hsic_configs[] = {
+ 	{
+@@ -559,6 +573,7 @@ static struct msm_gpiomux_config apq8064_hsic_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &hsic_sus_cfg,
+ 		},
+ 	},
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	{
+ 		.gpio = 47,              /* wake up */
+ 		.settings = {
+@@ -566,6 +581,7 @@ static struct msm_gpiomux_config apq8064_hsic_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &hsic_wakeup_sus_cfg,
+ 		},
+ 	},
++#endif
+ };
+ #endif
+ 
+@@ -677,6 +693,48 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 			[GPIOMUX_SUSPENDED] = &gsbi1_uart_config,
+ 		},
+ 	},
++	{
++		.gpio      = APQ8064_SOM_GSBI2_SPI_MOSI,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI2_SPI_MISO,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI2_SPI_CLK,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI2_SPI_CS,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_BALL_SPI_CS0,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_cs_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_BALL_SPI_CS1,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_cs_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_BALL_SPI_CS2,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi_cs_config,
++		},
++	},
+ };
+ 
+ static struct msm_gpiomux_config apq8064_gsbi_configs[] __initdata = {
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 046745b..3a2f505 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2391,7 +2391,11 @@ static struct platform_device *common_not_mpq_devices[] __initdata = {
+ static struct platform_device *early_common_devices[] __initdata = {
+ 	&apq8064_device_acpuclk,
+ 	&apq8064_device_dmov,
++#ifdef CONFIG_MACH_APQ8064_SOM
++	&apq8064_device_qup_spi_gsbi2,
++#else
+ 	&apq8064_device_qup_spi_gsbi5,
++#endif
+ };
+ 
+ static struct platform_device *pm8921_common_devices[] __initdata = {
+@@ -2663,6 +2667,10 @@ static struct platform_device *mpq_devices[] __initdata = {
+ 	&rc_input_loopback_pdev,
+ };
+ 
++static struct msm_spi_platform_data apq8064_qup_spi_gsbi2_pdata = {
++	.max_clock_speed = 1100000,
++};
++
+ static struct msm_spi_platform_data apq8064_qup_spi_gsbi5_pdata = {
+ 	.max_clock_speed = 1100000,
+ };
+@@ -3297,6 +3305,8 @@ static void __init apq8064_common_init(void)
+ 	apq8064_i2c_init();
+ 	register_i2c_devices();
+ 
++	apq8064_device_qup_spi_gsbi2.dev.platform_data =
++						&apq8064_qup_spi_gsbi2_pdata;
+ 	apq8064_device_qup_spi_gsbi5.dev.platform_data =
+ 						&apq8064_qup_spi_gsbi5_pdata;
+ 	apq8064_init_pmic();
+@@ -3426,7 +3436,7 @@ static void __init apq8064_cdp_init(void)
+ 		ethernet_init();
+ 		msm_rotator_set_split_iommu_domain();
+ 		platform_add_devices(cdp_devices, ARRAY_SIZE(cdp_devices));
+-		/* SOM: No SPI Devices */
++		/* SOM: No SPI devices connected*/
+ 		if(!machine_is_apq8064_som())
+ 		spi_register_board_info(spi_board_info,
+ 						ARRAY_SIZE(spi_board_info));
+diff --git a/arch/arm/mach-msm/board-8064.h b/arch/arm/mach-msm/board-8064.h
+index af62711..7456221 100644
+--- a/arch/arm/mach-msm/board-8064.h
++++ b/arch/arm/mach-msm/board-8064.h
+@@ -158,4 +158,13 @@ enum {
+ 
+ extern struct msm_rtb_platform_data apq8064_rtb_pdata;
+ extern struct msm_cache_dump_platform_data apq8064_cache_dump_pdata;
++
++#define APQ8064_SOM_GSBI2_SPI_MOSI  22
++#define APQ8064_SOM_GSBI2_SPI_MISO  23
++#define APQ8064_SOM_GSBI2_SPI_CLK   25
++#define APQ8064_SOM_GSBI2_SPI_CS    24
++#define APQ8064_SOM_BALL_SPI_CS0    10
++#define APQ8064_SOM_BALL_SPI_CS1    11
++#define APQ8064_SOM_BALL_SPI_CS2    48
++
+ #endif
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index 31de28d..825332e1 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5322,11 +5322,19 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("core_clk",		gsbi7_uart_clk.c, "msm_serial_hsl.0"),
+ #endif
+ 	CLK_LOOKUP("core_clk",		gsbi1_qup_clk.c,	"qup_i2c.0"),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("core_clk",		gsbi2_qup_clk.c,	"spi_qsd.0"),
++#else
+ 	CLK_LOOKUP("core_clk",		gsbi2_qup_clk.c,	""),
++#endif
+ 	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	"qup_i2c.3"),
+ 	CLK_LOOKUP("core_clk",		gsbi4_qup_clk.c,	"qup_i2c.4"),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	""),
++#else
+ 	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"spi_qsd.0"),
+ 	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"qup_i2c.5"),
++#endif
+ 	CLK_LOOKUP("core_clk",		gsbi6_qup_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi7_qup_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		pdm_clk.c,		""),
+@@ -5368,15 +5376,23 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"msm_serial_hsl.1"),
+ #endif
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"qup_i2c.0"),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,		"spi_qsd.0"),
++#else
+ 	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,		""),
++#endif
+ 	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,		"qup_i2c.3"),
+ #ifdef CONFIG_MACH_LGE
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,		"msm_serial_hsl.0"),
+ #endif
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,		"qup_i2c.4"),
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,	"msm_serial_hs.1"),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,		""),
++#else
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,		"spi_qsd.0"),
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,		"qup_i2c.5"),
++#endif
+ #ifdef CONFIG_MACH_APQ8064_SOM
+ 	CLK_LOOKUP("iface_clk",		gsbi6_p_clk.c,	"msm_serial_hsl.0"),
+ #else
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index e410d65..d47488f 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -309,6 +309,76 @@ struct platform_device apq8064_device_qup_i2c_gsbi3 = {
+ 	.resource	= resources_qup_i2c_gsbi3,
+ };
+ 
++static struct resource resources_qup_spi_gsbi2[] = {
++	{
++		.name   = "spi_base",
++		.start  = MSM_GSBI2_QUP_PHYS,
++		.end    = MSM_GSBI2_QUP_PHYS + SZ_4K - 1,
++		.flags  = IORESOURCE_MEM,
++	},
++	{
++		.name   = "gsbi_base",
++		.start  = MSM_GSBI2_PHYS,
++		.end    = MSM_GSBI2_PHYS + 4 - 1,
++		.flags  = IORESOURCE_MEM,
++	},
++	{
++		.name   = "spi_irq_in",
++		.start  = APQ8064_GSBI2_QUP_IRQ,
++		.end    = APQ8064_GSBI2_QUP_IRQ,
++		.flags  = IORESOURCE_IRQ,
++	},
++    {
++        .name   = "spi_clk",
++        .start  = APQ8064_SOM_GSBI2_SPI_CLK,
++        .end    = APQ8064_SOM_GSBI2_SPI_CLK,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_miso",
++        .start  = APQ8064_SOM_GSBI2_SPI_MISO,
++        .end    = APQ8064_SOM_GSBI2_SPI_MISO,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_mosi",
++        .start  = APQ8064_SOM_GSBI2_SPI_MOSI,
++        .end    = APQ8064_SOM_GSBI2_SPI_MOSI,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_cs",
++        .start  = APQ8064_SOM_GSBI2_SPI_CS,
++        .end    = APQ8064_SOM_GSBI2_SPI_CS,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_cs1",
++        .start  = APQ8064_SOM_BALL_SPI_CS0,
++        .end    = APQ8064_SOM_BALL_SPI_CS0,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_cs2",
++        .start  = APQ8064_SOM_BALL_SPI_CS1,
++        .end    = APQ8064_SOM_BALL_SPI_CS1,
++        .flags  = IORESOURCE_IO,
++    },
++    {
++        .name   = "spi_cs3",
++        .start  = APQ8064_SOM_BALL_SPI_CS2,
++        .end    = APQ8064_SOM_BALL_SPI_CS2,
++        .flags  = IORESOURCE_IO,
++    },
++};
++
++struct platform_device apq8064_device_qup_spi_gsbi2 = {
++	.name		= "spi_qsd",
++	.id		= 0,
++	.num_resources	= ARRAY_SIZE(resources_qup_spi_gsbi2),
++	.resource	= resources_qup_spi_gsbi2,
++};
++
+ static struct resource resources_uart_gsbi4[] = {
+ 	{
+ 		.start = GSBI4_UARTDM_IRQ,
+diff --git a/arch/arm/mach-msm/devices.h b/arch/arm/mach-msm/devices.h
+index 960f1e5..2150abd 100644
+--- a/arch/arm/mach-msm/devices.h
++++ b/arch/arm/mach-msm/devices.h
+@@ -93,6 +93,7 @@ extern struct platform_device apq8064_device_uart_gsbi7;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi1;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi3;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi4;
++extern struct platform_device apq8064_device_qup_spi_gsbi2;
+ extern struct platform_device apq8064_device_qup_spi_gsbi5;
+ extern struct platform_device apq8064_slim_ctrl;
+ extern struct platform_device apq8064_device_ssbi_pmic1;
+-- 
+1.8.2.1
+
