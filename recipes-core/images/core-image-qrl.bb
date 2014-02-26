@@ -43,7 +43,7 @@ fixup_conf() {
       done
     cd ${CURDIR}
     # Replace place holders with build system values.
-    sed -e "s|@DEPLOY_DIR@|${DEPLOY_DIR}|" -e "s|@MACHINE_ARCH@|${MACHINE_ARCH}|" -e "s|@WORKDIR@|${WORKDIR}|" -e "s|@TUNE_PKGARCH@|${TUNE_PKGARCH}|" -i ${WORKDIR}/multistrap.conf
+    sed -e "s|@DEPLOY_DIR@|${DEPLOY_DIR}|" -e "s|@MACHINE_ARCH@|${MACHINE_ARCH}|" -e "s|@WORKDIR@|${WORKDIR}|" -e "s|@TUNE_PKGARCH@|${TUNE_PKGARCH}|" -e "s|@QRL_MACHINE_MODULES@|${QRL_MACHINE_MODULES}|" -i ${WORKDIR}/multistrap.conf
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
