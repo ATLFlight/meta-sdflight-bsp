@@ -1,0 +1,41 @@
+From e417830f795c680edd79868884f112d7829f9d02 Mon Sep 17 00:00:00 2001
+From: Suman Kumar <suman@inforcecomputing.com>
+Date: Thu, 10 Oct 2013 18:16:58 +0530
+Subject: [PATCH 42/44] Audio: MIC: Support for DMIC recording on apq8064.
+
+Change-Id: I7e26d46675ddf560d139f0b7ae6f84e0703687c1
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ arch/arm/mach-msm/board-8064-gpiomux.c |    2 +-
+ sound/soc/msm/apq8064.c                |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index d32577d..e10d33b 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -833,7 +833,7 @@ static struct msm_gpiomux_config mpq8064_spkr_i2s_config[] __initdata = {
+ 
+ static struct msm_gpiomux_config apq8064_audio_codec_configs[] __initdata = {
+ 	{
+-		.gpio = 38,
++		.gpio = PM8921_GPIO_PM_TO_SYS(7),
+ 		.settings = {
+ 			[GPIOMUX_SUSPENDED] = &mbhc_hs_detect,
+ 		},
+diff --git a/sound/soc/msm/apq8064.c b/sound/soc/msm/apq8064.c
+index 087c6dd..ad175a2 100644
+--- a/sound/soc/msm/apq8064.c
++++ b/sound/soc/msm/apq8064.c
+@@ -61,7 +61,7 @@
+ #define TABLA_MBHC_DEF_BUTTONS 8
+ #define TABLA_MBHC_DEF_RLOADS 5
+ 
+-#define JACK_DETECT_GPIO 38
++#define JACK_DETECT_GPIO PM8921_GPIO_PM_TO_SYS(7)
+ 
+ /* Shared channel numbers for Slimbus ports that connect APQ to MDM. */
+ enum {
+-- 
+1.7.9.5
+

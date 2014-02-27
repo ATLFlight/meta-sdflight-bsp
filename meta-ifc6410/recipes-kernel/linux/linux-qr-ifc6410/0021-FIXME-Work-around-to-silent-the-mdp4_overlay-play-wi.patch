@@ -1,0 +1,32 @@
+From 7c72850650474c4b406900c37622666f9ebb1f0d Mon Sep 17 00:00:00 2001
+From: Suman Kumar <suman@inforcecomputing.com>
+Date: Sat, 25 May 2013 13:35:35 +0530
+Subject: [PATCH 21/44] FIXME: Work around to silent the 'mdp4_overlay play
+ with FB memory'
+
+Change-Id: Id3e5d89424a514c3a463a43214f1d56e5cdb13e6
+
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ drivers/video/msm/mdp4_overlay.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/video/msm/mdp4_overlay.c b/drivers/video/msm/mdp4_overlay.c
+index 2bcde21..8c74647 100644
+--- a/drivers/video/msm/mdp4_overlay.c
++++ b/drivers/video/msm/mdp4_overlay.c
+@@ -2929,9 +2929,9 @@ static int get_img(struct msmfb_data *img, struct fb_info *info,
+ 				DISPLAY_SUBSYSTEM_ID)) {
+ 				ret = -1;
+ 			} else {
+-				pr_warn("%s: mdp4_overlay play with FB memory\n",
++/*				pr_warn("%s: mdp4_overlay play with FB memory\n",
+ 							 __func__);
+-				*srcp_file = file;
++*/				*srcp_file = file;
+ 				*p_need = put_needed;
+ 			}
+ 		} else
+-- 
+1.7.9.5
+

@@ -1,0 +1,42 @@
+From 918a047925eaf8a89a74b4fdb0abef238bf030d4 Mon Sep 17 00:00:00 2001
+From: Suman Kumar <suman@inforcecomputing.com>
+Date: Sat, 25 May 2013 05:02:44 +0530
+Subject: [PATCH 19/44] wifi: def_config: add support for sdc4
+
+Change-Id: Ib0bde541925404824950c1e5711de6797d9f8469
+
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ arch/arm/configs/msm8960-perf_defconfig |    2 ++
+ arch/arm/configs/msm8960_defconfig      |    2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/arch/arm/configs/msm8960-perf_defconfig b/arch/arm/configs/msm8960-perf_defconfig
+index 47e040b..6980304 100644
+--- a/arch/arm/configs/msm8960-perf_defconfig
++++ b/arch/arm/configs/msm8960-perf_defconfig
+@@ -454,6 +454,8 @@ CONFIG_MMC_MSM_SDC1_8_BIT_SUPPORT=y
+ # CONFIG_MMC_MSM_SDC2_SUPPORT is not set
+ CONFIG_MMC_MSM_SDC3_SUPPORT=y
+ CONFIG_MMC_MSM_SDC3_WP_SUPPORT=y
++CONFIG_MMC_MSM_SDC4_SUPPORT=y
++CONFIG_MMC_MSM_SDC4_8_BIT_SUPPORT=y
+ CONFIG_MMC_MSM_SPS_SUPPORT=y
+ CONFIG_LEDS_PM8XXX=y
+ CONFIG_LEDS_TRIGGERS=y
+diff --git a/arch/arm/configs/msm8960_defconfig b/arch/arm/configs/msm8960_defconfig
+index b07e96f..d03556b 100644
+--- a/arch/arm/configs/msm8960_defconfig
++++ b/arch/arm/configs/msm8960_defconfig
+@@ -456,6 +456,8 @@ CONFIG_MMC_MSM_SDC1_8_BIT_SUPPORT=y
+ # CONFIG_MMC_MSM_SDC2_SUPPORT is not set
+ CONFIG_MMC_MSM_SDC3_SUPPORT=y
+ CONFIG_MMC_MSM_SDC3_WP_SUPPORT=y
++CONFIG_MMC_MSM_SDC4_SUPPORT=y
++CONFIG_MMC_MSM_SDC4_8_BIT_SUPPORT=y
+ CONFIG_MMC_MSM_SPS_SUPPORT=y
+ CONFIG_LEDS_PM8XXX=y
+ CONFIG_LEDS_TRIGGERS=y
+-- 
+1.7.9.5
+
