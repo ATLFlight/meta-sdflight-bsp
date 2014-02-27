@@ -1,0 +1,44 @@
+From ee1d513c89c8b212c9e738e3f4d7d7e8e27f5e1d Mon Sep 17 00:00:00 2001
+From: Chan-Taek Park <chantaek@inforcecomputing.com>
+Date: Wed, 5 Jun 2013 14:26:06 +0530
+Subject: [PATCH 24/44] bluetooth: Add support for GSBI6 UARTDM for Bluetooth
+ feature
+
+Change-Id: Id9c90191bb3a8230d766f67a3f8eb48c3789f4b8
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ arch/arm/mach-msm/board-8064-gpiomux.c |    3 ++-
+ arch/arm/mach-msm/board-8064.c         |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 4e38989..be38b04 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -1595,7 +1595,8 @@ void __init apq8064_init_gpiomux(void)
+ 
+ 	msm_gpiomux_install(apq8064_sdc3_configs,
+ 			ARRAY_SIZE(apq8064_sdc3_configs));
+-	 if (machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv())
++	if (machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv() ||
++		machine_is_apq8064_cdp() || machine_is_apq8064_sys6440())
+ 		msm_gpiomux_install(mpq8064_uartdm_configs,
+ 				ARRAY_SIZE(mpq8064_uartdm_configs));
+ }
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 10560b7..98853c7 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -3453,7 +3453,8 @@ static void __init apq8064_cdp_init(void)
+ 	apq8064_init_cam();
+ #endif
+ 
+-	if (machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv()) {
++	if (machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv() ||
++		machine_is_apq8064_cdp() || machine_is_apq8064_sys6440()) {
+ 		platform_device_register(&mpq8064_device_uartdm_gsbi6);
+ #ifdef CONFIG_SERIAL_MSM_HS
+ 		/* GSBI6(2) - UARTDM_RX */
+-- 
+1.7.9.5
+

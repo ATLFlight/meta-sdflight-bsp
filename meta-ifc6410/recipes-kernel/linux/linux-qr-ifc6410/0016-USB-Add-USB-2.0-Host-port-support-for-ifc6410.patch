@@ -1,0 +1,27 @@
+From 786f47546ba6f0d61ed95ffdee3b60c6f3245fbb Mon Sep 17 00:00:00 2001
+From: Chan-Taek Park <chantaek@inforcecomputing.com>
+Date: Sat, 25 May 2013 04:59:14 +0530
+Subject: [PATCH 16/44] USB: Add USB 2.0 Host port support for ifc6410
+
+Change-Id: If017efa466cb99b4c3f0b760a2852c50e0c0e40a
+
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ arch/arm/mach-msm/board-8064.c |    1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index a369ff3..639f4a1 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -913,6 +913,7 @@ static struct msm_usb_host_platform_data msm_ehci_host_pdata4;
+ static void __init apq8064_ehci_host_init(void)
+ {
+ 	if (machine_is_apq8064_liquid() || machine_is_mpq8064_cdp() ||
++		machine_is_apq8064_cdp() || machine_is_apq8064_sys6440() ||
+ 		machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv()) {
+ 		if (machine_is_apq8064_liquid())
+ 			msm_ehci_host_pdata3.dock_connect_irq =
+-- 
+1.7.9.5
+

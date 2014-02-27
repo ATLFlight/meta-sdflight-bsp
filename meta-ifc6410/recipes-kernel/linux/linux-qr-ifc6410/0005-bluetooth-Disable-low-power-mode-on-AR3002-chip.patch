@@ -1,0 +1,84 @@
+From cdcac78df2f096f6995f332f519d455e3484570c Mon Sep 17 00:00:00 2001
+From: Anantha Krishnan <ananthk@codeaurora.org>
+Date: Wed, 20 Mar 2013 01:22:49 +0530
+Subject: [PATCH 05/44] bluetooth: Disable low power mode on AR3002 chip
+
+Disable the sleep vote mechanism in the host and controller
+for initial bringup phase.
+Signed-off-by: Anantha Krishnan <ananthk@codeaurora.org>
+
+Change-Id: I7c6f4e877832b51cc0f0b324636ec88a906e2a5a
+Signed-off-by: Anantha Krishnan <ananthk@codeaurora.org>
+
+Conflicts:
+
+	drivers/bluetooth/hci_ath.c
+---
+ drivers/bluetooth/hci_ath.c |   21 ++++++++++++++++++---
+ 1 file changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/bluetooth/hci_ath.c b/drivers/bluetooth/hci_ath.c
+index 50b3362..b20c6b6 100644
+--- a/drivers/bluetooth/hci_ath.c
++++ b/drivers/bluetooth/hci_ath.c
+@@ -44,7 +44,7 @@
+ 
+ #include "hci_uart.h"
+ 
+-unsigned int enableuartsleep = 1;
++unsigned int enableuartsleep;
+ module_param(enableuartsleep, uint, 0644);
+ /*
+  * Global variables
+@@ -149,6 +149,11 @@ static int ath_bluesleep_gpio_config(int on)
+ {
+ 	int ret = 0;
+ 
++	if (!enableuartsleep) {
++		pr_err("%s: LPM is disabled\n", __func__);
++		return 0;
++	}
++
+ 	BT_INFO("%s config: %d", __func__, on);
+ 	if (!on) {
+ 		if (disable_irq_wake(bsi->host_wake_irq))
+@@ -239,8 +244,10 @@ static int ath_open(struct hci_uart *hu)
+ 
+ 	BT_DBG("hu %p, bsi %p", hu, bsi);
+ 
+-	if (!bsi)
++	if (!bsi) {
++		pr_err("%s: Bluetooth sleep info. not available\n", __func__);
+ 		return -EIO;
++	}
+ 
+ 	if (ath_bluesleep_gpio_config(1) < 0) {
+ 		BT_ERR("HCIATH3K GPIO Config failed");
+@@ -413,6 +420,11 @@ static int __init bluesleep_probe(struct platform_device *pdev)
+ 		goto failed;
+ 	}
+ 
++	if (!enableuartsleep) {
++		pr_debug("%s: Low power mode disabled\n", __func__);
++		return 0;
++	}
++
+ 	res = platform_get_resource_byname(pdev, IORESOURCE_IO,
+ 						"gpio_host_wake");
+ 	if (!res) {
+@@ -476,8 +488,11 @@ int __init ath_init(void)
+ 		return ret;
+ 	}
+ 	ret = platform_driver_probe(&bluesleep_driver, bluesleep_probe);
+-	if (ret)
++	if (ret) {
++		pr_err("%s: Probe registration failed with ret value : %d\n",
++			 __func__, ret);
+ 		return ret;
++	}
+ 	return 0;
+ }
+ 
+-- 
+1.7.9.5
+

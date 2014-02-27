@@ -1,0 +1,46 @@
+From fbc4d0329edc1121a26a81e65401a1cbbb5806c8 Mon Sep 17 00:00:00 2001
+From: Anantha Krishnan <ananthk@codeaurora.org>
+Date: Thu, 6 Dec 2012 11:14:08 +0530
+Subject: [PATCH 03/44] msm: 8064: move bt to i2c1
+
+i2c communication has moved to GSBI1 from GSBI5 in
+the new version of MPQ8064 asic 1.2, this change
+enables bt to use GSBI1.
+
+Change-Id: Ib715b704f7c55946c750c70d9aead1787736b958
+Signed-off-by: Parth Dixit <parthd@codeaurora.org>
+Signed-off-by: Anantha Krishnan <ananthk@codeaurora.org>
+---
+ arch/arm/mach-msm/board-8064-bt.c |   16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-bt.c b/arch/arm/mach-msm/board-8064-bt.c
+index 963b1a3..e2a12b5 100644
+--- a/arch/arm/mach-msm/board-8064-bt.c
++++ b/arch/arm/mach-msm/board-8064-bt.c
+@@ -534,10 +534,18 @@ void __init apq8064_bt_power_init(void)
+ {
+ 	int rc = 0;
+ 	struct device *dev;
+-
+-	rc = i2c_register_board_info(APQ_8064_GSBI5_QUP_I2C_BUS_ID,
+-				bahama_devices,
+-				ARRAY_SIZE(bahama_devices));
++	uint32_t hrd_version = socinfo_get_version();
++
++	if (machine_is_mpq8064_hrd()
++		&& (SOCINFO_VERSION_MAJOR(hrd_version) == 2)) {
++		rc = i2c_register_board_info(APQ_8064_GSBI1_QUP_I2C_BUS_ID,
++					bahama_devices,
++					ARRAY_SIZE(bahama_devices));
++	} else{
++		rc = i2c_register_board_info(APQ_8064_GSBI5_QUP_I2C_BUS_ID,
++					bahama_devices,
++					ARRAY_SIZE(bahama_devices));
++	}
+ 	if (rc < 0) {
+ 		pr_err("%s: I2C Register failed\n", __func__);
+ 		return;
+-- 
+1.7.9.5
+

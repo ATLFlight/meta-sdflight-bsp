@@ -1,0 +1,34 @@
+From 8dc76897d72f2ea3db2b04c9f9da6deb11ded1fe Mon Sep 17 00:00:00 2001
+From: Chan-Taek Park <chantaek@inforcecomputing.com>
+Date: Sat, 25 May 2013 05:01:30 +0530
+Subject: [PATCH 18/44] FIXME: pcie-sata: Workaround to resolve conflict
+ between
+
+Change-Id: Icf1fdfd1a561e0532ad64c781dff66d21b3ff274
+
+Signed-off-by: Suman Kumar <suman@inforcecomputing.com>
+---
+ arch/arm/mach-msm/board-8064-regulator.c |    7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-regulator.c b/arch/arm/mach-msm/board-8064-regulator.c
+index 079bda6..89ba0bc 100644
+--- a/arch/arm/mach-msm/board-8064-regulator.c
++++ b/arch/arm/mach-msm/board-8064-regulator.c
+@@ -579,7 +579,12 @@ apq8064_gpio_regulator_pdata[] __devinitdata = {
+ 	GPIO_VREG(EXT_MPP8, "ext_mpp8", "ext_mpp8_en",
+ 			PM8921_MPP_PM_TO_SYS(8), NULL, 0),
+ 	GPIO_VREG(EXT_SATA_PWR, "ext_sata_pwr", "ext_sata_pwr_en",
+-			PM8921_MPP_PM_TO_SYS(4), "ext_3p3v", 1),
++			/* FIXME: The GPIO port is changed from 4 to 3
++			 * as SATA_PWR_EN conflicts with PCIE_PWR_EN.
++			 * This change is only for a short term workaround.
++			 * We should fix it properly.
++			 */
++			PM8921_MPP_PM_TO_SYS(3), "ext_3p3v", 1),
+ };
+ 
+ struct gpio_regulator_platform_data
+-- 
+1.7.9.5
+

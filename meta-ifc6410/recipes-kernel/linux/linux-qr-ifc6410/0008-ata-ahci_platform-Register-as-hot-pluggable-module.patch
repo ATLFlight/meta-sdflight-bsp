@@ -1,0 +1,53 @@
+From 42d1b8b5694bb15e7d4477b9d6b50ca6951476f6 Mon Sep 17 00:00:00 2001
+From: Sujit Reddy Thumma <sthumma@codeaurora.org>
+Date: Thu, 3 Jan 2013 14:18:13 +0530
+Subject: [PATCH 08/44] ata: ahci_platform: Register as hot-pluggable module
+
+Even though AHCI controller is part of SoC in most chipsets
+it is not safe to assume that AHCI device is registered before
+AHCI module init is called. Register AHCI platform driver as
+hot-pluggable module so that the device, driver match
+can happen in any order.
+
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+(cherry picked from commit 021bf99560d056b97612551d4abf1bdabbbfadef)
+
+Change-Id: I82c01d9eab00c86b16d10a964bdfaccd21586c01
+Signed-off-by: Sujit Reddy Thumma <sthumma@codeaurora.org>
+---
+ drivers/ata/ahci_platform.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/ata/ahci_platform.c b/drivers/ata/ahci_platform.c
+index 9e419e1..427207d 100644
+--- a/drivers/ata/ahci_platform.c
++++ b/drivers/ata/ahci_platform.c
+@@ -73,7 +73,7 @@ static struct scsi_host_template ahci_platform_sht = {
+ 	AHCI_SHT("ahci_platform"),
+ };
+ 
+-static int __init ahci_probe(struct platform_device *pdev)
++static int __devinit ahci_probe(struct platform_device *pdev)
+ {
+ 	struct device *dev = &pdev->dev;
+ 	struct ahci_platform_data *pdata = dev_get_platdata(dev);
+@@ -286,6 +286,7 @@ static const struct of_device_id ahci_of_match[] = {
+ MODULE_DEVICE_TABLE(of, ahci_of_match);
+ 
+ static struct platform_driver ahci_driver = {
++	.probe	= ahci_probe,
+ 	.remove = __devexit_p(ahci_remove),
+ 	.driver = {
+ 		.name = "ahci",
+@@ -300,7 +301,7 @@ static struct platform_driver ahci_driver = {
+ 
+ static int __init ahci_init(void)
+ {
+-	return platform_driver_probe(&ahci_driver, ahci_probe);
++	return platform_driver_register(&ahci_driver);
+ }
+ module_init(ahci_init);
+ 
+-- 
+1.7.9.5
+
