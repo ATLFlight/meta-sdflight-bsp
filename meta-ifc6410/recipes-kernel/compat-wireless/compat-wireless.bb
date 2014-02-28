@@ -14,9 +14,12 @@ SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=$
 SRC_URI += " \
    file://0000-Kbuild.patch \
    file://0001-compiler-warning.patch \
-   file://prima-init.sh \
-   file://prima.cfg \
-"
+   file://ifc6410-android2linux-macaddress.sh \
+   file://mac2softmac.sh \
+   file://interfaces \
+   file://eth0.cfg \
+   file://qca6234.cfg \
+   "
 
 PROVIDES += "virtual/wlan-module"
 
@@ -70,11 +73,17 @@ module_do_install() {
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
 
-	# Install prima-init.sh and prima.cfg
 	mkdir -p ${D}/etc/network
-	install ${WORKDIR}/prima-init.sh ${D}/etc/network/prima-init.sh
+
+   # rm -f ${D}/etc/network/interfaces
+	# install ${WORKDIR}/interfaces ${D}/etc/network/interfaces
+
+	install -m 744 ${WORKDIR}/ifc6410-android2linux-macaddress.sh ${D}/etc/network/ifc6410-android2linux-macaddress.sh
+	install -m 744 ${WORKDIR}/mac2softmac.sh ${D}/etc/network/mac2softmac.sh
+
 	mkdir -p ${D}/etc/network/interfaces.d
-	install -m 644 ${WORKDIR}/prima.cfg ${D}/etc/network/interfaces.d/prima.cfg
+	install -m 644 ${WORKDIR}/eth0.cfg ${D}/etc/network/interfaces.d/eth0.cfg
+	install -m 644 ${WORKDIR}/qca6234.cfg ${D}/etc/network/interfaces.d/qca6234.cfg
 }
 
 addtask do_setup_dirs after do_unpack before do_patch
