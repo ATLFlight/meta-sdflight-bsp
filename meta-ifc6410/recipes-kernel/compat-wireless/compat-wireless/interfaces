@@ -1,0 +1,21 @@
+################################################################################
+## Author: Rahul Anand (ranand@qti.qualcomm.com)
+##
+## /etc/network/interfaces
+## This file is auto-generated after multistrap, and configures the 
+## network interfaces for the Dragon Board 8060A Ubuntu install.
+################################################################################
+
+# Loopback interface
+auto lo
+iface lo inet loopback
+
+# Ethernet interface on the Dragon Board
+# auto eth0
+# iface eth0 inet dhcp
+
+source /etc/network/interfaces.d/*.cfg
+
+# This allows DHCP to be run for wlan0 (actually all interfaces).
+iface default inet dhcp
+ 
