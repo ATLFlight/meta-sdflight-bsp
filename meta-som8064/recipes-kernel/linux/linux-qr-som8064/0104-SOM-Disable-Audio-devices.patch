@@ -1,5 +1,5 @@
 From 80523ab4eeebc9c8356b7b1f9dd036a1370c9549 Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Tue, 12 Nov 2013 17:52:10 -0800
 Subject: [PATCH] SOM Disable Audio devices
 

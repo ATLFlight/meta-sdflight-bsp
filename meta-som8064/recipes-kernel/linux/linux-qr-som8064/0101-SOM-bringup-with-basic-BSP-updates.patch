@@ -1,5 +1,5 @@
 From ee016e734d6b286913b7c0464c35b5160c3305de Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Fri, 18 Oct 2013 19:38:06 -0700
 Subject: [PATCH 1/2] SOM bringup with basic BSP updates
 

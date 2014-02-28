@@ -1,5 +1,5 @@
 From 6edabdc8ad9f9d8d38c856c1c67cab01c8dbc6e6 Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Tue, 5 Nov 2013 14:52:20 -0800
 Subject: [PATCH] SOM UART_4wire on GSBI1 as serial port
 

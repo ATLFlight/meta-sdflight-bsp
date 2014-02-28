@@ -1,5 +1,5 @@
 From 3d9c1c414952f36373776c6539e3dffef63b7a4c Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Tue, 26 Nov 2013 18:59:30 -0800
 Subject: [PATCH] SOM I2C gpio pins default configuration
 

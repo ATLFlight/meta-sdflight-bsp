@@ -1,5 +1,5 @@
 From 16d2324fc3632c0aa9f5cabef4341bcf924cb055 Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Thu, 24 Oct 2013 12:34:58 -0700
 Subject: [PATCH 2/2] SOM USB2 bringup
 

@@ -1,5 +1,5 @@
 From 0c101056ac8c6f79f5f987842bc1b649648fcfca Mon Sep 17 00:00:00 2001
-From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Mon, 25 Nov 2013 17:04:08 -0800
 Subject: [PATCH] SOM I2C host controller configuration
 
