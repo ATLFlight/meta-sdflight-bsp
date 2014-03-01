@@ -1,0 +1,187 @@
+From d02b4af8f0159ae25447ba094ce080de85058dc0 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+Date: Tue, 26 Nov 2013 16:39:18 -0800
+Subject: [PATCH] SOM GSBI1 HSUART configuration
+
+---
+ arch/arm/mach-msm/board-8064.c       | 25 ++++++++++++++++++-
+ arch/arm/mach-msm/clock-8960.c       |  6 ++++-
+ arch/arm/mach-msm/devices-8064.c     | 48 +++++++++++++++++++++++++++++++++++-
+ arch/arm/mach-msm/devices.h          |  1 +
+ arch/arm/mach-msm/include/mach/dma.h |  7 ++++++
+ 5 files changed, 84 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index a06486b..291a80d 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2532,7 +2532,9 @@ static struct platform_device *common_devices[] __initdata = {
+ };
+ 
+ static struct platform_device *cdp_devices[] __initdata = {
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	&apq8064_device_uart_gsbi1,
++#endif
+ #ifdef CONFIG_MACH_APQ8064_SOM
+ 	&apq8064_device_uart_gsbi6,
+ #else
+@@ -3242,6 +3244,18 @@ static struct msm_serial_hs_platform_data apq8064_uartdm_gsbi4_pdata = {
+ static struct msm_serial_hs_platform_data apq8064_uartdm_gsbi4_pdata;
+ #endif
+ 
++#ifdef CONFIG_SERIAL_MSM_HS
++static struct msm_serial_hs_platform_data apq8064_uartdm_gsbi1_pdata = {
++	.config_gpio	= 4,
++	.uart_tx_gpio	= 18,
++	.uart_rx_gpio	= 19,
++	.uart_cts_gpio	= 20,
++	.uart_rfr_gpio	= 21,
++};
++#else
++static struct msm_serial_hs_platform_data apq8064_uartdm_gsbi1_pdata;
++#endif
++
+ static void __init apq8064ab_update_retention_spm(void)
+ {
+ 	int i;
+@@ -3379,7 +3393,16 @@ static void __init apq8064_common_init(void)
+ 			platform_device_register(&mdm_8064_device);
+ 		}
+ 	}
+-	if(!machine_is_apq8064_som()) {
++	if(machine_is_apq8064_som()) {
++		#ifdef CONFIG_SERIAL_MSM_HS
++		/* HSUART */
++		/* TBD: gpio line for irq */
++		apq8064_uartdm_gsbi1_pdata.wakeup_irq = gpio_to_irq(10);
++		apq8064_device_uartdm_gsbi1.dev.platform_data =
++					&apq8064_uartdm_gsbi1_pdata;
++		platform_device_register(&apq8064_device_uartdm_gsbi1);
++		#endif
++	} else if (SOCINFO_VERSION_MINOR(platform_version) == 1) {
+ 		platform_device_register(&apq8064_slim_ctrl);
+ 		slim_register_board_info(apq8064_slim_devices,
+ 			ARRAY_SIZE(apq8064_slim_devices));
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index 31de28d..d31853b 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5300,7 +5300,9 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("core_clk",		gp2_clk.c,		""),
+ #ifdef CONFIG_MACH_LGE
+ 	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c,	""),
+-#else
++#elif CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c, "msm_serial_hs.0"),
++#else
+ 	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c, "msm_serial_hsl.1"),
+ #endif
+ 	CLK_LOOKUP("core_clk",		gsbi2_uart_clk.c,	""),
+@@ -5364,6 +5366,8 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("dma_bam_pclk",	dma_bam_p_clk.c,	NULL),
+ #ifdef CONFIG_MACH_LGE
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,		""),
++#elif CONFIG_MACH_APQ8064_SOM
++	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"msm_serial_hs.0"),
+ #else
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"msm_serial_hsl.1"),
+ #endif
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index 358663e..2c8fd6e 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -202,6 +202,52 @@ struct platform_device apq8064_device_uart_gsbi1 = {
+ 	.resource	= resources_uart_gsbi1,
+ };
+ 
++#ifdef CONFIG_MACH_APQ8064_SOM
++/* GSBI 1 used into UARTDM Mode for 8064 SOM */
++static struct resource msm_uart_dm1_resources[] = {
++	{
++		.start  = MSM_UART1DM_PHYS,
++		.end    = MSM_UART1DM_PHYS + PAGE_SIZE - 1,
++		.name   = "uartdm_resource",
++		.flags  = IORESOURCE_MEM,
++	},
++	{
++		.start  = APQ8064_GSBI1_UARTDM_IRQ,
++		.end    = APQ8064_GSBI1_UARTDM_IRQ,
++		.flags  = IORESOURCE_IRQ,
++	},
++	{
++		.start  = MSM_GSBI1_PHYS,
++		.end    = MSM_GSBI1_PHYS + 4 - 1,
++		.name   = "gsbi_resource",
++		.flags  = IORESOURCE_MEM,
++	},
++	{   /* TBD: Which DMA channel to use? */
++		.start  = DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CHAN,
++		.end    = DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CHAN,
++		.name   = "uartdm_channels",
++		.flags  = IORESOURCE_DMA,
++	},
++	{
++		.start  = DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CRCI,
++		.end    = DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CRCI,
++		.name   = "uartdm_crci",
++		.flags  = IORESOURCE_DMA,
++	},
++};
++static u64 msm_uart_dm1_dma_mask = DMA_BIT_MASK(32);
++struct platform_device apq8064_device_uartdm_gsbi1 = {
++	.name   = "msm_serial_hs",
++	.id     = 0,
++	.num_resources  = ARRAY_SIZE(msm_uart_dm1_resources),
++	.resource       = msm_uart_dm1_resources,
++	.dev    = {
++		.dma_mask		= &msm_uart_dm1_dma_mask,
++		.coherent_dma_mask	= DMA_BIT_MASK(32),
++	},
++};
++#endif
++
+ static struct resource resources_uart_gsbi3[] = {
+ 	{
+ 		.start	= GSBI3_UARTDM_IRQ,
+@@ -532,7 +578,7 @@ struct platform_device mpq8064_device_uartdm_gsbi6 = {
+ 	},
+ };
+ 
+-/* SOM: UAR-2wire serial port on GSBI6 */
++/* SOM: UART-2wire serial port on GSBI6 */
+ static struct resource resources_uart_gsbi6[] = {
+ 	{
+ 		.start	= GSBI6_UARTDM_IRQ,
+diff --git a/arch/arm/mach-msm/devices.h b/arch/arm/mach-msm/devices.h
+index 960f1e5..76c93c3 100644
+--- a/arch/arm/mach-msm/devices.h
++++ b/arch/arm/mach-msm/devices.h
+@@ -85,6 +85,7 @@ extern struct platform_device msm8960_device_ebi1_ch0_erp;
+ extern struct platform_device msm8960_device_ebi1_ch1_erp;
+ 
+ extern struct platform_device apq8064_device_uart_gsbi1;
++extern struct platform_device apq8064_device_uartdm_gsbi1;
+ extern struct platform_device apq8064_device_uart_gsbi3;
+ extern struct platform_device apq8064_device_uart_gsbi4;
+ extern struct platform_device apq8064_device_uartdm_gsbi4;
+diff --git a/arch/arm/mach-msm/include/mach/dma.h b/arch/arm/mach-msm/include/mach/dma.h
+index 361dce2..4e5b762 100644
+--- a/arch/arm/mach-msm/include/mach/dma.h
++++ b/arch/arm/mach-msm/include/mach/dma.h
+@@ -272,6 +272,13 @@ int msm_dmov_exec_cmd(unsigned id, unsigned int cmdptr);
+ #define DMOV8064_TSIF_CHAN         2
+ #define DMOV8064_TSIF_CRCI         1
+ 
++/* channels for APQ8064 SOM*/
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CHAN	11
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CRCI	8
++
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CHAN	10
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CRCI	7
++
+ /* channels for APQ8064 SGLTE*/
+ #define DMOV_APQ8064_HSUART_GSBI4_TX_CHAN	11
+ #define DMOV_APQ8064_HSUART_GSBI4_TX_CRCI	8
+-- 
+1.8.2.1
+
