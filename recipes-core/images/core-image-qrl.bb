@@ -22,7 +22,7 @@ SRC_URI += " \
    "
 
 DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools diag testtools serial-console"
+DEPENDS += "reboot2fastboot android-tools diag testtools serial-console ltp"
 
 PV = "CLAR-0018"
 
@@ -31,6 +31,61 @@ IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
 #IMAGE_ROOTFS_SIZE_ext4 = "8192000"
 IMAGE_ROOTFS_EXTRA_SPACE = "200000"
+
+# Overall multistrap configuration
+#     - From this the multistrap.conf file will be generated
+
+# define the possible multistrap sections
+#   Each section will specify how multistrap will download the dpkg from
+MULTISTRAP_SECTIONS = "Raring Modules Packages"
+
+# The value of the default section must be one of the sections listed in the above MULTISTRAP_SECTIONS variable
+MULTISTRAP_DEFAULT_SECTION = "Packages"
+
+MULTISTRAP_GENERAL_noauth = 'true'
+MULTISTRAP_GENERAL_unpack = 'true'
+MULTISTRAP_GENERAL_arch   = 'armhf'
+MULTISTRAP_GENERAL_configscript = '@WORKDIR@/config.sh'
+
+
+MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com"
+MULTISTRAP_SUITE_Raring = "raring"
+MULTISTRAP_COMPONENTS_Raring = "main universe"
+MULTISTRAP_DEBOOTSTRAP_Raring = "1"
+MULTISTRAP_APTSOURCES_Raring = "1"
+
+
+MULTISTRAP_SOURCE_Modules = "copy://${DEPLOY_DIR}/deb/${MACHINE_ARCH} ./"
+MULTISTRAP_DEBOOTSTRAP_Modules = "1"
+MULTISTRAP_APTSOURCES_Modules = "0"
+
+MULTISTRAP_SOURCE_Packages = "copy://${DEPLOY_DIR}/deb/${TUNE_PKGARCH} ./"
+MULTISTRAP_DEBOOTSTRAP_Packages = "1"
+MULTISTRAP_APTSOURCES_Packages = "0"
+
+
+# Define package groups here, which are lists of packages and the multistrap section they belong to
+#      If a package group is defined and the multistrap section is not defined, it will be placed in the default section
+
+# Some explanation for why some of these packages are included
+# - vim-tiny, less: For basic editing
+# - apt: Obvious
+# - module-init-tools: For dealing with kernel modules
+# - Networking:
+#    - iputils-ping openssh-*: For basic networking
+#    - iproute: To use iproute2 for network link management
+#    - wpasupplicant: To manage Wi-Fi
+#    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
+
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf logrotate expect file gcc udhcpd bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
+MULTISTRAP_SECTION_ubuntu = "Raring"
+
+PACKAGE_GROUP_kernelmods = "${QRL_MACHINE_MODULES}"
+MULTISTRAP_SECTION_kernelmods = "Modules"
+
+PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console ltp"
+MULTISTRAP_SECTION_userpkgs = "Packages"
+
 
 fixup_conf() {
     # Convert flat directories to package repositories
