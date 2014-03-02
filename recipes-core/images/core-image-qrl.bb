@@ -22,15 +22,14 @@ SRC_URI += " \
    "
 
 DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools diag testtools serial-console ltp"
+DEPENDS += "reboot2fastboot android-tools diag testtools serial-console"
 
-PV = "CLAR-0018"
+PV = "CLAR-0018-rc"
 
 #IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
-#IMAGE_ROOTFS_SIZE_ext4 = "8192000"
-IMAGE_ROOTFS_EXTRA_SPACE = "200000"
+IMAGE_ROOTFS_SIZE_ext4 = "1800000"
 
 # Overall multistrap configuration
 #     - From this the multistrap.conf file will be generated
@@ -80,10 +79,9 @@ MULTISTRAP_APTSOURCES_Packages = "0"
 PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf logrotate expect file gcc udhcpd bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
-PACKAGE_GROUP_kernelmods = "${QRL_MACHINE_MODULES}"
 MULTISTRAP_SECTION_kernelmods = "Modules"
 
-PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console ltp"
+PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
 
