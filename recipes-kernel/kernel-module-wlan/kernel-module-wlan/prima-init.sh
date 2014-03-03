@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-## Author: Rahul Anand (ranand@qti.qualcomm.com)
+## Author: Rahul Anand (ranand@codeaurora.org)
 ##
 ## prima-init.sh is auto-generated and is used to bring up the WCN36{6,8}0 chip
 ## on Linux. It depends on udev to load the required firmware

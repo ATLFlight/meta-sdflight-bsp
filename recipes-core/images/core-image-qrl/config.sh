@@ -1,6 +1,6 @@
 #
 ###############################################################################
-## Author: Rahul Anand (ranand@qti.qualcomm.com)
+## Author: Rahul Anand (ranand@codeaurora.org)
 ## 
 ## This script fixes up the file system created by multistrap. It will
 ## be automatically run on-target, after booting the kernel for the first time

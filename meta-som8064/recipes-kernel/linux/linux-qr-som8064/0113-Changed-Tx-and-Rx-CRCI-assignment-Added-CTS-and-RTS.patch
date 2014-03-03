@@ -1,5 +1,5 @@
 From 6105e645e768c1b7f3db274ee50ed68c1b28b2c7 Mon Sep 17 00:00:00 2001
-From: Simon Teplitsky <simont@qti.qualcomm.com>
+From: Simon Teplitsky <simont@codeaurora.org>
 Date: Fri, 28 Feb 2014 18:57:32 -0800
 Subject: Changed Tx and Rx CRCI assignment. Added CTS and RTS lines to
  gsbi_configs[].
