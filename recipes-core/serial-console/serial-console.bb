@@ -1,6 +1,6 @@
 DESCRIPTION = "Serial port configuration"
 LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=af4568eb99af15f8fbea8230e6762581"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
 
 PR = "r0"
 PV = "1.0"
