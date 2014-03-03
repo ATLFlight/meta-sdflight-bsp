@@ -1,5 +1,5 @@
 This README file contains information on the contents of the
-apqlinux layer.
+qr-linux layer.
 
 Please see the corresponding sections below for details.
 
@@ -11,54 +11,137 @@ This layer depends on:
 
   URI: git://git.openembedded.org/bitbake
   branch: master
+  revision: 1484905373ad717cedcaef37a0addde034ebdc60
 
   URI: git://git.openembedded.org/openembedded-core
   layers: meta
   branch: master
+  revision: 7e2dbda690b480ab05d14353cb038749ce23d58c
 
-  URI: git://git.yoctoproject.org/xxxx
-  layers: xxxx
+  URI: git://git.linaro.org/openembedded/meta-linaro
+  layers: meta-linaro
   branch: master
-
+  revision: 179a002f019dfbbe1e0851f768bbd9620242b7f0
 
 Patches
 =======
 
-Please submit any patches against the apqlinux layer to the
-xxxx mailing list (xxxx@zzzz.org) and cc: the maintainer:
+Please submit any patches against the qr-linux layer to the
+QR Linux forum (https://www.codeaurora.org/forums/qr-linux) and cc: the maintainer:
 
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
+Maintainer: Rahul Anand <ranand@codeaurora.org>
 
 
 Table of Contents
 =================
 
-  I. Adding the apqlinux layer to your build
- II. Misc
+  I. Building QR Linux
+ II. For More Information
 
 
-I. Adding the apqlinux layer to your build
+I. Building QR Linux
 =================================================
 
---- replace with specific instructions for the apqlinux layer ---
+The following instructions assume that you are working from an Ubuntu
+12.04 (or later) system. The steps for other systmes will be similar,
+and should be easily discerned from what follows.
 
-In order to use this layer, you need to make the build system aware of
-it.
+A. Install Required Packages in Chroot
 
-Assuming the apqlinux layer exists at the top-level of your
-yocto build tree, you can add it to the build system by adding the
-location of the apqlinux layer to bblayers.conf, along with any
-other layers needed. e.g.:
+Yocto requires access to the programs diffstat, texinfo, gawk,
+and chrpath. We also need multistrap for building the user
+space. You can get them by using apt-get. Be sure to log in as
+root, or use sudo.
 
-  BBLAYERS ?= " \
-    /path/to/yocto/meta \
-    /path/to/yocto/meta-yocto \
-    /path/to/yocto/meta-yocto-bsp \
-    /path/to/yocto/meta-apqlinux \
-    "
+    apt-get install diffstat, texinfo, gawk, chrpath, multistrap
 
 
-II. Misc
+B. Fetch Build system
+
+To build the system, you must first use repo to set up the system
+build tree. To do this, enter the following:
+
+    mkdir oe-core
+    cd oe-core 
+    repo init -u git://codeaurorua.org/qr-lnux/manifest
+    repo sync
+
+This fetches the core pieces of the open embedded system, including
+bitbake, sets up the build directory, and downloads the layers
+necessary for building QR Linux.
+
+C. Perform Your First Build
+
+Begin by initializing the build environment:
+  
+    cd oe-core
+    source oe-init-build-env build
+
+QR Linux uses a pre-compiled, external toolchain from Linaro. This
+matches the compiler that comes standard with Ubuntu, and will allow
+us to make compatible builds. Included is a recipe that downloads the
+appropriate binary, and unpacks it into the appropriate space in the
+build tree. This needs to be run only once, when you are first setting
+everything else. 
+
+    bitbake -b linaro-fetch
+
+Note that you will get some errors and warnings. In particular, it
+will complain that it couldn't get the Linaro toolchain version. This
+is because you are only now installing it. Once you have executed this
+command, you won't get that error any more.
+
+At this point, you are ready to construct the system. We build
+everything using using the core-image-apq recipe. Before you begin,
+you need to decide which platform you are building for, and prepare to
+specify that machine ont he command line. The current release supports
+the Inforce IFC6410 (MACHINE="ifc6410") or the QR Linux System On
+Module (SOM) (MACHINE="som8064"). To excute the build, type:
+
+    MACHINE="ifc6410" bitbake core-image-apq
+or
+    MACHINE="som8064" bitbake core-image-apq
+
+D. Download the Images
+
+If all has gone well, there should now be a directory under your build
+called tmp-eglibc/deploy/images/<machine name>. In there, you will find
+a file called linux-qr-<machine>-boot-<machine>.img. This is the
+kernel image. You will also find a file called 
+core-image-qrl-<machine>-xxxxxxxxxxxxxx.rootfs.ext4, where the
+string of x's represent a date stamp. This is the userspace you have
+built. 
+
+To install them, you use fastboot, which was conveniently produced
+for you during the build process. Begin by rebooting your system,
+either by using the command reboot2fastboot, or by holding down the
+power and volume-down keys until the system is in fastboot mode. Then
+execute the following commands from the build directory, while either
+logged in as root, ur using sudo.
+
+    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase boot 
+    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash boot tmp-eglibc/deploy/images/<machine>/linux-qr-<machine>-boot-<machine>.img
+    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase userdata
+    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash userdata tmp-eglibc/deploy/images/liquid8064/core-image-qrl-<machine>-xxxxxxxxxxxxxx.rootfs.ext4
+    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot reboot
+
+Note that in the deploy/images/<machine> directory you will also see a
+symbolic link to the userdata file, called
+core-img-qrl-<machine>.ext4. At some point, you are going to want to
+use that link to save yourself some typing, above. *DO NOT USE THE
+SYMBOLIC LINK!* For some reason, it confuses the flash loader, and you
+will get a user space that will not boot completely.
+
+At this point, the system will boot, initialize, and reboot. You
+should end up with a login prompt. Congratulations! You have now built
+and installed QR Linux.
+
+II. For More Information
 ========
 
---- replace with specific information about the apqlinux layer ---
+Now that you have a booting system, you are going to want to modify
+it, adding new packages, and building your own
+applications. Information for doing this can be found on the wiki at
+https://www.codeaurora.org/xwiki/bin/QR+Linux/WebHome, and on the
+support forum at https://www.codeaurora.org/forums/qr-linux. 
+
