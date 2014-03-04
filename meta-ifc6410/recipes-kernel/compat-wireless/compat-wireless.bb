@@ -21,7 +21,7 @@ SRC_URI += " \
    file://qca6234.cfg \
    "
 
-PROVIDES += "virtual/wlan-module"
+PROVIDES += "kernel-module-cfg80211 kernel-module-wlan"
 
 PACKAGES = "kernel-module-cfg80211 kernel-module-wlan ${PN}"
 
