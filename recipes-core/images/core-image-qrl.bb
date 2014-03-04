@@ -80,7 +80,7 @@ MULTISTRAP_SECTION_ubuntu = "Raring"
 
 MULTISTRAP_SECTION_kernelmods = "Modules"
 
-PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console"
+PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console ltp"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
 
