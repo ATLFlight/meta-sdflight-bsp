@@ -21,7 +21,17 @@ SRC_URI += " \
    "
 
 DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools diag testtools serial-console"
+DEPENDS += "reboot2fastboot android-tools serial-console"
+DEPENDS += "configdb"
+DEPENDS += "dsutils"
+DEPENDS += "diag"
+DEPENDS += "mp-decision"
+DEPENDS += "qcom-common"
+DEPENDS += "qmi"
+DEPENDS += "qmi-framework"
+DEPENDS += "thermal"
+DEPENDS += "xmllib"
+DEPENDS += "testtools"
 
 PV = "CLAR-0018-rc"
 
@@ -80,7 +90,7 @@ MULTISTRAP_SECTION_ubuntu = "Raring"
 
 MULTISTRAP_SECTION_kernelmods = "Modules"
 
-PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools diag testtools serial-console ltp"
+PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console ltp"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
 
