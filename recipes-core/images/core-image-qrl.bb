@@ -20,22 +20,10 @@ SRC_URI += " \
    file://udev_files_to_keep.grep \
    "
 
-DEPENDS += "virtual/kernel virtual/wlan-module"
-DEPENDS += "reboot2fastboot android-tools serial-console"
-DEPENDS += "configdb"
-DEPENDS += "dsutils"
-DEPENDS += "diag"
-DEPENDS += "mp-decision"
-DEPENDS += "qcom-common"
-DEPENDS += "qmi"
-DEPENDS += "qmi-framework"
-DEPENDS += "thermal"
-DEPENDS += "xmllib"
-DEPENDS += "testtools"
+DEPENDS += "virtual/kernel"
 
 PV = "CLAR-0018-rc"
 
-#IMAGE_INSTALL = "image-base"
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
 IMAGE_ROOTFS_SIZE_ext4 = "1800000"
@@ -61,16 +49,17 @@ MULTISTRAP_SUITE_Raring = "raring"
 MULTISTRAP_COMPONENTS_Raring = "main universe"
 MULTISTRAP_DEBOOTSTRAP_Raring = "1"
 MULTISTRAP_APTSOURCES_Raring = "1"
-
+MULTISTRAP_BUILD_Raring = "0"
 
 MULTISTRAP_SOURCE_Modules = "copy://${DEPLOY_DIR}/deb/${MACHINE_ARCH} ./"
 MULTISTRAP_DEBOOTSTRAP_Modules = "1"
 MULTISTRAP_APTSOURCES_Modules = "0"
+MULTISTRAP_BUILD_Modules = "1"
 
 MULTISTRAP_SOURCE_Packages = "copy://${DEPLOY_DIR}/deb/${TUNE_PKGARCH} ./"
 MULTISTRAP_DEBOOTSTRAP_Packages = "1"
 MULTISTRAP_APTSOURCES_Packages = "0"
-
+MULTISTRAP_BUILD_Packages = "1"
 
 # Define package groups here, which are lists of packages and the multistrap section they belong to
 #      If a package group is defined and the multistrap section is not defined, it will be placed in the default section
@@ -93,6 +82,7 @@ MULTISTRAP_SECTION_kernelmods = "Modules"
 PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console ltp"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
+IMAGE_FEATURES = "ubuntu kernelmods userpkgs"
 
 fixup_conf() {
     # Convert flat directories to package repositories
