@@ -14,6 +14,7 @@ SRC_URI += " \
    file://config.sh \
    file://fstab \
    file://init \
+   file://installPkgs.sh \
    file://interfaces \
    file://multistrap.conf \
    file://wpa_supplicant.conf \
@@ -81,6 +82,17 @@ MULTISTRAP_SECTION_kernelmods = "Modules"
 
 PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console ltp"
 MULTISTRAP_SECTION_userpkgs = "Packages"
+DEPENDS += "configdb"
+DEPENDS += "dsutils"
+DEPENDS += "diag"
+DEPENDS += "ltp"
+DEPENDS += "mp-decision"
+DEPENDS += "qcom-common"
+DEPENDS += "qmi"
+DEPENDS += "qmi-framework"
+DEPENDS += "thermal"
+DEPENDS += "xmllib"
+DEPENDS += "testtools"
 
 IMAGE_FEATURES = "ubuntu kernelmods userpkgs"
 
@@ -102,6 +114,7 @@ MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
+    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}/installPkgs.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
     install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}/etc/network/interfaces
