@@ -21,7 +21,7 @@ PACKAGES = "${PN}"
 
 FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/* \
-	    ${base_libdir}/modules/3.4.0-caf-standard/* \
+	    ${base_libdir}/modules/3.4.0-${MACHINE} \
 	    ${sysconfdir}/network/* \
 	    ${sysconfdir}/network/interfaces.d/* \
 	    "
