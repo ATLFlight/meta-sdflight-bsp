@@ -1,6 +1,10 @@
 LIC_FILES_CHKSUM = "file://${COREBASE}/LICENSE;md5=3f40d7994397109285ec7b81fdeb3b58 \
                     file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
 
+
+IMAGE_FEATURES ?= ""
+EXTRA_IMAGE_FEATURES ?= ""
+
 python () {
     section = {}
     debootstrap = ''
@@ -67,20 +71,20 @@ python () {
                         section[s]['PACKAGES'] += ' ' + package_list
                     else:
                         section[s]['PACKAGES'] = package_list
-                    if section[s]['BUILD']:
-                        package_list_split = package_list.split()
-                        for pkg in package_list_split:
-                            deps += " %s:do_package_write_deb" % pkg
                 else:
-                    if section[default_section]['BUILD']:
-                        package_list_split = package_list.split()
-                        for pkg in package_list_split:
-                            deps += " %s:do_package_write_deb" % pkg
                     if section[default_section]['PACKAGES']:
                         section[default_section]['PACKAGES'] += ' ' + package_list
                     else:
                         section[default_section]['PACKAGES'] = package_list
+
+    # Set up the build dependences
+    for s in sections:
+    	if section[s]['BUILD'] and section[s]['PACKAGES']:
+            package_list_split = section[s]['PACKAGES'].split()
+            for pkg in package_list_split:
+                deps += " %s:do_package_write_deb" % pkg
     d.appendVarFlag('do_rootfs', 'depends', deps)
+
 
     # Write out the multistrap.conf
     mf = open(d.getVar('TOPDIR') + '/../meta-qr-linux/recipes-core/images/core-image-qrl/multistrap.conf', 'w')

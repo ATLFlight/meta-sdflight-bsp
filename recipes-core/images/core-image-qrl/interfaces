@@ -10,10 +10,6 @@
 auto lo
 iface lo inet loopback
 
-# Ethernet interface on the Dragon Board
-auto eth0
-iface eth0 inet dhcp
-
 source /etc/network/interfaces.d/*.cfg
 
 # This allows DHCP to be run for wlan0 (actually all interfaces).

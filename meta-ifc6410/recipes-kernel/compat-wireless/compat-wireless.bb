@@ -16,8 +16,6 @@ SRC_URI += " \
    file://0001-compiler-warning.patch \
    file://ifc6410-android2linux-macaddress.sh \
    file://mac2softmac.sh \
-   file://interfaces \
-   file://eth0.cfg \
    file://qca6234.cfg \
    "
 
@@ -75,14 +73,10 @@ module_do_install() {
 
 	mkdir -p ${D}/etc/network
 
-   # rm -f ${D}/etc/network/interfaces
-	# install ${WORKDIR}/interfaces ${D}/etc/network/interfaces
-
 	install -m 744 ${WORKDIR}/ifc6410-android2linux-macaddress.sh ${D}/etc/network/ifc6410-android2linux-macaddress.sh
 	install -m 744 ${WORKDIR}/mac2softmac.sh ${D}/etc/network/mac2softmac.sh
 
 	mkdir -p ${D}/etc/network/interfaces.d
-	install -m 644 ${WORKDIR}/eth0.cfg ${D}/etc/network/interfaces.d/eth0.cfg
 	install -m 644 ${WORKDIR}/qca6234.cfg ${D}/etc/network/interfaces.d/qca6234.cfg
 }
 

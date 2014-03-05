@@ -17,10 +17,8 @@ SRC_URI += " \
 	"
 
 
-PACKAGES = "kernel-module-cfg80211 ${PN}"
-PROVIDES += "kernel-module-cfg80211"
+PACKAGES = "${PN}"
 
-FILES_kernel-module-cfg80211 = "${base_libdir}/modules/3.4.0-caf-standard/extra/cfg80211.ko"
 FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/* \
 	    ${base_libdir}/modules/3.4.0-caf-standard/* \

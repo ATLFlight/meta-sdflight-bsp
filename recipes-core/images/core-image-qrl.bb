@@ -78,8 +78,6 @@ MULTISTRAP_BUILD_Packages = "1"
 PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf logrotate expect file gcc udhcpd bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
-MULTISTRAP_SECTION_kernelmods = "Modules"
-
 PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console ltp"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 DEPENDS += "configdb"
@@ -94,7 +92,7 @@ DEPENDS += "thermal"
 DEPENDS += "xmllib"
 DEPENDS += "testtools"
 
-IMAGE_FEATURES = "ubuntu kernelmods userpkgs"
+IMAGE_FEATURES += "ubuntu userpkgs"
 
 fixup_conf() {
     # Convert flat directories to package repositories
