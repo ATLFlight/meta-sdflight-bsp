@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
-RDEPENDS_${PN} = "acl openssl"
+RDEPENDS_${PN} = ""
+DEPENDS = ""
 
 SRC_URI += "file://cmds.ltp"
 
