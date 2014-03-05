@@ -78,7 +78,7 @@ MULTISTRAP_BUILD_Packages = "1"
 PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf logrotate expect file gcc udhcpd bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
-PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console ltp"
+PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 DEPENDS += "configdb"
 DEPENDS += "dsutils"
