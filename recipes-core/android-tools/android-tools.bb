@@ -13,6 +13,7 @@ PV="1.1.36"
 PN = "android-tools"
 
 PROVIDES = "android-tools"
+DEPENDS += "zlib"
 
 PACKAGES = "${PN}"
 
