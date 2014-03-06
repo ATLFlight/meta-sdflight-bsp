@@ -23,7 +23,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel"
 
-PV = "CLAR-0018-rc"
+PV = "CLAR-0018"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
