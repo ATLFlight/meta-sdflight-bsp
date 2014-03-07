@@ -8,6 +8,8 @@ SRC_URI += " \
 	file://cmds.ltp \
 "
 
+EXTRA_OECONF += "--with-expect --with-bash --with-perl --with-python"
+
 do_install_append() {
    install -m 644 ${WORKDIR}/cmds.ltp ${D}/opt/ltp/runtest
 }
