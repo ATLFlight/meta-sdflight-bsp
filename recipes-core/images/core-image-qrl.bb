@@ -10,8 +10,7 @@ inherit multistrap-image
 SRC_URI += " \
    file://adb.conf \
    file://apt.conf \
-   file://multistrap.conf \
-   file://config.sh \
+   file://config.sh.in \
    file://fstab \
    file://init \
    file://installPkgs.sh \
@@ -27,7 +26,6 @@ PV = "CLAR-0018"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
-IMAGE_ROOTFS_SIZE_ext4 = "1800000"
 
 # Overall multistrap configuration
 #     - From this the multistrap.conf file will be generated
@@ -75,7 +73,7 @@ MULTISTRAP_BUILD_Packages = "1"
 #    - wpasupplicant: To manage Wi-Fi
 #    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
 
-PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf logrotate expect file gcc udhcpd bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
 PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console"
@@ -102,8 +100,10 @@ fixup_conf() {
          dpkg-scansources . /dev/null | gzip -9c > Sources.gz
       done
     cd ${CURDIR}
+    # Set file system root in config.sh
+    cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh
+    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/config.sh
     # Replace place holders with build system values.
-    sed -e "s|@DEPLOY_DIR@|${DEPLOY_DIR}|" -e "s|@MACHINE_ARCH@|${MACHINE_ARCH}|" -e "s|@WORKDIR@|${WORKDIR}|" -e "s|@TUNE_PKGARCH@|${TUNE_PKGARCH}|" -e "s|@QRL_MACHINE_MODULES@|${QRL_MACHINE_MODULES}|" -i ${WORKDIR}/multistrap.conf
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
