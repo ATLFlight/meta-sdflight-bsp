@@ -2,12 +2,11 @@
 
 t=/etc/network/
 
-afw=/mnt/system/etc/firmware/ath6k/AR6004/hw3.0/
-lfw=/lib/firmware/ath6k/AR6004/hw3.0/
-
 out=/etc/network/eth0-init.sh
 
 if [ ! -f $t/macaddress.done ]; then
+   afw=/mnt/system/etc/firmware/ath6k/AR6004/hw3.0/
+   lfw=/lib/firmware/ath6k/AR6004/hw3.0/
    mkdir -p /mnt/system
    mount /dev/mmcblk0p12 /mnt/system/
    mkdir -p $lfw
@@ -15,6 +14,17 @@ if [ ! -f $t/macaddress.done ]; then
    cp $afw/fw.ram.bin $lfw
    cp $afw/bdata.bin_sdio $lfw/bdata.bin
    umount /mnt/system
+
+   afw=/mnt/system/etc/firmware/ath6k/AR6004/hw1.3/
+   lfw=/lib/firmware/ath6k/AR6004/hw1.3/
+   mkdir -p /mnt/system
+   mount /dev/mmcblk0p12 /mnt/system/
+   mkdir -p $lfw
+   cp $afw/softmac.bin $lfw
+   cp $afw/fw.ram.bin $lfw
+   cp $afw/bdata.bin_sdio $lfw/bdata.bin
+   umount /mnt/system
+
 
    mkdir -p /mnt/userdata
    mount /dev/mmcblk0p13 /mnt/userdata/
