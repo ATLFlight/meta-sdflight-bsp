@@ -9,8 +9,8 @@
 echo "[INFO] Running firstboot scripts..."
 
 mount -a -t proc,sysfs,tmpfs
-
 /config.sh
+/setup.sh
 
 # Now delete ourselves and go back to regular init
 echo "[INFO] Configuring system for normal boot..."
