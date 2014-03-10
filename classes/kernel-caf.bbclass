@@ -88,7 +88,7 @@ do_kernel_checkout() {
 	fi
 }
 
-LK_ROOT_DEV ?= "/dev/mmcblk0p13"
+LK_ROOT_DEV ?= ""
 LK_CMDLINE_OPTIONS ?= ""
 
 do_lk_mkimage() {
