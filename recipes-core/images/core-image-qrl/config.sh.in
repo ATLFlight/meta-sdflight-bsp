@@ -9,7 +9,6 @@
 ## the dash.preinst script, and dkpg --configure -a.
 ## It does user-space specific things, and then adds a default user too.
 ###############################################################################
-
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 export LC_ALL=C LANGUAGE=C LANG=C
 
@@ -71,7 +70,6 @@ ln -s /var/log/syslog /var/log/messages
 ## Set the default runlevel to 2
 ## 
 sed -i -e 's/DEFAULT_RUNLEVEL=1/DEFAULT_RUNLEVEL=2/' /etc/init/rc-sysinit.conf
-#echo "S:2345:respawn /sbin/getty -L ttyHSL0 115200 linux >> /etc/inittab
 
 ##
 ## Remove the diversion we created earlier

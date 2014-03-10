@@ -11,11 +11,11 @@ SRC_URI += " \
    file://adb.conf \
    file://apt.conf \
    file://config.sh.in \
+   file://resize.in \
    file://fstab \
    file://init \
    file://installPkgs.sh \
    file://interfaces \
-   file://multistrap.conf \
    file://wpa_supplicant.conf \
    file://udev_files_to_keep.grep \
    "
@@ -32,7 +32,7 @@ IMAGE_LINGUAS = " "
 
 # define the possible multistrap sections
 #   Each section will specify how multistrap will download the dpkg from
-MULTISTRAP_SECTIONS = "Raring Modules Packages"
+MULTISTRAP_SECTIONS = "Raring Modules Packages Binaries"
 
 # The value of the default section must be one of the sections listed in the above MULTISTRAP_SECTIONS variable
 MULTISTRAP_DEFAULT_SECTION = "Packages"
@@ -40,8 +40,7 @@ MULTISTRAP_DEFAULT_SECTION = "Packages"
 MULTISTRAP_GENERAL_noauth = 'true'
 MULTISTRAP_GENERAL_unpack = 'true'
 MULTISTRAP_GENERAL_arch   = 'armhf'
-MULTISTRAP_GENERAL_configscript = '@WORKDIR@/config.sh'
-
+MULTISTRAP_GENERAL_configscript = '${WORKDIR}/config.sh'
 
 MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com"
 MULTISTRAP_SUITE_Raring = "raring"
@@ -76,17 +75,8 @@ MULTISTRAP_BUILD_Packages = "1"
 PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
-PACKAGE_GROUP_userpkgs = "reboot2fastboot android-tools serial-console"
+PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0"
 MULTISTRAP_SECTION_userpkgs = "Packages"
-DEPENDS += "configdb"
-DEPENDS += "dsutils"
-DEPENDS += "diag"
-DEPENDS += "mp-decision"
-DEPENDS += "qcom-common"
-DEPENDS += "qmi"
-DEPENDS += "qmi-framework"
-DEPENDS += "thermal"
-DEPENDS += "xmllib"
 
 IMAGE_FEATURES += "ubuntu userpkgs"
 
@@ -99,24 +89,36 @@ fixup_conf() {
          dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
          dpkg-scansources . /dev/null | gzip -9c > Sources.gz
       done
+    for dir in `ls ${DEPLOY_DIR}/images`
+      do
+         cd ${DEPLOY_DIR}/images/${dir}/qcom-proprietary
+         dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+         dpkg-scansources . /dev/null | gzip -9c > Sources.gz
+      done
     cd ${CURDIR}
     # Set file system root in config.sh
     cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh
     sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/config.sh
+    cp ${WORKDIR}/resize.in ${WORKDIR}/resize
+    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/resize
     # Replace place holders with build system values.
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
+    # Install init.d scripts
+    install ${WORKDIR}/resize ${IMAGE_ROOTFS}${sysconfdir}/init.d/resize
+    update-rc.d -r ${IMAGE_ROOTFS} resize start 20 2 .
+    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}${sysconfdir}/init.d/installPkgs.sh
+    update-rc.d -r ${IMAGE_ROOTFS} installPkgs.sh start 20 2 .
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
-    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}/installPkgs.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
-    install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}/etc/fstab
-    install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}/etc/network/interfaces
-    install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}/etc/wpa_supplicant/wpa_supplicant.conf
-    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}/etc/clarence-version
-    sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}/etc/init/rc-sysinit.conf
+    install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}${sysconfdir}/fstab
+    install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}${sysconfdir}/network/interfaces
+    install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}${sysconfdir}/wpa_supplicant/wpa_supplicant.conf
+    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}${sysconfdir}/clarence-version
+    sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
 
