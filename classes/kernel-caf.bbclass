@@ -107,7 +107,8 @@ do_lk_mkimage() {
         --cmdline "noinitrd console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
 	--base 0x80200000 \
         --pagesize 2048 \
-	--output ${DEPLOY_DIR_IMAGE}/${PN}-boot-${MACHINE}.img
+	--output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
+  cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
 addtask lk_mkimage after do_deploy and before do_package

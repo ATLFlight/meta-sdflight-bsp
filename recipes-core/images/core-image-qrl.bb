@@ -72,7 +72,7 @@ MULTISTRAP_BUILD_Packages = "1"
 #    - wpasupplicant: To manage Wi-Fi
 #    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
 
-PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push"
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
 PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0"
@@ -125,3 +125,10 @@ fixup_sysroot() {
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"
+
+rename_images() {
+    rm -f ${DEPLOY_DIR_IMAGE}/userdata.img
+    cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/userdata.img
+}
+
+IMAGE_POSTPROCESS_COMMAND = "rename_images"
