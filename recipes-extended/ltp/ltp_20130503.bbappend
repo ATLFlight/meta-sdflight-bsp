@@ -5,6 +5,7 @@ DEPENDS = ""
 
 SRC_URI += " \
 	file://0001-Use-bash-for-all-shell-scripts.patch \
+	file://0002-Updated-file_test.sh-for-qr-linux.patch \
 	file://cmds.ltp \
 "
 
