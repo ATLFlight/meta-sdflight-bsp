@@ -1,4 +1,4 @@
-DESCRIPTION = "This recipe includes the core packages needed for an apq system."
+DESCRIPTION = "This recipe includes the core packages needed for a qrl system."
 AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
 
 LICENSE = "BSD-3-Clause-Clear" 
@@ -117,7 +117,7 @@ fixup_sysroot() {
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}${sysconfdir}/fstab
     install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}${sysconfdir}/network/interfaces
     install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}${sysconfdir}/wpa_supplicant/wpa_supplicant.conf
-    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}${sysconfdir}/clarence-version
+    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}${sysconfdir}/qrl-version
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
