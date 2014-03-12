@@ -1,29 +1,29 @@
 #!/bin/bash
 ### BEGIN INIT INFO
-# Provides:        install_proprietary_binaries  
+# Provides:        install_binaries  
 # Required-Start:    
 # Required-Stop:     
 # Should-Start:      
 # Should-Stop:       
 # Default-Start:     2 
 # Default-Stop:      0
-# Short-Description: Install proprietary binaries.
-# Description:       This script installs proprietary binaries necessary for operation of QR Linux.
+# Short-Description: Install binaries.
+# Description:       This script installs binaries necessary for operation of QR Linux.
 ### END INIT INFO
 ###############################################################################
 ## Author: Rahul Anand (ranand@codeaurora.org)
 ## 
-## This script installs proprietary SW
+## This script installs packages needed for bsp support
 ##
 ###############################################################################
 
-if [ ! -e /etc/init.d/installed_proprietary_binaries ]; then
+if [ ! -e /etc/init.d/installed_binaries ]; then
     MOUNT=/bin/mount
     GREP=/bin/grep
     MKDIR=/bin/mkdir 
 
-    QC_FW_DEVICE=/dev/mmcblk0p1	# eMMC partition that contains the firmware
-    QC_FW_MOUNT_POINT=/firmware	# Where to mount the eMMC partition
+    QC_FW_DEVICE=/dev/mmcblk0p14 # eMMC partition that contains the firmware
+    QC_FW_MOUNT_POINT=/persist	# Where to mount the eMMC partition
     QC_PKG_SUBDIR=deb		# The subdir in eMMC partition where pkgs are
 
     qcPkgDir=${QC_FW_MOUNT_POINT}/${QC_PKG_SUBDIR} # Where to install the pkgs from
@@ -65,7 +65,7 @@ if [ ! -e /etc/init.d/installed_proprietary_binaries ]; then
 	fi
 
 	echo "[INFO] Mounting the partition..."
-	${MOUNT} -t vfat ${device} ${mntPoint}
+	${MOUNT} -t ext4 ${device} ${mntPoint}
     }
 
     ##
@@ -75,17 +75,16 @@ if [ ! -e /etc/init.d/installed_proprietary_binaries ]; then
 	echo "In checkInstallPkgs"
 	mountPartition ${QC_FW_DEVICE} ${QC_FW_MOUNT_POINT} || {
 	    echo "[ERROR] Error mounting the partition ${QC_FW_DEVICE}"
-	    #return 1
+	    return 0 # Don't fail if we can't install
 	}
 	pkgDir=${QC_FW_MOUNT_POINT}/${QC_PKG_SUBDIR}
 	if [ ! -d ${pkgDir} ]
 	then
 	    echo "[WARNING] Pkg directory ${pkgDir} doesn't exist"
-	    return 1
+	    return 0
 	fi
 	export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv
 	cd ${pkgDir}
-	dpkg --install testtools_*.deb
 	dpkg --install reboot2fastboot_*.deb
 	dpkg --install diag_*.deb
 	dpkg --install libxml0_*.deb
@@ -95,18 +94,8 @@ if [ ! -e /etc/init.d/installed_proprietary_binaries ]; then
 	dpkg --install qmi-framework_*.deb
 	dpkg --install thermal_*.deb
 	dpkg --install mp-decision_*.deb
-
-	# (
-	# 	cd ${pkgDir}
-	# 	cmd="apt-get install "
-	# 	for pkg in `ls *deb`
-	# 	do
-	# 	    cmd="${cmd} ${pkg/_*/}"
-	# 	    echo $cmd
-	# 	done
-	# )
     }
 
     checkInstallPkgs
-    touch /etc/init.d/installed_proprietary_binaries
+    touch /etc/init.d/installed_binaries
 fi

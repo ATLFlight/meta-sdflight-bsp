@@ -16,6 +16,12 @@ QC_FW_WIFI_FILE_EXT=mdt		# The extension of the WCN fw filename
 QC_FW_TRIGGER_DEVICE=/dev/wcnss_wlan # The device to trigger for fw download
 QC_FW_DEST_DIR=/lib/firmware	     # Where to copy the fw files
 
+QC_PERSIST_DEVICE=/dev/mmcblk0p14 # eMMC partition that contains the firmware
+QC_PERSIST_MOUNT_POINT=/persist	# Where to mount the eMMC partition
+QC_NV_FILE_NAME=WCNSS_qcom_wlan_nv
+QC_NV_FILE_EXT=bin
+QC_NV_FILE_DEST_DIR=/lib/firmware/wlan/prima
+
 qcFwImgDir=${QC_FW_MOUNT_POINT}/${QC_FW_SUBDIR} # Where to copy fw files from
 
 ##
@@ -58,6 +64,32 @@ checkFilesAndPartitions () {
     then
         echo "ERROR: Firmware  not found. Giving up"
         exit 1
+    fi
+
+    wifiMdtNVFile=${QC_PERSIST_MOUNT_POINT}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
+    wifiMdtNVDstFile=${QC_NV_FILE_DEST_DIR}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
+
+    # Mount the persist partion if not already mounted
+    if [ ! -d ${QC_PERSIST_MOUNT_POINT} ]; then
+	/bin/mkdir -p ${QC_PERSIST_MOUNT_POINT}
+    fi
+
+    if [ ! -f ${wifiMdtNVFile} ]; then
+	echo "INFO: Mounting persist partition..."
+	${MOUNT} -t ext4 ${QC_PERSIST_DEVICE} ${QC_PERSIST_MOUNT_POINT}
+    else
+	echo "INFO: Skipping mounting the firmware partition"
+    fi
+
+    if [ -f ${wifiMdtNVFile} ]; then
+	/bin/cp ${wifiMdtNVFile} ${wifiMdtNVDstFile}
+    else
+	echo "WARNING: NV File not found or mount failed"
+    fi
+
+    if [ ! -f ${wifiMdtNVDstFile} ]; then
+	echo "ERROR: NV File not found, Giving up"
+	exit 1
     fi
     return 0
 }

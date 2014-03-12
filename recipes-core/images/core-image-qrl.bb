@@ -89,12 +89,6 @@ fixup_conf() {
          dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
          dpkg-scansources . /dev/null | gzip -9c > Sources.gz
       done
-    for dir in `ls ${DEPLOY_DIR}/images`
-      do
-         cd ${DEPLOY_DIR}/images/${dir}/qcom-proprietary
-         dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
-         dpkg-scansources . /dev/null | gzip -9c > Sources.gz
-      done
     cd ${CURDIR}
     # Set file system root in config.sh
     cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh

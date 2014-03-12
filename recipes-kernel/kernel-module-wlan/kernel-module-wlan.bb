@@ -20,7 +20,8 @@ SRC_URI += " \
 PACKAGES = "${PN}"
 
 FILES_${PN} += " \
-	    ${base_libdir}/firmware/wlan/prima/* \
+	    ${base_libdir}/firmware/wlan/prima/WCNSS_cfg.dat \
+	    ${base_libdir}/firmware/wlan/prima/WCNNS_qcom_cfg.ini \
 	    ${base_libdir}/modules/3.4.0-${MACHINE} \
 	    ${sysconfdir}/network/* \
 	    ${sysconfdir}/network/interfaces.d/* \
@@ -56,3 +57,17 @@ module_do_install() {
 	install -m 644 ${WORKDIR}/prima.cfg ${D}/etc/network/interfaces.d/prima.cfg
 }
 
+do_package_append() {
+
+    import shutil
+
+    deploy_dir = d.getVar('DEPLOY_DIR', True)
+    machine = d.getVar('MACHINE', True)
+    destdir = deploy_dir+'/persist/'+machine
+    try:
+        os.makedirs(destdir)
+    except:
+        pass
+    d_dir = d.getVar('D', True)
+    shutil.copy(d_dir+'/lib/firmware/wlan/prima/WCNSS_qcom_wlan_nv.bin', destdir)
+}
