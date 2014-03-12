@@ -20,7 +20,7 @@ SRC_URI += " \
    file://udev_files_to_keep.grep \
    "
 
-DEPENDS += "virtual/kernel"
+DEPENDS += "virtual/kernel update-rc.d-native"
 
 PV = "CLAR-0019-rc1"
 
