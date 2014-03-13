@@ -8,7 +8,7 @@ LICENSE = "ISC"
 
 LIC_FILES_CHKSUM = "file://../COPYING;md5=552efe106a6bfffc3be6ad39e5273108"
 
-SRC_URI = "git://git.quicinc.com:29418/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=ssh"
+SRC_URI = "git://codeaurora.org/kernel/platform/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git"
 SRC_URI += " \
 	file://COPYING \
 	file://prima.patch \
