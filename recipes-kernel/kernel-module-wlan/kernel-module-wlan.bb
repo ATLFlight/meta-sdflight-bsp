@@ -21,7 +21,7 @@ PACKAGES = "${PN}"
 
 FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/WCNSS_cfg.dat \
-	    ${base_libdir}/firmware/wlan/prima/WCNNS_qcom_cfg.ini \
+	    ${base_libdir}/firmware/wlan/prima/WCNSS_qcom_cfg.ini \
 	    ${base_libdir}/modules/3.4.0-${MACHINE} \
 	    ${sysconfdir}/network/* \
 	    ${sysconfdir}/network/interfaces.d/* \
