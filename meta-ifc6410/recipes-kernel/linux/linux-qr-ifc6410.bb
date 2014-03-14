@@ -14,7 +14,6 @@ SRC_URI += "file://defconfig \
             file://ifc6410.scc \
             file://ifc6410.cfg \
             file://ifc6410-user-config.cfg \
-            file://ifc6410-user-patches.scc \
            "
 
 LINUX_VERSION ?= "3.4"
