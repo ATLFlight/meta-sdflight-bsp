@@ -14,6 +14,7 @@ SRC_URI += " \
 	file://prima.patch \
 	file://prima-init.sh \
 	file://prima.cfg \
+	file://WCNSS_qcom_wlan_nv.bin \
 	"
 
 
@@ -68,6 +69,6 @@ do_package_append() {
         os.makedirs(destdir)
     except:
         pass
-    d_dir = d.getVar('D', True)
-    shutil.copy(d_dir+'/lib/firmware/wlan/prima/WCNSS_qcom_wlan_nv.bin', destdir)
+    workdir = d.getVar('WORKDIR', True)
+    shutil.copy(workdir+'/WCNSS_qcom_wlan_nv.bin', destdir)
 }
