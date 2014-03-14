@@ -108,7 +108,8 @@ do_lk_mkimage() {
 	--base 0x80200000 \
         --pagesize 2048 \
 	--output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
-  cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/boot.img
+  install -d ${DEPLOY_DIR_IMAGE}/out
+  cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/out/boot.img
 }
 
 addtask lk_mkimage after do_deploy and before do_package

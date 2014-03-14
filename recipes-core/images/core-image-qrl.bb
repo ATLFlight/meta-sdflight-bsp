@@ -122,7 +122,8 @@ IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"
 
 rename_images() {
     rm -f ${DEPLOY_DIR_IMAGE}/userdata.img
-    cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/userdata.img
+    install -d ${DEPLOY_DIR_IMAGE}/out
+    cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/out/userdata.img
 }
 
 IMAGE_POSTPROCESS_COMMAND = "rename_images"
