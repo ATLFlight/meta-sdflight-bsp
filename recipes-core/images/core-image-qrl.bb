@@ -22,7 +22,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "CLAR-0019-rc1"
+PV = "CLAR-0019-rc3"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
