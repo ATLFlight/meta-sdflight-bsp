@@ -35,41 +35,41 @@ checkFilesAndPartitions () {
     if [ -f ${wifiMdtDstFile} ]
     then
        echo "INFO: Found existing firmware files. Skipping copying from eMMC"
-       return 0
-    fi
-
-    # Mount the firmware partition if not already mounted
-    if [ ! -d ${QC_FW_MOUNT_POINT} ]
-    then
-        /bin/mkdir -p ${QC_FW_MOUNT_POINT}
-    fi
-
-    if [ ! -d ${qcFwImgDir} ]
-    then
-        echo "INFO: Mounting firmware partition..."
-        ${MOUNT} -t vfat ${QC_FW_DEVICE} ${QC_FW_MOUNT_POINT}
     else
-        echo "INFO: Skipping mounting the firmware partition"
+
+       # Mount the firmware partition if not already mounted
+       if [ ! -d ${QC_FW_MOUNT_POINT} ]
+       then
+           /bin/mkdir -p ${QC_FW_MOUNT_POINT}
+       fi
+
+       if [ ! -d ${qcFwImgDir} ]
+       then
+           echo "INFO: Mounting firmware partition..."
+           ${MOUNT} -t vfat ${QC_FW_DEVICE} ${QC_FW_MOUNT_POINT}
+       else
+           echo "INFO: Skipping mounting the firmware partition"
+       fi
+
+       if [ ! -e ${wifiMdtSrcFile} ]
+       then
+           echo "ERROR: Firmware not found or mount failed"
+           return 1
+       fi
+       # Copy the wcnss* files from eMMC partition to /lib/firmware
+       /bin/cp ${qcFwImgDir}/${QC_FW_WIFI_FILE_NAME}* ${QC_FW_DEST_DIR}
+
+       if [ ! -f ${wifiMdtDstFile} ]
+       then
+           echo "ERROR: Firmware  not found. Giving up"
+           exit 1
+       fi
     fi
 
-    if [ ! -e ${wifiMdtSrcFile} ]
-    then
-        echo "ERROR: Firmware not found or mount failed"
-        return 1
-    fi
-    # Copy the wcnss* files from eMMC partition to /lib/firmware
-    /bin/cp ${qcFwImgDir}/${QC_FW_WIFI_FILE_NAME}* ${QC_FW_DEST_DIR}
-
-    if [ ! -f ${wifiMdtDstFile} ]
-    then
-        echo "ERROR: Firmware  not found. Giving up"
-        exit 1
-    fi
-
+    # Always copy the NV file
     wifiMdtNVFile=${QC_PERSIST_MOUNT_POINT}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
     wifiMdtNVDstFile=${QC_NV_FILE_DEST_DIR}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
 
-    # Mount the persist partion if not already mounted
     if [ ! -d ${QC_PERSIST_MOUNT_POINT} ]; then
 	/bin/mkdir -p ${QC_PERSIST_MOUNT_POINT}
     fi
@@ -77,9 +77,6 @@ checkFilesAndPartitions () {
     if [ ! -f ${wifiMdtNVFile} ]; then
 	echo "INFO: Mounting persist partition..."
 	${MOUNT} -t ext4 ${QC_PERSIST_DEVICE} ${QC_PERSIST_MOUNT_POINT}
-    else
-	echo "INFO: Skipping mounting the firmware partition"
-    fi
 
     if [ -f ${wifiMdtNVFile} ]; then
 	/bin/cp ${wifiMdtNVFile} ${wifiMdtNVDstFile}
