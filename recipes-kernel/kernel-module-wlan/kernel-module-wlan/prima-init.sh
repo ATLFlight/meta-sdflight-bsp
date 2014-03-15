@@ -77,6 +77,7 @@ checkFilesAndPartitions () {
     if [ ! -f ${wifiMdtNVFile} ]; then
 	echo "INFO: Mounting persist partition..."
 	${MOUNT} -t ext4 ${QC_PERSIST_DEVICE} ${QC_PERSIST_MOUNT_POINT}
+    fi
 
     if [ -f ${wifiMdtNVFile} ]; then
 	/bin/cp ${wifiMdtNVFile} ${wifiMdtNVDstFile}
