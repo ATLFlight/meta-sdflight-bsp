@@ -14,6 +14,6 @@ kconf hardware ifc6410.cfg
 kconf hardware ifc6410-user-config.cfg
 include ifc6410-user-patches.scc
 
-# These are config fragments needed by the Clarence system
+# These are config fragments needed for the kernel
 kconf hardware ltp.cfg
 kconf hardware panics.cfg

@@ -13,6 +13,6 @@ kconf hardware som8064.cfg
 kconf hardware som8064-user-config.cfg
 include som8064-user-patches.scc
 
-# These are config fragments needed by the Clarence system
+# These are config fragments for the kernel
 kconf hardware ltp.cfg
 kconf hardware panics.cfg

@@ -7,7 +7,7 @@
 ##
 ## It does standard things discussed in the multistrap guide, i.e. runs
 ## the dash.preinst script, and dkpg --configure -a.
-## It does user-space specific things, and then adds a default user too.
+## It then does user-space configuration for QR-Linux.
 ###############################################################################
 export DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true
 export LC_ALL=C LANGUAGE=C LANG=C
@@ -26,25 +26,23 @@ mkdir -p /usr/share/man/man1
 
 ##
 ## Add a diversion for /sbin/initctl, which gets called, but fails, in the configuration
-## phase. We only need it during normal boot, so we'll delete the diversion at the end
+## phase. We only need it during normal boot, so we'll delete the diversion later in 
+## this script
 ## 
 dpkg-divert --local --rename --add /sbin/initctl
 ln -s /bin/true /sbin/initctl
 
 ##
-## Add a hostname
+## Add a temporary hostname
 ## 
-#serialNum=$(( $RANDOM % 10 ))
 serialNum=100
 hostName=${HOST_NAME}${serialNum}
-echo "[INFO[ Configuring host name to: $hostName"
 echo $hostName >> /etc/hostname
 echo "127.0.0.1 localhost" >> /etc/hosts
 
 ##
 ## Create /dev/random and /dev/urandom
 ##
-echo "[INFO] Creating /dev/random and /dev/urandom..."
 test -e /dev/random || /bin/mknod -m 644 /dev/random c 1 8
 test -e /dev/urandom || /bin/mknod -m 644 /dev/urandom c 1 9
 
@@ -55,12 +53,12 @@ echo "[INFO] Configuring packages..."
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv dpkg --configure -a
 mount proc -t proc /proc
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv dpkg --configure -a
-echo "[INFO] Done configuring packages"
 
 ##
 ## Change the owners on /dev/random and /dev/urandom
 ##
 chown root:root /dev/random /dev/urandom
+
 ##
 ## Make a symlink of /var/log/syslog as /var/log/messages
 ##
@@ -85,18 +83,19 @@ dpkg-divert --rename --remove /sbin/initctl
 ##
 ## Set the root password 
 ## 
-echo "Set root password..."
+echo "[INFO] Setting root password..."
 echo root:clarence | /usr/sbin/chpasswd
 
 ##
-## Add a non-root user account "clarence" and add it to sudo group
+## Add a non-root user account "qrl-user" and add it to sudo group
 ##
-(useradd -b /home -m -s /bin/bash clarence && usermod -aG sudo clarence)
+(useradd -b /home -m -s /bin/bash qrl-user && usermod -aG sudo qrl-user)
 ## 
 ## Creat a group for diag.
 groupadd diag
-# Now make other changes to the file
+# Now modify the Wi-Fi configuration file
 sed -i -e "s/#gStaKeepAlivePeriod = 30/gStaKeepAlivePeriod = 30/" /lib/firmware/wlan/prima/WCNSS_qcom_cfg.ini
+
 ##
 ## Uniqify the hostname using /dev/random
 ## 
@@ -117,10 +116,10 @@ sync;sync
 ## Add start_usb and start_adbd services 
 ##
 export PATH=$PATH:/usr/lib/insserv
-echo "Adding adb_usb service"
+echo "[INFO] Adding adb_usb service..."
 #/usr/lib/insserv/insserv start_usb
 /usr/sbin/update-rc.d start_usb defaults
-echo "Adding adb_deamon service"
+echo "[INFO] Adding adb_deamon service..."
 #/usr/lib/insserv/insserv start_adbd
 /usr/sbin/update-rc.d start_adbd defaults
 
