@@ -16,7 +16,7 @@
 ## This script installs packages needed for QR-Linux bsp support
 ##
 ###############################################################################
-CHECK_FILE=/var/run/.qrl_installed_binaries
+CHECK_FILE=/var/lib/dpkg/.qrl_installed_binaries
 
 if [ -e ${CHECK_FILE} ] 
 then
@@ -45,6 +45,10 @@ isMounted () {
     return $?
 }
 
+##
+## mountPartition:
+##   Mount the partition for the binaries 
+##    
 mountPartition () {
     local device=$1
     local mntPoint=$2
