@@ -22,7 +22,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "Q14.03.00-ES"
+PV = "14.03.0"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
