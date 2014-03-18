@@ -1,0 +1,18 @@
+#
+# The top-level 'feature' for the som8064 custom kernel.
+#
+# Essentially this is a convenient top-level container or starting
+# point for adding lower-level config fragements and features.
+#
+
+kconf hardware som8064.cfg
+
+# These are used by yocto-kernel to add config fragments and features.
+# Don't remove if you plan on using yocto-kernel with this BSP.
+
+kconf hardware som8064-user-config.cfg
+include som8064-user-patches.scc
+
+# These are config fragments for the kernel
+kconf hardware ltp.cfg
+kconf hardware panics.cfg

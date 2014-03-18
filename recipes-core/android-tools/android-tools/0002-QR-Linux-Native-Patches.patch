@@ -1,0 +1,62 @@
+From 27b62225eb3d02a14456fdab3651489e20ecb42f Mon Sep 17 00:00:00 2001
+From: Gene Marsh <gmarsh@codeaurora.org>
+Date: Sat, 25 Jan 2014 08:34:12 +0000
+Subject: APQ Linux Native Patches
+
+---
+ Makefile.am           |  2 +-
+ adb/Makefile.am       | 37 +------------------------------------
+ configure.ac          |  3 ++-
+ mkbootimg/Makefile.am | 16 ++++++++++++++++
+ 4 files changed, 20 insertions(+), 38 deletions(-)
+ create mode 100644 mkbootimg/Makefile.am
+
+diff --git a/Makefile.am b/Makefile.am
+index 769daa9..84ae050 100755
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -5,6 +5,6 @@ BUILD_COMPONENTS += libcutils
+ endif
+ BUILD_COMPONENTS += liblog logcat libzipfile
+ 
+-BUILD_COMPONENTS += adb libmincrypt fastboot usb
++BUILD_COMPONENTS += adb libmincrypt fastboot usb mkbootimg
+ 
+ SUBDIRS := $(BUILD_COMPONENTS)
+diff --git a/configure.ac b/configure.ac
+index 1886c58..782f7d5 100755
+--- a/configure.ac
++++ b/configure.ac
+@@ -72,5 +72,6 @@
+           libzipfile/Makefile \
+           fastboot/Makefile \
+           adb/Makefile \
+-          usb/Makefile
++          usb/Makefile \
++	  mkbootimg/Makefile
+   ])
+diff --git a/mkbootimg/Makefile.am b/mkbootimg/Makefile.am
+new file mode 100644
+index 0000000..b492b5f
+--- /dev/null
++++ b/mkbootimg/Makefile.am
+@@ -0,0 +1,16 @@
++bin_PROGRAMS = mkbootimg
++
++mkbootimg_SOURCES := \
++	mkbootimg.c \
++	mkbootimg.h
++
++mkbootimg_CFLAGS = -O2 \
++	-g \
++	-Wall \
++	-Wno-unused-parameter \
++	-I../include
++
++mkbootimg_LDFLAGS = -all-static
++
++mkbootimg_LDADD = ../libmincrypt/libmincrypt.la
++
+-- 
+1.8.1.2
+

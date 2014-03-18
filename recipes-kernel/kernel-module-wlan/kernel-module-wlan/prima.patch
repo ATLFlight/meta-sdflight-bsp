@@ -1,0 +1,22 @@
+diff --git a/Kbuild b/Kbuild
+index f1e8184..6a3648f 100644
+--- a/Kbuild
++++ b/Kbuild
+@@ -10,7 +10,8 @@ ifeq ($(KERNEL_BUILD),1)
+ 	# These are provided in Android-based builds
+ 	# Need to explicitly define for Kernel-based builds
+ 	MODNAME := wlan
+-	WLAN_ROOT := drivers/staging/prima
++	WLAN_ROOT := $(M)
++	obj-m := $(MODNAME).o
+ endif
+ 
+ ifeq ($(KERNEL_BUILD),0)
+@@ -62,6 +65,7 @@ HAVE_CFG80211 := 0
+ endif
+ endif
+ 
++CFLAGS_REMOVE_limProcessMlmRspMessages.o = -Wframe-larger-than=1024
+ ############ BAP ############
+ BAP_DIR :=	CORE/BAP
+ BAP_INC_DIR :=	$(BAP_DIR)/inc

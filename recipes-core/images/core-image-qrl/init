@@ -1,0 +1,38 @@
+#!/bin/sh
+##
+## This is intended to replace /sbin/init when the system boots for the first
+## time. It mounts the kernel filesystems, and runs the target configure script,
+## /config.sh. After that is done, it deletes itself, and restores the upstart
+## /sbin/init as the regular init
+##
+
+echo "[INFO] Running firstboot scripts..."
+
+mount -a -t proc,sysfs,tmpfs
+/config.sh
+/setup.sh
+
+# Now delete ourselves and go back to regular init
+echo "[INFO] Configuring system for normal boot..."
+
+rm -f /sbin/init
+sync
+cp /sbin/init.upstart /sbin/init
+
+sync
+sync
+sleep 2
+sync
+
+## FINAL STEP - Reboot the card
+echo "[INFO] Reboot system now..."
+# Enable sysrq
+echo 1 > /proc/sys/kernel/sysrq
+# Sync all pending filesystem operations
+echo s > /proc/sysrq-trigger
+# Reboot immediately
+echo b > /proc/sysrq-trigger
+
+while [ 1 ]; do
+    /sbin/getty -L ttyHSL1 115200 linux
+done

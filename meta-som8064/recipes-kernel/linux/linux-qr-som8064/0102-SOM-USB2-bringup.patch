@@ -1,0 +1,106 @@
+From 16d2324fc3632c0aa9f5cabef4341bcf924cb055 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Thu, 24 Oct 2013 12:34:58 -0700
+Subject: [PATCH 2/2] SOM USB2 bringup
+
+---
+ arch/arm/mach-msm/board-8064-regulator.c | 13 +++++++++++++
+ arch/arm/mach-msm/board-8064.c           | 10 +++++++++-
+ arch/arm/mach-msm/board-8064.h           |  3 +++
+ 3 files changed, 25 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-regulator.c b/arch/arm/mach-msm/board-8064-regulator.c
+index 24098f2..7de89da 100644
+--- a/arch/arm/mach-msm/board-8064-regulator.c
++++ b/arch/arm/mach-msm/board-8064-regulator.c
+@@ -240,10 +240,12 @@ VREG_CONSUMERS(8821_S1) = {
+ 	REGULATOR_SUPPLY("8821_s1",		NULL),
+ 	REGULATOR_SUPPLY("krait3",		"acpuclk-8064"),
+ };
++#ifndef CONFIG_MACH_APQ8064_SOM
+ VREG_CONSUMERS(EXT_MPP8) = {
+ 	REGULATOR_SUPPLY("ext_mpp8",		NULL),
+ 	REGULATOR_SUPPLY("vbus",		"msm_ehci_host.1"),
+ };
++#endif
+ VREG_CONSUMERS(EXT_3P3V) = {
+ 	REGULATOR_SUPPLY("ext_3p3v",		NULL),
+ 	REGULATOR_SUPPLY("vdd_io",		"spi0.2"),
+@@ -290,7 +292,11 @@ VREG_CONSUMERS(NCP) = {
+ };
+ VREG_CONSUMERS(EXT_5V) = {
+ 	REGULATOR_SUPPLY("ext_5v",		NULL),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	REGULATOR_SUPPLY("vbus",		"msm_ehci_host.1"),
++#else
+ 	REGULATOR_SUPPLY("vbus",		"msm_ehci_host.0"),
++#endif
+ };
+ 
+ /* Regulators that are only present when using PM8917 */
+@@ -555,13 +561,20 @@ VREG_CONSUMERS(BOOST) = {
+ struct gpio_regulator_platform_data
+ apq8064_gpio_regulator_pdata[] __devinitdata = {
+ 	/*        ID      vreg_name gpio_label   gpio                  supply */
++#ifdef CONFIG_MACH_APQ8064_SOM
++	GPIO_VREG(EXT_5V, "ext_5v", "ext_5v_en", 
++		  APQ8064_EXT_5V_REG_EN_GPIO, NULL),
++#else
+ 	GPIO_VREG(EXT_5V, "ext_5v", "ext_5v_en", PM8921_MPP_PM_TO_SYS(7), NULL),
++#endif
+ 	GPIO_VREG(EXT_3P3V, "ext_3p3v", "ext_3p3v_en",
+ 		  APQ8064_EXT_3P3V_REG_EN_GPIO, NULL),
+ 	GPIO_VREG(EXT_TS_SW, "ext_ts_sw", "ext_ts_sw_en",
+ 		  PM8921_GPIO_PM_TO_SYS(23), "ext_3p3v"),
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	GPIO_VREG(EXT_MPP8, "ext_mpp8", "ext_mpp8_en",
+ 			PM8921_MPP_PM_TO_SYS(8), NULL),
++#endif
+ };
+ 
+ struct gpio_regulator_platform_data
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 4a19631..49c6798 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -931,6 +931,15 @@ static void __init apq8064_ehci_host_init(void)
+ 		platform_device_register(&apq8064_device_ehci_host4);
+ #endif
+ 	}
++
++	if (machine_is_apq8064_som()) {
++#ifdef CONFIG_USB_EHCI_MSM_HOST4
++		msm_ehci_host_pdata4.power_budget=500;
++		apq8064_device_ehci_host4.dev.platform_data =
++			&msm_ehci_host_pdata4;
++		platform_device_register(&apq8064_device_ehci_host4);
++#endif
++	}
+ }
+ 
+ static struct smb349_platform_data smb349_data __initdata = {
+@@ -3416,7 +3425,6 @@ static void __init apq8064_cdp_init(void)
+ 		platform_device_register(&mpq8064_device_uartdm_gsbi6);
+ 	}
+ 
+-	/* SOM */
+ 	if (machine_is_apq8064_cdp() || machine_is_apq8064_liquid()
+ 		|| machine_is_apq8064_som())
+ 		platform_device_register(&cdp_kp_pdev);
+diff --git a/arch/arm/mach-msm/board-8064.h b/arch/arm/mach-msm/board-8064.h
+index 256fac9..af62711 100644
+--- a/arch/arm/mach-msm/board-8064.h
++++ b/arch/arm/mach-msm/board-8064.h
+@@ -58,6 +58,9 @@ extern int msm8064_pm8917_regulator_pdata_len __devinitdata;
+ 
+ #define APQ8064_EXT_3P3V_REG_EN_GPIO	77
+ 
++#ifdef CONFIG_MACH_APQ8064_SOM
++#define APQ8064_EXT_5V_REG_EN_GPIO	81
++#endif
+ extern struct gpio_regulator_platform_data
+ 	apq8064_gpio_regulator_pdata[] __devinitdata;
+ 
+-- 
+1.8.2.1
+
