@@ -27,7 +27,7 @@ Patches
 =======
 
 Please submit any patches against the qr-linux layer to the
-QR Linux forum (https://www.codeaurora.org/forums/qr-linux) and cc: the maintainer:
+QR-Linux forum (https://www.codeaurora.org/forums/qr-linux) and cc: the maintainer:
 
 Maintainer: Rahul Anand <ranand@codeaurora.org>
 
@@ -35,74 +35,58 @@ Maintainer: Rahul Anand <ranand@codeaurora.org>
 Table of Contents
 =================
 
-  I. Building QR Linux
- II. For More Information
+  I. Building QR-Linux
+  II. Detailed Building Instructions
+  III. For More Information
 
 
-I. Building QR Linux
-=================================================
+I. Building QR-Linux
+====================
 
 The following instructions assume that you are working from an Ubuntu
-12.04 (or later) system. The steps for other systmes will be similar,
+12.04 (or later) system. The steps for other systems will be similar,
 and should be easily discerned from what follows.
 
-A. Install Required Packages
+A. Fetch The Source
 
-Yocto requires access to the programs diffstat, texinfo, gawk,
-and chrpath. We also need multistrap for building the user
-space. You can get them by using apt-get. Be sure to log in as
-root, or use sudo.
-
-    apt-get install diffstat texinfo gawk chrpath multistrap
-
-
-B. Fetch Build system
-
-To build the system, you must first use repo to set up the system
-build tree. To do this, enter the following:
+To build QR-Linux, you must first use repo to download the code:
 
     mkdir oe-core
     cd oe-core 
-    repo init -u git://codeaurorua.org/qr-lnux/manifest  -b 14_master
+    repo init -u git://codeaurora.org/quic/lx/qr-linux/manifest -b release -m <manifest>.xml
     repo sync
 
 This fetches the core pieces of the open embedded system, including
 bitbake, sets up the build directory, and downloads the layers
-necessary for building QR Linux.
+necessary for building QR-Linux.
 
-C. Perform Your First Build
+B. Perform Your First Build
 
-Begin by initializing the build environment from oe-core:
-  
-    source oe-init-build-env build
+The script meta-qr-linux/scripts/qrlbuild.sh automates the steps of
+doing a complete build. You will need the details in the following
+sub-sections if things fail, but otherwise you should be able to
+build using
+    meta-qr-linux/scripts/qrlbuild.sh -m <machine name>
+where the <machine name> is either som8064 or ifc6410, depending on 
+your target device.
 
-QR Linux uses a pre-compiled, external toolchain from Linaro. This
-matches the compiler that comes standard with Ubuntu, and will allow
-us to make compatible builds. Included is a script that downloads the
-appropriate binary, and unpacks it into the appropriate space in the
-build tree. This needs to be run only once, when you are first setting
-everything else. 
+If this fails because of missing required packages, see the section
+"Install Required Packages" below,  and re-run.
 
-    meta-qr-linux/scripts/linaro-fetch.sh
+i. Special Instructions for Building for IFC6410
+The IFC6410 requires board-specific patches that are not checked into this
+repo. You will need to obtain these patches and add them to the recipe
+before you can do the build.
 
-At this point, you are ready to construct the system. We build
-everything using the core-image-qrl recipe. Before you begin, you need
-to decide which platform you are building for, and prepare to specify
-that machine on the command line. The current release supports the
-Inforce IFC6410 (MACHINE="ifc6410") or the QR Linux System On Module
-(SOM) (MACHINE="som8064"). To execute the build, type:
+C. Download the Images
 
-    MACHINE="ifc6410" bitbake core-image-qrl
-or
-    MACHINE="som8064" bitbake core-image-qrl
+If all has gone well, there should now be a sub-directory under the build
+directory that contains the images you will need:
+   Location: build/tmp-eglibc/deploy/images/<machine name>/out
+   boot.img: This is the kernel image. 
+   userdata.img:  This is the userspace or the root file system
 
-D. Download the Images
-
-If all has gone well, there should now be a directory under your build
-called tmp-eglibc/deploy/images/<machine name>. In there, you will
-find a file called boot.img. This is the kernel image. You will also
-find a file called userdata.img. This is the userspace you have
-built. Installation of these files depends on the machine that is the
+Installation of these files depends on the machine that is the
 installation target.
 
 i. SOM8064
@@ -112,11 +96,11 @@ conveniently produced for you during the build process. Begin by
 rebooting your system into fastboot mode. Then execute the following
 commands from the build directory:
 
-    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase boot 
-    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash boot tmp-eglibc/deploy/images/som8064/boot.img
-    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase userdata
-    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash userdata tmp-eglibc/deploy/images/som8064/userdata.img
-    tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot reboot
+    build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase boot 
+    build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash boot tmp-eglibc/deploy/images/som8064/out/boot.img
+    build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot erase userdata
+    build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot flash userdata tmp-eglibc/deploy/images/som8064/out/userdata.img
+    build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/fastboot reboot
 
 At this point, the system will boot, initialize, and reboot. You
 should end up with a login prompt. Enter:
@@ -124,31 +108,34 @@ should end up with a login prompt. Enter:
 login: root
 Password: clarence
 
-Congratulations! You have now built and installed QR Linux.
+Congratulations! You have now built and installed QR-Linux.
 
 ii. IFC6410
 
 To install your images on the IFC6410, you use adb and fastboot, which
 were conveniently produced for you during the build process. To use
-them, you will have to add the systroot in your build directory into
+them, you will have to add the sysroot in your build directory into
 your path.
 
-    export PATH=`pwd`/tmp-eglibc/sysroots/x86_64-linux/usr/bin/:$PATH
+    export PATH=`pwd`/build/tmp-eglibc/sysroots/x86_64-linux/usr/bin/:$PATH
     
 You will also need a USB drive with a capacity of at least 8GB. The
 first time you use this drive, you need to format it with a GPT
-partition. Once you have done this, you can copy the your userspace to
-the drive.
+partition table, and create one ext4 partition in it. You can use gparted to 
+create the GPT table and the ext4 partition. After creating the new partition, 
+unplug the USB drive from your build machine for the changes to take effect.
+Once you have done this, you can copy the your userspace to the drive.
 
 Attach the USB drive to you build machine. In a terminal window, type:
 
-dmesg | grep Attached | tail -1
+    dmesg | grep Attached | tail -1
 
 You should see a device reference, e.g. /dev/sdb. That is your flash
 drive. For the rest of this document, we will assume that the device
-is /dev/sdb. Now copy the userdata.img.
+is /dev/sdb. Make sure /dev/sdb1 is not mounted, using the mount command
+Now copy the userdata.img to the USB drive:
 
-    sudo dd if=userdata.img of=/dev/sdb1
+    sudo dd if=build/tmp-eglibc/deploy/images/ifc6410/out/userdata.img of=/dev/sdb1
 
 When the command finishes, unplug the USB drive.
 
@@ -161,7 +148,7 @@ To bring your system up, plug the USB drive into your system, and
 reboot your system into fastboot mode. Then execute the following
 commands from the build directory:
 
-    fastboot flash boot tmp-eglibc/deploy/images/ifc6410/boot.img
+    fastboot flash boot build/tmp-eglibc/deploy/images/ifc6410/out/boot.img
     fastboot reboot
 
 WARNING: The above command will replace the Android boot image
@@ -169,24 +156,80 @@ with a Linux boot image. To run Android, you will have to reflash your
 original Android boot image. If you wish to maintain your Android boot
 image, you can do the following:
 
-    fastboot boot tmp-eglibc/deploy/images/ifc6410/boot.img
+    fastboot boot build/tmp-eglibc/deploy/images/ifc6410/out/boot.img
 
 At this point, the system will boot, initialize, and reboot into
 Android. You now have to do a final boot using fastboot.
 
     adb reboot-bootloader
-    fastboot boot tmp-eglibc/deploy/images/ifc6410/boot.img
+    fastboot boot build/tmp-eglibc/deploy/images/ifc6410/out/boot.img
 
 Either way, you should end up with a login prompt.  Enter:
 
 login: root
 Password: clarence
 
-Congratulations!  You have now built and installed QR Linux.
+Congratulations!  You have now built and installed QR-Linux.
+
+D. Tips and Tricks
+
+To do a clean build, from scratch, do the following to get to a clean state:
+    cd oe-core
+    rm -rf build/tmp-eglibc build/sstate-cache build/cache build/downloads
+
+To build for a different machine, get to a clean state first, as noted above
 
 
-II. For More Information
-========
+II. Detailed Building Instructions
+===================================
+
+The script qrlbuild.sh automates these steps, but it's useful to
+to know the necessary steps to understand why things fail.
+
+i. Install Required Packages
+
+Yocto requires access to the programs diffstat, texinfo, gawk,
+and chrpath. We also need multistrap for building the user
+space. You can get them by using apt-get. Be sure to log in as
+root, or use sudo.
+
+    apt-get install diffstat texinfo gawk chrpath multistrap
+
+ii. Fetch the toolchain
+
+QR-Linux uses a pre-compiled, external toolchain from Linaro. This
+matches the compiler that comes standard with Ubuntu, and will allow
+us to make compatible builds. Included is a script that downloads the
+appropriate binary, and unpacks it into the appropriate space in the
+build tree. This needs to be run only once, when you are first setting
+everything else. 
+
+    cd oe-core
+    meta-qr-linux/scripts/linaro-fetch.sh
+
+iii. Build the images
+
+Begin by initializing the build environment from oe-core:
+  
+    source oe-init-build-env build
+
+This should put you in the build directory.
+
+At this point, you are ready to construct the system. We build
+everything using the core-image-qrl recipe. Before you begin, you need
+to decide which platform you are building for, and prepare to specify
+that machine on the command line. The current release supports the
+Inforce IFC6410 (MACHINE="ifc6410") or the QR-Linux System On Module
+(SOM) (MACHINE="som8064"). To execute the build, type:
+
+    MACHINE="ifc6410" bitbake core-image-qrl
+or
+    MACHINE="som8064" bitbake core-image-qrl
+
+
+
+III. For More Information
+========================
 
 Now that you have a booting system, you are going to want to modify
 it, adding new packages, and building your own
