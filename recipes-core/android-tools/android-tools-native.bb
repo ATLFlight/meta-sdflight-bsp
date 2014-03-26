@@ -15,6 +15,7 @@ PV="1.1.36"
 PN = "android-tools-native"
 
 PROVIDES = "android-tools-native"
+DEPENDS += "zlib"
 
 SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
 SRC_URI += "file://0002-QR-Linux-Native-Patches.patch"
