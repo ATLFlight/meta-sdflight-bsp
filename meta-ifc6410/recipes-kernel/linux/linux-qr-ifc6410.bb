@@ -12,6 +12,7 @@ SRC_URI = "git://codeaurora.org/kernel/msm.git;revision=${SRCREV};protocol=git;b
 
 SRC_URI += "file://defconfig \
             file://ifc6410.scc \
+            file://ifc6410-patches.scc \
             file://ifc6410.cfg \
             file://ifc6410-user-config.cfg \
            "
@@ -24,7 +25,7 @@ PV = "${LINUX_VERSION}+git${SRCPV}"
 
 GCCVERSION="4.7%"
 
-COMPATIBLE_MACHINE_if6410 = "ifc6410"
-LINUX_VERSION_EXTENSION_if6410 = "-ifc6410"
+COMPATIBLE_MACHINE_ifc6410 = "ifc6410"
+LINUX_VERSION_EXTENSION_ifc6410 = "-ifc6410"
 
 
