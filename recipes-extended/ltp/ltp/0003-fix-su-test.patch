@@ -1,0 +1,189 @@
+From d18c38ec9ef61c4d2878995f27097b3d40aae59f Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Fri, 18 Apr 2014 11:20:13 -0700
+Subject: [PATCH] Fix su LTP test
+
+---
+ testcases/commands/su/su01_s1 | 56 +++++++++++++++++++------------------------
+ 1 file changed, 25 insertions(+), 31 deletions(-)
+
+diff --git a/testcases/commands/su/su01_s1 b/testcases/commands/su/su01_s1
+index b50ebdf..4414254 100755
+--- a/testcases/commands/su/su01_s1
++++ b/testcases/commands/su/su01_s1
+@@ -31,6 +31,9 @@
+ #     05/23/07  Kris Wilson     Make test 7 work for SLES.
+ ########################################################################
+ 
++# For debugging
++#exp_internal 1
++
+ # The root user cannot succesfully execute su test because the root user
+ # is able to become anyone without entering passwords
+ set whoami [ exec whoami ]
+@@ -47,10 +50,10 @@ if [info exists env(PASSWD)] {
+ 	exit 1
+ }
+ 
+-if [info exists env(TEST_USER2)] {
+-  set USER1 $env(TEST_USER2)
++if [info exists env(TEST_USER1)] {
++  set USER1 $env(TEST_USER1)
+ } else {
+-  	send_user "YOU MUST SET ENVIRONMENT VARIABLE TEST_USER2"
++  	send_user "YOU MUST SET ENVIRONMENT VARIABLE TEST_USER1"
+   	exit 1
+ }
+ 
+@@ -62,10 +65,10 @@ if [info exists env(tvar)] {
+         exit 1
+ }
+ 
+-if [info exists env(TEST_USER2_PASSWD)] {
+-  set USER1_PASSWORD $env(TEST_USER2_PASSWD)
++if [info exists env(TEST_USER1_PASSWD)] {
++  set USER1_PASSWORD $env(TEST_USER1_PASSWD)
+ } else {
+-  send_user "YOU MUST SET ENVIROMENT VARIABLE TEST_USER2_PASSWD"
++  send_user "YOU MUST SET ENVIROMENT VARIABLE TEST_USER1_PASSWD"
+   exit 1
+ }
+ 
+@@ -132,10 +135,9 @@ expect {
+ 		set i_can_root 1
+ 	 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+ set codes [wait]
+ set pid [lindex $codes 0]
+@@ -152,7 +154,6 @@ if { $i_am_root==1 } {
+ 		}
+ 	}
+ 	expect eof
+-	catch close
+ 	wait
+ 
+ 	set test_env_var [exec cat $TEST_ENV_FILE]
+@@ -195,12 +196,11 @@ expect {
+ 				"su: incorrect password" { set displayed_error 1 }
+ 				"su: Authentication failure" { set displayed_error 1 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ 
+@@ -234,12 +234,11 @@ expect {
+     expect {
+ 				"root" { set i_am_root 1 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ 
+@@ -289,12 +288,11 @@ expect {
+ 				"su: incorrect password" { set displayed_error 1 }
+ 				"su: Authentication failure" { set displayed_error 1 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ if { ($displayed_error==1) && ($exit_code!=0) && ($pid>0) } {
+@@ -322,12 +320,11 @@ expect {
+     expect {
+ 				"$USER1\r" { set i_am_correct 1 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ 
+@@ -381,12 +378,11 @@ expect {
+ 				"su: incorrect password" { set displayed_error 1 }
+ 				"su: Authentication failure" { set displayed_error 1 }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ if { ($displayed_error==1) && ($exit_code!=0) && ($pid>0) } {
+@@ -444,12 +440,11 @@ expect {
+         }
+       }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ # capture result code
+-set codes [wait]
++catch wait codes
+ set pid [lindex $codes 0]
+ set exit_code [lindex $codes 3]
+ if { ($i_am_correct==1) && ($exit_code!=0) && ($pid>0) } {
+@@ -466,10 +461,10 @@ expect {
+   "Password: " {
+     send "$PASSWD\r"
+     expect {
+-     "Enter new password: " {
++     "Enter new *password: " {
+         send "$USER1_NEW_PASSWORD\r"
+         expect {
+-          "Re-type new password: " {
++          "Re*type new *password: " {
+             send "$USER1_NEW_PASSWORD\r"
+             expect {
+               "Password changed" {}
+@@ -478,10 +473,9 @@ expect {
+         }
+       }
+     }
+-  }
++  } eof
+ }
+ 
+-catch close
+ } else {
+ 
+ 	send_user "TEST:  su to user1 with the user1 password expired. (FAILED),see more next line.\n"
+-- 
+1.7.11.4
+
