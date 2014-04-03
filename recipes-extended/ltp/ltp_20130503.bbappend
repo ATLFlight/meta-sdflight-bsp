@@ -13,6 +13,17 @@ SRC_URI += " \
 
 EXTRA_OECONF += "--with-expect --with-bash --with-perl --with-python"
 
+
+# Do the same install as the version for meta except do not remove expect scripts
+do_install(){
+	install -d ${D}/opt/ltp/
+	oe_runmake DESTDIR=${D} SKIP_IDCHECK=1 install
+	
+	# Copy POSIX test suite into ${D}/opt/ltp/testcases by manual
+	cp -r testcases/open_posix_testsuite ${D}/opt/ltp/testcases
+}
+
+
 do_install_append() {
    install -m 644 ${WORKDIR}/cmds.ltp ${D}/opt/ltp/runtest
 }
