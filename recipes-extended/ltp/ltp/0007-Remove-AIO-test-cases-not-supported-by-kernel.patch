@@ -1,0 +1,33 @@
+From 8d9d05733ea4d9f0de2613694b9ee1900c5a983f Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Wed, 30 Apr 2014 11:48:49 -0700
+Subject: [PATCH] Remove test cases not supported by kernel
+
+---
+ testcases/kernel/io/aio/aio02/aio_tio.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/testcases/kernel/io/aio/aio02/aio_tio.c b/testcases/kernel/io/aio/aio02/aio_tio.c
+index 9dda462..858fed2 100644
+--- a/testcases/kernel/io/aio/aio02/aio_tio.c
++++ b/testcases/kernel/io/aio/aio02/aio_tio.c
+@@ -253,6 +253,8 @@ int test_main(void)
+ 		return status;
+ 	}
+ 
++        /*** Comment out test 7 and 8 since they are not supported by our kernel
++
+ 	tst_resm(TINFO, "Running test 7 \n");
+ 	status = io_tio("file2",
+ 			O_TRUNC | O_DIRECT | O_WRONLY | O_CREAT | O_LARGEFILE,
+@@ -268,6 +270,7 @@ int test_main(void)
+ 	if (status) {
+ 		return status;
+ 	}
++        */
+ 
+ 	return status;
+ }
+-- 
+1.7.11.4
+

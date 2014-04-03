@@ -1,0 +1,77 @@
+From 969757ae62cf0c91c4bb588705750de9bf58a94f Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Thu, 17 Apr 2014 13:33:28 -0700
+Subject: [PATCH] X11 updates
+
+---
+ drivers/video/msm/mdp4_dtv.c     | 6 ++++++
+ drivers/video/msm/mdp4_overlay.c | 4 ++--
+ drivers/video/msm/msm_fb.c       | 6 ++++--
+ 3 files changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/video/msm/mdp4_dtv.c b/drivers/video/msm/mdp4_dtv.c
+index ba810a9..ee7fb23 100644
+--- a/drivers/video/msm/mdp4_dtv.c
++++ b/drivers/video/msm/mdp4_dtv.c
+@@ -171,6 +171,12 @@ static int dtv_on(struct platform_device *pdev)
+ 	flush_work_sync(&dtv_off_work);
+ 
+ 	mfd = platform_get_drvdata(pdev);
++
++        if ( mfd->fbi->var.pixclock > 148500000 )
++        {
++            mfd->fbi->var.pixclock = 148500000;
++        }
++
+ 	panel_pixclock_freq = mfd->fbi->var.pixclock;
+ 
+ 	if (panel_pixclock_freq > 58000000)
+diff --git a/drivers/video/msm/mdp4_overlay.c b/drivers/video/msm/mdp4_overlay.c
+index 3c71ede..7ba1e71 100644
+--- a/drivers/video/msm/mdp4_overlay.c
++++ b/drivers/video/msm/mdp4_overlay.c
+@@ -1251,7 +1251,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pipe)
+ 		pipe->bpp = 4;		/* 4 bpp */
+ 		pipe->chroma_sample = MDP4_CHROMA_RGB;
+ 		break;
+-	case MDP_RGBA_8888:
++	case MDP_BGRA_8888:
+ 		pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
+ 		pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
+ 		pipe->a_bit = 3;	/* alpha, 4 bits */
+@@ -1287,7 +1287,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pipe)
+ 		pipe->bpp = 4;		/* 4 bpp */
+ 		pipe->chroma_sample = MDP4_CHROMA_RGB;
+ 		break;
+-	case MDP_BGRA_8888:
++	case MDP_RGBA_8888:
+ 		pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
+ 		pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
+ 		pipe->a_bit = 3;	/* alpha, 4 bits */
+diff --git a/drivers/video/msm/msm_fb.c b/drivers/video/msm/msm_fb.c
+index a7163b6..59be180 100644
+--- a/drivers/video/msm/msm_fb.c
++++ b/drivers/video/msm/msm_fb.c
+@@ -1333,7 +1333,8 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
+ 		bpp = 3;
+ 		break;
+ 
+-	case MDP_ARGB_8888:
++	case MDP_RGBA_8888:
++                pr_err( "MODE MDP_RGBA_8888" );
+ 		fix->type = FB_TYPE_PACKED_PIXELS;
+ 		fix->xpanstep = 1;
+ 		fix->ypanstep = 1;
+@@ -1352,7 +1353,8 @@ static int msm_fb_register(struct msm_fb_data_type *mfd)
+ 		bpp = 4;
+ 		break;
+ 
+-	case MDP_RGBA_8888:
++	case MDP_ARGB_8888:
++                pr_err( "MODE MDP_ARGB_8888" );
+ 		fix->type = FB_TYPE_PACKED_PIXELS;
+ 		fix->xpanstep = 1;
+ 		fix->ypanstep = 1;
+-- 
+1.7.11.4
+

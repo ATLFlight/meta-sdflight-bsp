@@ -1,0 +1,14 @@
+--- bluez-4.101/tools/hciattach_ath3k.c.old	2014-05-14 15:34:04.056765188 -0700
++++ bluez-4.101/tools/hciattach_ath3k.c	2014-05-14 15:34:12.600932747 -0700
+@@ -828,7 +828,10 @@
+ 	stream = fopen(ps_file, "r");
+ 	if (!stream) {
+ 		perror("firmware file open error\n");
+-		err = -EILSEQ;
++		if ( rom_version == 0x1020201 )
++			err = 0;
++		else
++			err = -EILSEQ;
+ 		goto download_cmplete;
+ 	}
+ 	tag_count = ath_parse_ps(stream);

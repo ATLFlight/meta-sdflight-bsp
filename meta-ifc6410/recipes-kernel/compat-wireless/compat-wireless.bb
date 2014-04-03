@@ -14,8 +14,7 @@ SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=$
 SRC_URI += " \
    file://0000-Kbuild.patch \
    file://0001-compiler-warning.patch \
-   file://ifc6410-android2linux-macaddress.sh \
-   file://mac2softmac.sh \
+   file://qrl-mac-fw-inc.sh \
    file://qca6234.cfg \
    "
 
@@ -42,6 +41,7 @@ FILES_${PN} = "	\
 	    ${base_libdir}/modules/3.4.0-caf-standard/modules.softdep \
 	    ${base_libdir}/modules/3.4.0-caf-standard/modules.symbols \
 	    ${base_libdir}/modules/3.4.0-caf-standard/modules.symbols.bin \
+            /usr/local/qr-linux/* \
 	    "
 
 do_unpack_append() {
@@ -71,13 +71,16 @@ module_do_install() {
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
 
-	mkdir -p ${D}/etc/network
+	# Install network interface
+	install -m 644 ${WORKDIR}/qca6234.cfg -D ${D}/etc/network/interfaces.d/qca6234.cfg
 
-	install -m 744 ${WORKDIR}/ifc6410-android2linux-macaddress.sh ${D}/etc/network/ifc6410-android2linux-macaddress.sh
-	install -m 744 ${WORKDIR}/mac2softmac.sh ${D}/etc/network/mac2softmac.sh
+	# Install qrl-copyFirmware.sh
+	install -m 644 ${WORKDIR}/qrl-mac-fw-inc.sh -D ${D}/usr/local/qr-linux/qrl-mac-fw-inc.sh
 
-	mkdir -p ${D}/etc/network/interfaces.d
-	install -m 644 ${WORKDIR}/qca6234.cfg ${D}/etc/network/interfaces.d/qca6234.cfg
 }
 
 addtask do_setup_dirs after do_unpack before do_patch
+
+pkg_postinst_${PN}() {
+    /usr/local/qr-linux/qrl-copy-firmware.sh
+}

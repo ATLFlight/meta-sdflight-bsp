@@ -18,7 +18,8 @@
 ## Resize the root file ssytem.
 ##
 
-if [ ! -e /etc/init.d/resized_root_partition ]; then
-   /sbin/resize2fs @LK_ROOT_DEV@
-   touch /etc/init.d/resized_root_partition
+if [ ! -e /usr/local/qr-linux/.resized_root_partition ]; then
+   LK_ROOT_DEV=`cat /proc/cmdline | sed "s|.*root=\([A-Za-z0-9/]\+\).*|\1|"`
+   /sbin/resize2fs ${LK_ROOT_DEV}
+   touch /usr/local/qr-linux/.resized_root_partition
 fi

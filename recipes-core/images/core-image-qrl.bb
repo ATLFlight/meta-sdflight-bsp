@@ -10,19 +10,22 @@ inherit multistrap-image
 SRC_URI += " \
    file://adb.conf \
    file://apt.conf \
-   file://config.sh.in \
-   file://resize.in \
+   file://config.sh \
+   file://resize \
    file://fstab \
    file://init \
    file://installPkgs.sh \
    file://interfaces \
    file://wpa_supplicant.conf \
    file://udev_files_to_keep.grep \
+   file://qrl-common-inc.sh \
+   file://qrl-copy-firmware.sh \
+   file://qrl-config-macaddr.sh \
    "
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "14.03.1+0020"
+PV = "LNX.LX.1.0.14.06.0"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
@@ -42,7 +45,7 @@ MULTISTRAP_GENERAL_unpack = 'true'
 MULTISTRAP_GENERAL_arch   = 'armhf'
 MULTISTRAP_GENERAL_configscript = '${WORKDIR}/config.sh'
 
-MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com"
+MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com/"
 MULTISTRAP_SUITE_Raring = "raring"
 MULTISTRAP_COMPONENTS_Raring = "main universe"
 MULTISTRAP_DEBOOTSTRAP_Raring = "1"
@@ -72,13 +75,19 @@ MULTISTRAP_BUILD_Packages = "1"
 #    - wpasupplicant: To manage Wi-Fi
 #    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
 
-PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip"
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip ntp"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
-PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0"
+PACKAGE_GROUP_ubuntuXSlim = "xserver-xorg xterm x11-apps icewm firefox slim"
+MULTISTRAP_SECTION_ubuntuXSlim = "Raring"
+
+PACKAGE_GROUP_ubuntuXubuntu = "gdm xubuntu-desktop firefox"
+MULTISTRAP_SECTION_ubuntuXubuntu = "Raring"
+
+PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0 glib-2.0-bin"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
-IMAGE_FEATURES += "ubuntu userpkgs"
+IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
 
 fixup_conf() {
     # Convert flat directories to package repositories
@@ -90,22 +99,15 @@ fixup_conf() {
          dpkg-scansources . /dev/null | gzip -9c > Sources.gz
       done
     cd ${CURDIR}
-    # Set file system root in config.sh
-    cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh
-    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/config.sh
-    cp ${WORKDIR}/resize.in ${WORKDIR}/resize
-    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/resize
-    # Replace place holders with build system values.
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
-    # Install init.d scripts
     install ${WORKDIR}/resize ${IMAGE_ROOTFS}${sysconfdir}/init.d/resize
     update-rc.d -r ${IMAGE_ROOTFS} resize start 20 2 .
-    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}${sysconfdir}/init.d/installPkgs.sh
-    update-rc.d -r ${IMAGE_ROOTFS} installPkgs.sh start 20 2 .
+    install -d ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}/usr/local/qr-linux/installPkgs.sh
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}${sysconfdir}/fstab
@@ -115,9 +117,13 @@ fixup_sysroot() {
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
-    install ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
+    install -m 644 ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
 
-
+    # Install qrl-*.sh
+    mkdir -p ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 644 ${WORKDIR}/qrl-common-inc.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 755 ${WORKDIR}/qrl-config-macaddr.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 755 ${WORKDIR}/qrl-copy-firmware.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"

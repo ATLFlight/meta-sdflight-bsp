@@ -1,0 +1,27 @@
+From ab2977f6178690690fa4aa4bbb390dd136355468 Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Mon, 5 May 2014 10:49:10 -0700
+Subject: [PATCH] Fix LTP readahead test - clear page cache initially
+
+---
+ testcases/kernel/syscalls/readahead/readahead02.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/testcases/kernel/syscalls/readahead/readahead02.c b/testcases/kernel/syscalls/readahead/readahead02.c
+index 66158f0..8ba481a 100644
+--- a/testcases/kernel/syscalls/readahead/readahead02.c
++++ b/testcases/kernel/syscalls/readahead/readahead02.c
+@@ -267,6 +267,10 @@ static void test_readahead(void)
+ 	char proc_io_fname[128];
+ 	sprintf(proc_io_fname, "/proc/%u/io", getpid());
+ 
++	/* clear out all caches to put system in a known state */
++	sync();
++	drop_caches();
++
+ 	/* find out how much can cache hold if we read whole file */
+ 	read_testfile(0, testfile, testfile_size, &read_bytes, &usec, &cached);
+ 	cached_max = get_cached_size();
+-- 
+1.7.11.4
+

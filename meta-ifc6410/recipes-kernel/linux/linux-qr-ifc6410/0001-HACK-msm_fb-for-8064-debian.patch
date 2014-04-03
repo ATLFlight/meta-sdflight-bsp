@@ -1,0 +1,24 @@
+From 6524c14b0073f4ebcc0f63b3cd225fc9e5aeb06e Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Fri, 25 Apr 2014 15:48:32 -0700
+Subject: [PATCH] HACK-msm_fb-for-8064-debian
+
+---
+ drivers/video/msm/msm_fb.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/video/msm/msm_fb.c b/drivers/video/msm/msm_fb.c
+index a7163b6..c707579 100644
+--- a/drivers/video/msm/msm_fb.c
++++ b/drivers/video/msm/msm_fb.c
+@@ -1004,6 +1004,7 @@ static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 	case FB_BLANK_NORMAL:
+ 	case FB_BLANK_POWERDOWN:
+ 	default:
++                return 0;
+ 		if (mfd->panel_power_on) {
+ 			int curr_pwr_state;
+ 
+-- 
+1.7.11.4
+

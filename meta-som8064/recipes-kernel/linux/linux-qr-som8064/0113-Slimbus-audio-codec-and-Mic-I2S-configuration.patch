@@ -1,19 +1,19 @@
-From f1e2e317d1c852c56644b382025aae06999bb167 Mon Sep 17 00:00:00 2001
+From d1962f273ecb049dda2ff92a0ec931b57b59c94e Mon Sep 17 00:00:00 2001
 From: Kaustubh Gondkar <kgondkar@codeaurora.org>
-Date: Wed, 26 Feb 2014 13:36:19 -0800
-Subject: [PATCH] Slimbus audio codec and Mic I2S configuration
+Date: Thu, 10 Apr 2014 23:38:32 -0700
+Subject: [PATCH] Slimbus-audio-codec-and-Mic-I2S-configuration
 
 ---
  arch/arm/mach-msm/board-8064-gpiomux.c | 43 ++++++++++++++++++++++++++++++++--
- arch/arm/mach-msm/board-8064.c         | 10 ++++----
+ arch/arm/mach-msm/board-8064.c         |  8 +++----
  sound/soc/msm/apq8064.c                | 31 ++++++++++++++++++++++++
- 3 files changed, 77 insertions(+), 7 deletions(-)
+ 3 files changed, 75 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
-index a51ca80..cdaca01 100644
+index 3aaf6a6..9d0be58 100644
 --- a/arch/arm/mach-msm/board-8064-gpiomux.c
 +++ b/arch/arm/mach-msm/board-8064-gpiomux.c
-@@ -354,11 +354,13 @@ static struct gpiomux_setting gpio_i2c_config_sus = {
+@@ -372,11 +372,13 @@ static struct gpiomux_setting gpio_i2c_config_sus = {
  	.pull = GPIOMUX_PULL_KEEPER,
  };
  
@@ -27,7 +27,7 @@ index a51ca80..cdaca01 100644
  
  static struct gpiomux_setting cdc_mclk = {
  	.func = GPIOMUX_FUNC_1,
-@@ -891,13 +893,48 @@ static struct msm_gpiomux_config mpq8064_spkr_i2s_config[] __initdata = {
+@@ -921,13 +923,48 @@ static struct msm_gpiomux_config mpq8064_spkr_i2s_config[] __initdata = {
  	},
  };
  
@@ -76,7 +76,7 @@ index a51ca80..cdaca01 100644
  	{
  		.gpio = 39,
  		.settings = {
-@@ -1634,10 +1671,12 @@ void __init apq8064_init_gpiomux(void)
+@@ -1664,10 +1701,12 @@ void __init apq8064_init_gpiomux(void)
  	msm_gpiomux_install(apq8064_slimbus_config,
  			ARRAY_SIZE(apq8064_slimbus_config));
  
@@ -92,31 +92,29 @@ index a51ca80..cdaca01 100644
  
  	if (machine_is_mpq8064_cdp() || machine_is_mpq8064_hrd() ||
 diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
-index 3a2f505..7a9c7c7 100644
+index 42f5895..1443fea 100644
 --- a/arch/arm/mach-msm/board-8064.c
 +++ b/arch/arm/mach-msm/board-8064.c
-@@ -3400,11 +3400,11 @@ static void __init apq8064_common_init(void)
- 			platform_device_register(&mdm_8064_device);
+@@ -3433,11 +3433,9 @@ static void __init apq8064_common_init(void)
  		}
  	}
+ 	
 -	if(!machine_is_apq8064_som()) {
 -		platform_device_register(&apq8064_slim_ctrl);
 -		slim_register_board_info(apq8064_slim_devices,
 -			ARRAY_SIZE(apq8064_slim_devices));
 -	}
-+	
 +	platform_device_register(&apq8064_slim_ctrl);
 +	slim_register_board_info(apq8064_slim_devices,
 +		ARRAY_SIZE(apq8064_slim_devices));
-+	
+ 
  	if (!PLATFORM_IS_MPQ8064()) {
  		apq8064_init_dsps();
- 		platform_device_register(&msm_8960_riva);
 diff --git a/sound/soc/msm/apq8064.c b/sound/soc/msm/apq8064.c
-index 24453ec..b7e264b 100644
+index 2097b85..5ef1a33 100644
 --- a/sound/soc/msm/apq8064.c
 +++ b/sound/soc/msm/apq8064.c
-@@ -507,6 +507,12 @@ static const struct snd_soc_dapm_widget apq8064_dapm_widgets[] = {
+@@ -508,6 +508,12 @@ static const struct snd_soc_dapm_widget apq8064_dapm_widgets[] = {
  	 */
  	SND_SOC_DAPM_MIC("Analog mic7", NULL),
  
@@ -129,7 +127,7 @@ index 24453ec..b7e264b 100644
  	SND_SOC_DAPM_MIC("Headset Mic", NULL),
  	SND_SOC_DAPM_MIC("ANCRight Headset Mic", NULL),
  	SND_SOC_DAPM_MIC("ANCLeft Headset Mic", NULL),
-@@ -532,6 +538,7 @@ static const struct snd_soc_dapm_route apq8064_common_audio_map[] = {
+@@ -533,6 +539,7 @@ static const struct snd_soc_dapm_route apq8064_common_audio_map[] = {
  
  	{"HEADPHONE", NULL, "LDO_H"},
  
@@ -137,7 +135,7 @@ index 24453ec..b7e264b 100644
  	/* Speaker path */
  #ifdef CONFIG_SND_SOC_TPA2028D
  	{"Ext Spk Top", NULL, "LINEOUT1"},
-@@ -564,6 +571,21 @@ static const struct snd_soc_dapm_route apq8064_common_audio_map[] = {
+@@ -565,6 +572,21 @@ static const struct snd_soc_dapm_route apq8064_common_audio_map[] = {
  	{"AMIC4", NULL, "MIC BIAS1 Internal2"},
  	{"MIC BIAS1 Internal2", NULL, "ANCLeft Headset Mic"},
  #endif
@@ -159,7 +157,7 @@ index 24453ec..b7e264b 100644
  };
  
  static const struct snd_soc_dapm_route apq8064_mtp_audio_map[] = {
-@@ -1262,6 +1284,9 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
+@@ -1263,6 +1285,9 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
  	if (machine_is_apq8064_mtp() || machine_is_apq8064_mako()) {
  		snd_soc_dapm_add_routes(dapm, apq8064_mtp_audio_map,
  			ARRAY_SIZE(apq8064_mtp_audio_map));
@@ -169,7 +167,7 @@ index 24453ec..b7e264b 100644
  	} else  {
  		snd_soc_dapm_add_routes(dapm, apq8064_liquid_cdp_audio_map,
  			ARRAY_SIZE(apq8064_liquid_cdp_audio_map));
-@@ -1298,6 +1323,12 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
+@@ -1307,6 +1332,12 @@ static int msm_audrx_init(struct snd_soc_pcm_runtime *rtd)
  	codec_clk = clk_get(cpu_dai->dev, "osr_clk");
  
  #ifndef CONFIG_SWITCH_FSA8008

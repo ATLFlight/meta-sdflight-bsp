@@ -1,0 +1,13 @@
+[802-3-ethernet]
+cloned-mac-address=@REPLACE_WITH_REAL_MAC_ADDR@
+
+[connection]
+id=wired-connection-1
+uuid=@REPLACE_WITH_REAL_UUID@
+type=802-3-ethernet
+
+[ipv6]
+method=auto
+
+[ipv4]
+method=auto

@@ -8,15 +8,14 @@ LICENSE = "ISC"
 
 LIC_FILES_CHKSUM = "file://../COPYING;md5=552efe106a6bfffc3be6ad39e5273108"
 
-SRC_URI = "git://codeaurora.org/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git"
+SRC_URI = "git://codeaurora.org/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041;protocol=git"
 SRC_URI += " \
 	file://COPYING \
 	file://prima.patch \
-	file://prima-init.sh \
-	file://prima.cfg \
+	file://prima-init \
+	file://prima.cfg\
 	file://WCNSS_qcom_wlan_nv.bin \
 	"
-
 
 PACKAGES = "${PN}"
 
@@ -25,7 +24,6 @@ FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/WCNSS_qcom_cfg.ini \
 	    ${base_libdir}/modules/3.4.0-${MACHINE} \
 	    ${sysconfdir}/network/* \
-	    ${sysconfdir}/network/interfaces.d/* \
 	    "
 
 do_unpack_append() {
@@ -51,11 +49,10 @@ module_do_install() {
 	# Install firmware
 	mkdir -p ${D}/lib/firmware/wlan/prima
 	install -m 644 ${S}/firmware_bin/WCNSS_cfg.dat ${S}/firmware_bin/WCNSS_qcom_cfg.ini ${S}/firmware_bin/WCNSS_qcom_wlan_nv.bin ${D}/lib/firmware/wlan/prima
-	# Install prima-init.sh and prima.cfg
-	mkdir -p ${D}/etc/network
-	install ${WORKDIR}/prima-init.sh ${D}/etc/network/prima-init.sh
-	mkdir -p ${D}/etc/network/interfaces.d
-	install -m 644 ${WORKDIR}/prima.cfg ${D}/etc/network/interfaces.d/prima.cfg
+	# Install prima-init and prima.cfg
+	install -m 755 ${WORKDIR}/prima-init -D ${D}/etc/network/if-pre-up.d/prima-init
+	install -m 644 ${WORKDIR}/prima.cfg -D ${D}/etc/network/interfaces.d/prima.cfg
+
 }
 
 do_package_append() {
@@ -71,4 +68,8 @@ do_package_append() {
         pass
     workdir = d.getVar('WORKDIR', True)
     shutil.copy(workdir+'/WCNSS_qcom_wlan_nv.bin', destdir)
+}
+
+pkg_postinst_${PN}() {
+    /usr/local/qr-linux/qrl-copy-firmware.sh
 }

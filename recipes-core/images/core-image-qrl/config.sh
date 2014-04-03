@@ -47,6 +47,17 @@ test -e /dev/random || /bin/mknod -m 644 /dev/random c 1 8
 test -e /dev/urandom || /bin/mknod -m 644 /dev/urandom c 1 9
 
 ##
+## Create /dev/mmcblk0p12 (system), /dev/mmcblk0p13 (userdata),
+## /dev/mmcblk0p14 (persist), /dev/mmcblk0p15 (cache), 
+## and /dev/mmcblk0p1 (firmware).
+##
+test -e /dev/mmcblk0p1  || /bin/mknod -m 644 /dev/mmcblk0p1  b 179  1
+test -e /dev/mmcblk0p12 || /bin/mknod -m 644 /dev/mmcblk0p12 b 179 12
+test -e /dev/mmcblk0p13 || /bin/mknod -m 644 /dev/mmcblk0p13 b 179 13
+test -e /dev/mmcblk0p14 || /bin/mknod -m 644 /dev/mmcblk0p14 b 179 14
+test -e /dev/mmcblk0p15 || /bin/mknod -m 644 /dev/mmcblk0p15 b 179 15
+
+##
 ## Do the dkpg post-configure thingy
 ## 
 echo "[INFO] Configuring packages..."
@@ -111,17 +122,15 @@ echo $hostName >> /etc/hostname
 # it doesn't exist
 touch /etc/apt/sources.list
 
-sync;sync
-## 
-## Add start_usb and start_adbd services 
 ##
-export PATH=$PATH:/usr/lib/insserv
-echo "[INFO] Adding adb_usb service..."
-#/usr/lib/insserv/insserv start_usb
-/usr/sbin/update-rc.d start_usb defaults
-echo "[INFO] Adding adb_deamon service..."
-#/usr/lib/insserv/insserv start_adbd
-/usr/sbin/update-rc.d start_adbd defaults
+## Some other administrative tasks
+## 
+/bin/rm /sbin/insserv
+/bin/ln -s /usr/lib/insserv/insserv /sbin/insserv
+locale-gen en_US.UTF-8
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv dpkg-reconfigure locales
 
 sync;sync
 
+# Install our binary packages.
+/usr/local/qr-linux/installPkgs.sh
