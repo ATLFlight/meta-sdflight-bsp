@@ -1,22 +1,23 @@
-From 6105e645e768c1b7f3db274ee50ed68c1b28b2c7 Mon Sep 17 00:00:00 2001
+From 3cdea1f96daf9567c608434b9962ec5fae8db6f6 Mon Sep 17 00:00:00 2001
 From: Simon Teplitsky <simont@codeaurora.org>
-Date: Fri, 28 Feb 2014 18:57:32 -0800
-Subject: Changed Tx and Rx CRCI assignment. Added CTS and RTS lines to
- gsbi_configs[].
+Date: Fri, 4 Apr 2014 19:07:23 -0700
+Subject: [PATCH] Changed Tx and Rx CRCI assignment. Added CTS and RTS lines to
+  gsbi_configs[].
 
 ---
- arch/arm/mach-msm/board-8064-gpiomux.c | 12 ++++++++++++
- arch/arm/mach-msm/include/mach/dma.h   |  7 +++++++
- 2 files changed, 19 insertions(+)
+ arch/arm/mach-msm/board-8064-gpiomux.c | 13 ++++++++++++-
+ arch/arm/mach-msm/include/mach/dma.h   |  4 ++--
+ 2 files changed, 14 insertions(+), 3 deletions(-)
 
 diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
-index cdaca01..f6e2b8a 100644
+index 9edb94a..fe3e06a 100644
 --- a/arch/arm/mach-msm/board-8064-gpiomux.c
 +++ b/arch/arm/mach-msm/board-8064-gpiomux.c
-@@ -695,6 +695,18 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+@@ -784,7 +784,18 @@ static struct msm_gpiomux_config apq8064_gsbi_configs[] __initdata = {
  			[GPIOMUX_SUSPENDED] = &gsbi1_uart_config,
  		},
  	},
+-
 +        {
 +                .gpio      = 20,                /* GSBI1 UART CTS */
 +                .settings = {
@@ -29,27 +30,26 @@ index cdaca01..f6e2b8a 100644
 +                        [GPIOMUX_SUSPENDED] = &gsbi1_uart_config,
 +                },
 +        },
+ #if defined(CONFIG_KS8851) || defined(CONFIG_KS8851_MODULE)
  	{
- 		.gpio      = APQ8064_SOM_GSBI2_SPI_MOSI,
- 		.settings = {
+ 		.gpio      = 51,		/* GSBI5 QUP SPI_DATA_MOSI */
 diff --git a/arch/arm/mach-msm/include/mach/dma.h b/arch/arm/mach-msm/include/mach/dma.h
-index 361dce2..253b5a9 100644
+index 4e5b762..25a7994 100644
 --- a/arch/arm/mach-msm/include/mach/dma.h
 +++ b/arch/arm/mach-msm/include/mach/dma.h
-@@ -272,6 +272,13 @@ int msm_dmov_exec_cmd(unsigned id, unsigned int cmdptr);
- #define DMOV8064_TSIF_CHAN         2
- #define DMOV8064_TSIF_CRCI         1
+@@ -274,10 +274,10 @@ int msm_dmov_exec_cmd(unsigned id, unsigned int cmdptr);
  
-+/* channels for APQ8064 SOM*/
-+#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CHAN   11
-+#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CRCI   13
-+
-+#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CHAN   10
-+#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CRCI   12
-+
+ /* channels for APQ8064 SOM*/
+ #define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CHAN	11
+-#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CRCI	8
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_TX_CRCI	13
+ 
+ #define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CHAN	10
+-#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CRCI	7
++#define DMOV_APQ8064_SOM_HSUART_GSBI1_RX_CRCI	12
+ 
  /* channels for APQ8064 SGLTE*/
  #define DMOV_APQ8064_HSUART_GSBI4_TX_CHAN	11
- #define DMOV_APQ8064_HSUART_GSBI4_TX_CRCI	8
 -- 
 1.8.2.1
 
