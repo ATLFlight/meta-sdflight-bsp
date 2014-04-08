@@ -16,8 +16,8 @@ DEPENDS += "xz-native bc-native"
 LINUX_KERNEL_TYPE ?= "standard"
 
 # KMETA ?= ""
-KBRANCH ?= "jb_2.5"
-KTAG ?= "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+KBRANCH ?= "kk_2.7"
+KTAG ?= "AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041"
 KMACHINE ?= "${MACHINE}"
 SRCREV_FORMAT ?= "meta_machine" 
 

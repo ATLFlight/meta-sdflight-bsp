@@ -8,7 +8,7 @@ LICENSE = "ISC"
 
 LIC_FILES_CHKSUM = "file://../COPYING;md5=552efe106a6bfffc3be6ad39e5273108"
 
-SRC_URI = "git://codeaurora.org/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git"
+SRC_URI = "git://codeaurora.org/platform/vendor/qcom-opensource/wlan/prima.git;tag=AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041;protocol=git"
 SRC_URI += " \
 	file://COPYING \
 	file://prima.patch \
@@ -16,7 +16,6 @@ SRC_URI += " \
 	file://prima.cfg \
 	file://WCNSS_qcom_wlan_nv.bin \
 	"
-
 
 PACKAGES = "${PN}"
 

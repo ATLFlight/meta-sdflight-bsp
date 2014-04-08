@@ -27,21 +27,19 @@
 #            SRC_URI += "file://feature.scc"
 #
 
-KTAG_som8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+KTAG_som8064 = "AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041" 
 KBRANCH_som8064 = "linux-${MACHINE}"
 KBRANCH_DEFAULT = "linux-${MACHINE}"
 
 require include/linux-caf.inc
 
-SRC_URI = "git://codeaurora.org/kernel/msm.git;tag=AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241;protocol=git;bareclone=1"
+SRC_URI = "git://codeaurora.org/kernel/msm.git;tag=AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041;protocol=git;bareclone=1"
 SRC_URI += "file://defconfig \
             file://som8064.scc \
             file://som8064.cfg \
             file://som8064-user-config.cfg \
-            file://som8064-user-patches.scc \
+			file://som8064-user-patches.scc \
            "
-# tag: AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241
-SRCREV="960880659d78027b3fc0274d3acf64b3c5b34bf8"
 
 LINUX_VERSION ?= "3.4"
 LINUX_VERSION_EXTENSION ?= "-${MACHINE}"
