@@ -9,6 +9,7 @@ SRC_URI += " \
         file://0001-Use-bash-for-all-shell-scripts.patch \
 	file://0002-Updated-file_test.sh-for-qr-linux.patch \
         file://0003-fix-su-test.patch \
+	file://0004-use-pkill-instead-of-killall.patch \
 	file://cmds.ltp \
 "
 
