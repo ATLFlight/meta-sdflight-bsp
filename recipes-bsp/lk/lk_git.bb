@@ -10,9 +10,9 @@ SRC_URI  = "git://codeaurora.org/kernel/lk;protocol=git;tag=AU_LINUX_ANDROID_JB_
 	 file://NOTICE \
 	 file://0001-lk.patch \
 	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
-	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch \
+	 file://0102-SOM-Machine-type-definition.patch \
 	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
-	 "
+	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch"
 
 PV       = "1.0"
 PR       = "r9"
@@ -40,6 +40,8 @@ do_unpack_append() {
 }
 
 do_compile() {
+    PATH=/pkg/asw/compilers/codesourcery/arm-2010q1/bin:$PATH
+    make ${PARALLEL_MAKE} ${EXTRA_OEMAKE}
 }
 
 do_install() {
