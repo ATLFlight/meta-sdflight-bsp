@@ -75,10 +75,13 @@ MULTISTRAP_BUILD_Packages = "1"
 PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
+PACKAGE_GROUP_ubuntuXSlim = "xserver-xorg xterm x11-apps icewm firefox slim"
+MULTISTRAP_SECTION_ubuntuXSlim = "Raring"
+
 PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
-IMAGE_FEATURES += "ubuntu userpkgs"
+IMAGE_FEATURES += "ubuntu userpkgs ubuntuXSlim"
 
 fixup_conf() {
     # Convert flat directories to package repositories
