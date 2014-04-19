@@ -11,6 +11,7 @@ SRC_URI += " \
         file://0003-fix-su-test.patch \
 	file://0004-use-pkill-instead-of-killall.patch \
         file://0005-Fix-max_map_count-LTP-test.patch \
+        file://0006-Fix-the-ldd-LTP-test.patch \
 	file://cmds.ltp \
 "
 
