@@ -81,3 +81,43 @@ module_do_install() {
 }
 
 addtask do_setup_dirs after do_unpack before do_patch
+
+pkg_postinst_${PN}() {
+  # First mount the right android partitions to copy firmware and mac addressses
+  mkdir -p /system || {
+    echo "[ERROR] Error creating mount point"
+    exit 1
+  }
+  mount /dev/mmcblk0p12 /system/ || {
+    echo "[ERROR] Error mounting the system parition"
+    exit 1
+  }
+  mkdir -p /persist || {
+    echo "[ERROR] Error creating mount point"
+    exit 1
+  }
+  mount /dev/mmcblk0p14 /persist || {
+    echo "[ERROR] Error mounting the persist parition"
+    exit 1
+  }
+
+  #  Copy both versions of the firmware. It's ok for one
+  # of these to fail, in cases where either hw3.0 or hw1.3 dirs
+  # don't exist
+  afw=/system/etc/firmware/ath6k/AR6004/hw3.0/
+  lfw=/lib/firmware/ath6k/AR6004/hw3.0/
+  mkdir -p $lfw
+  cp $afw/softmac.bin $lfw
+  cp $afw/fw.ram.bin $lfw
+  cp $afw/bdata.bin_sdio $lfw/bdata.bin
+
+  afw=/system/etc/firmware/ath6k/AR6004/hw1.3/
+  lfw=/lib/firmware/ath6k/AR6004/hw1.3/
+  mkdir -p $lfw
+  cp $afw/softmac.bin $lfw
+  cp $afw/fw.ram.bin $lfw
+  cp $afw/bdata.bin_sdio $lfw/bdata.bin
+
+  umount /system
+  umount /persist
+}
