@@ -10,8 +10,4 @@
 auto lo
 iface lo inet loopback
 
-source /etc/network/interfaces.d/*.cfg
-
-# This allows DHCP to be run for wlan0 (actually all interfaces).
-iface default inet dhcp
  

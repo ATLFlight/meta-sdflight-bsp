@@ -72,7 +72,7 @@ MULTISTRAP_BUILD_Packages = "1"
 #    - wpasupplicant: To manage Wi-Fi
 #    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
 
-PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip"
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip network-manager"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
 PACKAGE_GROUP_ubuntuXSlim = "xserver-xorg xterm x11-apps icewm firefox slim"
@@ -84,7 +84,7 @@ MULTISTRAP_SECTION_ubuntuXubuntu = "Raring"
 PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0 glib-2.0-bin"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
-IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
+IMAGE_FEATURES += "ubuntu userpkgs"
 
 fixup_conf() {
     # Convert flat directories to package repositories
