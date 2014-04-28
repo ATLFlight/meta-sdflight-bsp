@@ -14,9 +14,6 @@ SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=$
 SRC_URI += " \
    file://0000-Kbuild.patch \
    file://0001-compiler-warning.patch \
-   file://ifc6410-android2linux-macaddress.sh \
-   file://mac2softmac.sh \
-   file://qca6234.cfg \
    "
 
 PROVIDES += "kernel-module-cfg80211 kernel-module-wlan"
@@ -70,14 +67,6 @@ module_do_compile() {
 module_do_install() {
 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
 	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
-
-	mkdir -p ${D}/etc/network
-
-	install -m 744 ${WORKDIR}/ifc6410-android2linux-macaddress.sh ${D}/etc/network/ifc6410-android2linux-macaddress.sh
-	install -m 744 ${WORKDIR}/mac2softmac.sh ${D}/etc/network/mac2softmac.sh
-
-	mkdir -p ${D}/etc/network/interfaces.d
-	install -m 644 ${WORKDIR}/qca6234.cfg ${D}/etc/network/interfaces.d/qca6234.cfg
 }
 
 addtask do_setup_dirs after do_unpack before do_patch
