@@ -1,4 +1,4 @@
 patch 0000-allow-uninitialized-warning-ifc6410.patch
-patch 0001-HACK-msm_fb-and-mdp-for-8064-debian.patch
+patch 0001-HACK-msm_fb-for-8064-debian.patch
 patch 0045-drm-kgsl-compiler-fix.patch
 patch 0046-X11-kernel.patch
