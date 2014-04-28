@@ -47,8 +47,10 @@ test -e /dev/random || /bin/mknod -m 644 /dev/random c 1 8
 test -e /dev/urandom || /bin/mknod -m 644 /dev/urandom c 1 9
 
 ##
-## Create /dev/mmcblk0p12 (system) and /dev/mmcblkp13 (userdata)
+## Create /dev/mmcblk0p12 (system), /dev/mmcblk0p13 (userdata),
+## /dev/mmcblk0p14 (persist), and /dev/mmcblk0p1 (firmware).
 ##
+test -e /dev/mmcblk0p1  || /bin/mknod -m 644 /dev/mmcblk0p1  b 179  1
 test -e /dev/mmcblk0p12 || /bin/mknod -m 644 /dev/mmcblk0p12 b 179 12
 test -e /dev/mmcblk0p13 || /bin/mknod -m 644 /dev/mmcblk0p13 b 179 13
 test -e /dev/mmcblk0p14 || /bin/mknod -m 644 /dev/mmcblk0p14 b 179 14
