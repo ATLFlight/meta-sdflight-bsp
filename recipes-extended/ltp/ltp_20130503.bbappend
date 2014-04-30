@@ -1,7 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 RDEPENDS_${PN} = ""
-DEPENDS = ""
+DEPENDS = "libaio"
 
 PARALLEL_MAKE = "-j 1"
 
