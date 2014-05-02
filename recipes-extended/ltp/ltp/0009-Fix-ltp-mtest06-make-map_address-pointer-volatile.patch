@@ -1,0 +1,25 @@
+From 9aeb1f01bdb0d7f00eb24b72c9621621741fa643 Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Thu, 1 May 2014 18:28:21 -0700
+Subject: [PATCH] Fix ltp mtest06 make map_address pointer volatile
+
+---
+ testcases/kernel/mem/mtest06/mmap1.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/testcases/kernel/mem/mtest06/mmap1.c b/testcases/kernel/mem/mtest06/mmap1.c
+index 61d5369..d4c4b62 100644
+--- a/testcases/kernel/mem/mtest06/mmap1.c
++++ b/testcases/kernel/mem/mtest06/mmap1.c
+@@ -62,7 +62,7 @@
+ } while (0)
+ 
+ static int verbose_print = 0;
+-static char *map_address;
++static char *volatile map_address;
+ static jmp_buf jmpbuf;
+ static volatile char read_lock = 0;
+ 
+-- 
+1.7.11.4
+

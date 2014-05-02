@@ -14,6 +14,7 @@ SRC_URI += " \
         file://0006-Fix-the-ldd-LTP-test.patch \
         file://0007-Remove-AIO-test-cases-not-supported-by-kernel.patch \
         file://0008-Fix-LTP-profil01-test-by-turning-off-compiler-optimi.patch \
+        file://0009-Fix-ltp-mtest06-make-map_address-pointer-volatile.patch \
 	file://cmds.ltp \
 "
 
