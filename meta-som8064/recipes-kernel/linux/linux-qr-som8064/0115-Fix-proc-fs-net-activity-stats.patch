@@ -1,0 +1,25 @@
+From ea9ee657a91c497b80ff112d9b4b645d2f018f80 Mon Sep 17 00:00:00 2001
+From: Kevin Lee <kdlee@codeaurora.org>
+Date: Fri, 2 May 2014 09:03:07 -0700
+Subject: [PATCH] Fix proc fs net/activity stats
+
+---
+ net/activity_stats.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/net/activity_stats.c b/net/activity_stats.c
+index 8a3e934..4d15e5a 100644
+--- a/net/activity_stats.c
++++ b/net/activity_stats.c
+@@ -68,7 +68,7 @@ static int activity_stats_read_proc(char *page, char **start, off_t off,
+ 
+ 	/* Only print if offset is 0, or we have enough buffer space */
+ 	if (off || count < (30 * BUCKET_MAX + 22))
+-		return -ENOMEM;
++		return 0;
+ 
+ 	len = snprintf(p, count, "Min Bucket(sec) Count\n");
+ 	count -= len;
+-- 
+1.7.11.4
+
