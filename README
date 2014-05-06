@@ -51,8 +51,8 @@ A. Fetch The Source
 
 To build QR-Linux, you must first use repo to download the code:
 
-    mkdir oe-core
-    cd oe-core 
+    mkdir qr-linux
+    cd qr-linux
     repo init -u git://codeaurora.org/quic/lx/qr-linux/manifest -b release -m <manifest>.xml
     repo sync
 
@@ -62,12 +62,15 @@ necessary for building QR-Linux.
 
 B. Perform Your First Build
 
-The script meta-qr-linux/scripts/qrlbuild.sh automates the steps of
-doing a complete build. You will need the details in the following
-sub-sections if things fail, but otherwise you should be able to
-build using
-    meta-qr-linux/scripts/qrlbuild.sh -m <machine name>
-where the <machine name> is either som8064 or ifc6410, depending on 
+Change into the oe-core directory. The script
+meta-qr-linux/scripts/qrlbuild.sh automates the steps of doing a
+complete build. You will need the details in the following
+sub-sections if things fail, but otherwise you should be able to build
+using 
+
+meta-qr-linux/scripts/qrlbuild.sh -m <machine name> 
+
+where the <machine name> is either som8064 or ifc6410, depending on
 your target device.
 
 If this fails because of missing required packages, see the section
