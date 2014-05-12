@@ -1,33 +1,22 @@
-From a9c647645486ffa0590f2962e23a22d213f77587 Mon Sep 17 00:00:00 2001
-From: Gene Marsh <gmarsh@codeaurora.org>
-Date: Fri, 31 Jan 2014 22:18:10 +0000
-Subject: APQ Linux Patches
+From 31d7ddf7b0aee8e55dd17fb56dbda87f9108fd4a Mon Sep 17 00:00:00 2001
+From: Rahul Anand <ranand@codeaurora.org>
+Date: Mon, 12 May 2014 13:43:59 -0700
+Subject: [PATCH] QR-Linux Patches Mods to get this working on QR-Linux New
+ change: modifed start_usb and start_adbd to not start on
+ any runlevel, since there's an upstart job that calls them
 
+Change-Id: Idcbe0d146d7f0e01be603b9a7e76b61007b3c6ae
 ---
- Makefile.am           |  2 +-
- adb/Makefile.am       | 38 +++-----------------------------------
- adb/start_adbd        | 13 ++++++++++++-
- configure.ac          |  2 +-
- libcutils/Makefile.am | 41 +++++++++++++++++++++++++++++++++++++++++
- usb/Makefile.am       | 20 ++++++++++----------
- usb/compositions/9025 | 16 +++++++++++++++-
- usb/start_usb         | 14 +++++++++++++-
- usb/target            |  3 +++
- 9 files changed, 99 insertions(+), 50 deletions(-)
+ adb/Makefile.am       |   38 +++-----------------------------------
+ adb/start_adbd        |   14 +++++++++++++-
+ configure.ac          |    2 +-
+ libcutils/Makefile.am |   41 +++++++++++++++++++++++++++++++++++++++++
+ usb/Makefile.am       |   20 ++++++++++----------
+ usb/compositions/9025 |   16 +++++++++++++++-
+ usb/start_usb         |   15 ++++++++++++++-
+ usb/target            |    3 +++
+ 8 files changed, 100 insertions(+), 49 deletions(-)
 
-diff --git a/Makefile.am b/Makefile.am
-index 769daa9..584677e 100755
---- a/Makefile.am
-+++ b/Makefile.am
-@@ -4,7 +4,7 @@ if USELIBCUTILS
- BUILD_COMPONENTS += libcutils
- endif
- BUILD_COMPONENTS += liblog logcat libzipfile
--
-+ 
- BUILD_COMPONENTS += adb libmincrypt fastboot usb
- 
- SUBDIRS := $(BUILD_COMPONENTS)
 diff --git a/adb/Makefile.am b/adb/Makefile.am
 index 5dc9966..8d94dc1 100755
 --- a/adb/Makefile.am
@@ -76,26 +65,27 @@ index 5dc9966..8d94dc1 100755
  # adbd device daemon
  # =========================================================
 diff --git a/adb/start_adbd b/adb/start_adbd
-index c4b1feb..7b03786 100644
+index c4b1feb..1a3d2a1 100644
 --- a/adb/start_adbd
 +++ b/adb/start_adbd
-@@ -1,4 +1,15 @@
+@@ -1,4 +1,16 @@
  #! /bin/sh
 +### BEGIN INIT INFO
 +# Provides:          start_adbd
-+# Required-Start:    start_usb
-+# Required-Stop:     start_usb
++# Required-Start:    
++# Required-Stop:     
 +# Should-Start:
 +# Should-Stop:
-+# Default-Start:     2 3 4 5
-+# Default-Stop:      0 1 6
++# Default-Start:     
++# Default-Stop:      
 +# Short-Description: Start android debug bridge deamon
 +# Description:       This script enabls android debug bridge over usb.
++#                    Does not start/stop on any runlevel. Called from upstart job only
 +### END INIT INFO                                                       
  #
  # Copyright (c) 2011, The Linux Foundation. All rights reserved.
  #
-@@ -38,7 +49,7 @@ fi
+@@ -38,7 +50,7 @@ fi
  case "$1" in
    start)
          echo -n "Starting adbd: "
@@ -228,10 +218,10 @@ index af2ebea..fbc47e1 100755
  		run_9x15 &
  		;;
 diff --git a/usb/start_usb b/usb/start_usb
-index 2e3ce5e..4fcca8f 100755
+index 2e3ce5e..5d81183 100755
 --- a/usb/start_usb
 +++ b/usb/start_usb
-@@ -1,4 +1,16 @@
+@@ -1,4 +1,17 @@
  #!/bin/sh
 +### BEGIN INIT INFO
 +# Provides:          start_usb
@@ -239,16 +229,17 @@ index 2e3ce5e..4fcca8f 100755
 +# Required-Stop:
 +# Should-Start:
 +# Should-Stop:
-+# Default-Start:     2 3 4 5
-+# Default-Stop:      0 1 6
++# Default-Start:     
++# Default-Stop:      
 +# Short-Description: Configure usb composition for android debug bridge
 +# Description:       This script configures usb composition to 9025 mode
 +#                    i.e. diag,serial_smd,serial_tty,rmnet_bam,mass_storage,adb.
++#                    Does not start/stop on any runlevel. Called from upstart job only
 +### END INIT INFO                                                       
  #
  # Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
  #
-@@ -33,7 +45,7 @@ case "$1" in
+@@ -33,7 +46,7 @@ case "$1" in
  
          case $KERNEL in
            3.*)
@@ -272,5 +263,5 @@ index a6cb631..367383a 100644
  		res="9x15"
  		;;
 -- 
-1.8.1.2
+1.7.9.5
 
