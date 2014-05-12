@@ -8,9 +8,6 @@
 if [ "$IFACE" = lo ]; then
     exit 0
 fi
-if [ "$IFACE" != "wlan0" -a "$IFACE" != "p2p0" ]; then
-    exit 0
-fi
 
 QC_FW_TRIGGER_DEVICE=/dev/wcnss_wlan # The device to trigger for fw download
 

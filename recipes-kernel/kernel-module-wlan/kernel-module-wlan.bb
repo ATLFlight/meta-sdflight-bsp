@@ -141,4 +141,11 @@ pkg_postinst_${PN}() {
 	echo "ERROR: NV File not found, Giving up"
 	exit 1
     fi
+
+    wlanMacAddr=`od -A n -j 10 -N 6 -t xC ${wifiMdtNVDstFile} | sed -e "s/ //" -e "s/ /:/g"`
+
+    for file in /etc/NetworkManager/system-connections/*
+    do
+      sed -i -e "/802-11-wireless/a\macaddress=${wlanMacAddr}" ${file}
+    done
 }
