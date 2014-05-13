@@ -84,7 +84,7 @@ MULTISTRAP_SECTION_ubuntuXubuntu = "Raring"
 PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0 glib-2.0-bin"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
-IMAGE_FEATURES += "ubuntu userpkgs"
+IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
 
 fixup_conf() {
     # Convert flat directories to package repositories
