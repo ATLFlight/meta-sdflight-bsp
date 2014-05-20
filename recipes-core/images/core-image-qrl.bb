@@ -25,7 +25,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "14.03.1+0023.eng2"
+PV = "LNX.LX.1.0.14.05.0a"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
