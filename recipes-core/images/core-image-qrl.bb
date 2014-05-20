@@ -18,11 +18,14 @@ SRC_URI += " \
    file://interfaces \
    file://wpa_supplicant.conf \
    file://udev_files_to_keep.grep \
+   file://qrl-common-inc.sh \
+   file://qrl-copy-firmware.sh \
+   file://qrl-config-macaddr.sh \
    "
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "14.03.1+0023"
+PV = "14.03.1+0023.eng2"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
@@ -42,7 +45,7 @@ MULTISTRAP_GENERAL_unpack = 'true'
 MULTISTRAP_GENERAL_arch   = 'armhf'
 MULTISTRAP_GENERAL_configscript = '${WORKDIR}/config.sh'
 
-MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com"
+MULTISTRAP_SOURCE_Raring = "http://crd-thor-01/ports/"
 MULTISTRAP_SUITE_Raring = "raring"
 MULTISTRAP_COMPONENTS_Raring = "main universe"
 MULTISTRAP_DEBOOTSTRAP_Raring = "1"
@@ -72,7 +75,7 @@ MULTISTRAP_BUILD_Packages = "1"
 #    - wpasupplicant: To manage Wi-Fi
 #    - wireless-tools: To get iwconfig family of tools (deprecated) to manually manage Wi-Fi
 
-PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip network-manager"
+PACKAGE_GROUP_ubuntu = "ubuntu-minimal vim-tiny less apt perl iputils-ping openssh-client openssh-server iproute wpasupplicant wireless-tools module-init-tools strace tcpdump iperf build-essential logrotate expect file bluetooth bluez bluez-tools obexftp python-gobject python-dbus ussp-push unzip"
 MULTISTRAP_SECTION_ubuntu = "Raring"
 
 PACKAGE_GROUP_ubuntuXSlim = "xserver-xorg xterm x11-apps icewm firefox slim"
@@ -84,7 +87,8 @@ MULTISTRAP_SECTION_ubuntuXubuntu = "Raring"
 PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0 glib-2.0-bin"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
-IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
+IMAGE_FEATURES += "ubuntu userpkgs"
+#IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
 
 fixup_conf() {
     # Convert flat directories to package repositories
@@ -123,7 +127,11 @@ fixup_sysroot() {
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
     install ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
 
-
+    # Install qrl-*.sh
+    mkdir -p ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 644 ${WORKDIR}/qrl-common-inc.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 755 ${WORKDIR}/qrl-config-macaddr.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 755 ${WORKDIR}/qrl-copy-firmware.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"

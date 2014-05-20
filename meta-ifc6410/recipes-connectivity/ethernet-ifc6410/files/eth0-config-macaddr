@@ -1,0 +1,17 @@
+#!/bin/sh		
+# quit if we're called for the loopback		
+if [ "$IFACE" != eth0 ]
+then		
+    exit 0		
+fi
+
+case "$MODE" in 		
+    start)		
+        case "$PHASE" in		
+            pre-up)		
+                ifconfig eth0 hw ether 
+                ;;
+        esac
+        ;;
+esac
+exit 0

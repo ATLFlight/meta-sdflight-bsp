@@ -13,6 +13,7 @@ SRC_URI += " \
 	file://COPYING \
 	file://prima.patch \
 	file://prima-init \
+	file://prima.cfg\
 	file://WCNSS_qcom_wlan_nv.bin \
 	"
 
@@ -23,7 +24,6 @@ FILES_${PN} += " \
 	    ${base_libdir}/firmware/wlan/prima/WCNSS_qcom_cfg.ini \
 	    ${base_libdir}/modules/3.4.0-${MACHINE} \
 	    ${sysconfdir}/network/* \
-	    ${sysconfdir}/network/interfaces.d/* \
 	    "
 
 do_unpack_append() {
@@ -49,9 +49,10 @@ module_do_install() {
 	# Install firmware
 	mkdir -p ${D}/lib/firmware/wlan/prima
 	install -m 644 ${S}/firmware_bin/WCNSS_cfg.dat ${S}/firmware_bin/WCNSS_qcom_cfg.ini ${S}/firmware_bin/WCNSS_qcom_wlan_nv.bin ${D}/lib/firmware/wlan/prima
-	# Install prima-init
-	mkdir -p ${D}/etc/network/if-up.d
-	install ${WORKDIR}/prima-init ${D}/etc/network/if-up.d/prima-init
+	# Install prima-init and prima.cfg
+	install -m 755 ${WORKDIR}/prima-init -D ${D}/etc/network/if-pre-up.d/prima-init
+	install -m 644 ${WORKDIR}/prima.cfg -D ${D}/etc/network/interfaces.d/prima.cfg
+
 }
 
 do_package_append() {
@@ -70,82 +71,5 @@ do_package_append() {
 }
 
 pkg_postinst_${PN}() {
-    MOUNT=/bin/mount
-
-    QC_FW_DEVICE=/dev/mmcblk0p1	# eMMC partition that contains the firmware
-    QC_FW_MOUNT_POINT=/firmware	# Where to mount the eMMC partition
-    QC_FW_SUBDIR=image		# The subdir in eMMC partition where the fw is
-    QC_FW_WIFI_FILE_NAME=wcnss	# The root of thw WCN fw filename
-    QC_FW_WIFI_FILE_EXT=mdt		# The extension of the WCN fw filename
-    QC_FW_TRIGGER_DEVICE=/dev/wcnss_wlan # The device to trigger for fw download
-    QC_FW_DEST_DIR=/lib/firmware	     # Where to copy the fw files
-
-    QC_PERSIST_DEVICE=/dev/mmcblk0p14 # eMMC partition that contains the firmware
-    QC_PERSIST_MOUNT_POINT=/persist	# Where to mount the eMMC partition
-    QC_NV_FILE_NAME=WCNSS_qcom_wlan_nv
-    QC_NV_FILE_EXT=bin
-    QC_NV_FILE_DEST_DIR=/lib/firmware/wlan/prima
-
-    qcFwImgDir=${QC_FW_MOUNT_POINT}/${QC_FW_SUBDIR} # Where to copy fw files from
-    wifiMdtSrcFile=${qcFwImgDir}/${QC_FW_WIFI_FILE_NAME}.${QC_FW_WIFI_FILE_EXT}
-    wifiMdtDstFile=${QC_FW_DEST_DIR}/${QC_FW_WIFI_FILE_NAME}.${QC_FW_WIFI_FILE_EXT}
-
-    # Mount the firmware partition if not already mounted
-    if [ ! -d ${QC_FW_MOUNT_POINT} ]
-    then
-        /bin/mkdir -p ${QC_FW_MOUNT_POINT}
-    fi
-
-    if [ ! -d ${qcFwImgDir} ]
-    then
-        echo "INFO: Mounting firmware partition..."
-        ${MOUNT} -t vfat ${QC_FW_DEVICE} ${QC_FW_MOUNT_POINT}
-    else
-        echo "INFO: Skipping mounting the firmware partition"
-    fi
-
-    if [ ! -e ${wifiMdtSrcFile} ]
-    then
-        echo "ERROR: Firmware not found or mount failed"
-        return 1
-    fi
-    # Copy the wcnss* files from eMMC partition to /lib/firmware
-    /bin/cp ${qcFwImgDir}/${QC_FW_WIFI_FILE_NAME}* ${QC_FW_DEST_DIR}
-
-    if [ ! -f ${wifiMdtDstFile} ]
-    then
-        echo "ERROR: Firmware  not found. Giving up"
-        exit 1
-    fi
-
-    # Always copy the NV file
-    wifiMdtNVFile=${QC_PERSIST_MOUNT_POINT}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
-    wifiMdtNVDstFile=${QC_NV_FILE_DEST_DIR}/${QC_NV_FILE_NAME}.${QC_NV_FILE_EXT}
-
-    if [ ! -d ${QC_PERSIST_MOUNT_POINT} ]; then
-	/bin/mkdir -p ${QC_PERSIST_MOUNT_POINT}
-    fi
-
-    if [ ! -f ${wifiMdtNVFile} ]; then
-	echo "INFO: Mounting persist partition..."
-	${MOUNT} -t ext4 ${QC_PERSIST_DEVICE} ${QC_PERSIST_MOUNT_POINT}
-    fi
-
-    if [ -f ${wifiMdtNVFile} ]; then
-	/bin/cp ${wifiMdtNVFile} ${wifiMdtNVDstFile}
-    else
-	echo "WARNING: NV File not found or mount failed"
-    fi
-
-    if [ ! -f ${wifiMdtNVDstFile} ]; then
-	echo "ERROR: NV File not found, Giving up"
-	exit 1
-    fi
-
-    wlanMacAddr=`od -A n -j 10 -N 6 -t xC ${wifiMdtNVDstFile} | sed -e "s/ //" -e "s/ /:/g"`
-
-    for file in /etc/NetworkManager/system-connections/*
-    do
-      sed -i -e "/802-11-wireless/a\macaddress=${wlanMacAddr}" ${file}
-    done
+    /usr/local/qr-linux/qrl-copy-firmware.sh
 }
