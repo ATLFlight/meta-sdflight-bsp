@@ -44,17 +44,11 @@ checkInstallPkgs () {
         return 0
     fi
     export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv
-    cd ${pkgDir}
     echo "[INFO] Installing pkgs..."
-    dpkg --install reboot2fastboot_*.deb > /dev/null 2>&1
-    dpkg --install diag_*.deb > /dev/null 2>&1
-    dpkg --install libxml0_*.deb > /dev/null 2>&1
-    dpkg --install libdsutils1_*.deb > /dev/null 2>&1
-    dpkg --install libconfigdb0_*.deb > /dev/null 2>&1
-    dpkg --install qmi_*.deb > /dev/null 2>&1
-    dpkg --install qmi-framework_*.deb > /dev/null 2>&1
-    dpkg --install thermal_*.deb > /dev/null 2>&1
-    dpkg --install mp-decision_*.deb > /dev/null 2>&1
+    for file in ${pkgDir}/*.deb
+    do
+      dpkg --install ${file} > /dev/null 2>&1
+    done
 }
 echo "[INFO] Checking and installing remaining packages"
 checkInstallPkgs

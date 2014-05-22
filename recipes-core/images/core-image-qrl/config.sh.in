@@ -48,12 +48,14 @@ test -e /dev/urandom || /bin/mknod -m 644 /dev/urandom c 1 9
 
 ##
 ## Create /dev/mmcblk0p12 (system), /dev/mmcblk0p13 (userdata),
-## /dev/mmcblk0p14 (persist), and /dev/mmcblk0p1 (firmware).
+## /dev/mmcblk0p14 (persist), /dev/mmcblk0p15 (cache), 
+## and /dev/mmcblk0p1 (firmware).
 ##
 test -e /dev/mmcblk0p1  || /bin/mknod -m 644 /dev/mmcblk0p1  b 179  1
 test -e /dev/mmcblk0p12 || /bin/mknod -m 644 /dev/mmcblk0p12 b 179 12
 test -e /dev/mmcblk0p13 || /bin/mknod -m 644 /dev/mmcblk0p13 b 179 13
 test -e /dev/mmcblk0p14 || /bin/mknod -m 644 /dev/mmcblk0p14 b 179 14
+test -e /dev/mmcblk0p15 || /bin/mknod -m 644 /dev/mmcblk0p15 b 179 15
 
 ##
 ## Do the dkpg post-configure thingy
@@ -122,4 +124,9 @@ touch /etc/apt/sources.list
 
 sync;sync
 
+/sbin/resize2fs @LK_ROOT_DEV@
 
+sync;sync
+
+# Install our binary packages.
+/usr/local/qr-linux/installPkgs.sh

@@ -11,7 +11,6 @@ SRC_URI += " \
    file://adb.conf \
    file://apt.conf \
    file://config.sh.in \
-   file://resize.in \
    file://fstab \
    file://init \
    file://installPkgs.sh \
@@ -88,7 +87,6 @@ PACKAGE_GROUP_userpkgs = "android-tools serial-console glib-2.0 glib-2.0-bin"
 MULTISTRAP_SECTION_userpkgs = "Packages"
 
 IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
-#IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
 
 fixup_conf() {
     # Convert flat directories to package repositories
@@ -103,19 +101,14 @@ fixup_conf() {
     # Set file system root in config.sh
     cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh
     sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/config.sh
-    cp ${WORKDIR}/resize.in ${WORKDIR}/resize
-    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/resize
-    # Replace place holders with build system values.
+
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
-    # Install init.d scripts
-    install ${WORKDIR}/resize ${IMAGE_ROOTFS}${sysconfdir}/init.d/resize
-    update-rc.d -r ${IMAGE_ROOTFS} resize start 20 2 .
-    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}${sysconfdir}/init.d/installPkgs.sh
-    update-rc.d -r ${IMAGE_ROOTFS} installPkgs.sh start 20 2 .
+    install -d ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}/usr/local/qr-linux/installPkgs.sh
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh
     install -b -S .upstart ${WORKDIR}/init ${IMAGE_ROOTFS}/sbin/init
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}${sysconfdir}/fstab
@@ -127,6 +120,7 @@ fixup_sysroot() {
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
     install ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
 
+    ln -s ${IMAGE_ROOTFS}/usr/lib/insserv/insserv ${IMAGE_ROOTFS}/sbin 
     # Install qrl-*.sh
     mkdir -p ${IMAGE_ROOTFS}/usr/local/qr-linux
     install -m 644 ${WORKDIR}/qrl-common-inc.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
