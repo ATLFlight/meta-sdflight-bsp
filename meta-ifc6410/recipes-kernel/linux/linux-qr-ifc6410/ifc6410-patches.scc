@@ -4,3 +4,4 @@ patch 0045-drm-kgsl-compiler-fix.patch
 patch 0046-X11-kernel.patch
 patch 0047-Fix-proc-fs-net-activity-stats.patch
 patch 0048-Bluetooth-To-Version-3_4_66.patch
+patch 0049-bluetooth-power.patch
