@@ -10,7 +10,8 @@ inherit multistrap-image
 SRC_URI += " \
    file://adb.conf \
    file://apt.conf \
-   file://config.sh.in \
+   file://config.sh \
+   file://resize \
    file://fstab \
    file://init \
    file://installPkgs.sh \
@@ -98,15 +99,13 @@ fixup_conf() {
          dpkg-scansources . /dev/null | gzip -9c > Sources.gz
       done
     cd ${CURDIR}
-    # Set file system root in config.sh
-    cp ${WORKDIR}/config.sh.in ${WORKDIR}/config.sh
-    sed -e "s|@LK_ROOT_DEV@|${LK_ROOT_DEV}|" -i ${WORKDIR}/config.sh
-
 }
 
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
+    install ${WORKDIR}/resize ${IMAGE_ROOTFS}${sysconfdir}/init.d/resize
+    update-rc.d -r ${IMAGE_ROOTFS} resize start 20 2 .
     install -d ${IMAGE_ROOTFS}/usr/local/qr-linux
     install ${WORKDIR}/installPkgs.sh ${IMAGE_ROOTFS}/usr/local/qr-linux/installPkgs.sh
     install ${WORKDIR}/config.sh ${IMAGE_ROOTFS}/config.sh

@@ -124,9 +124,5 @@ touch /etc/apt/sources.list
 
 sync;sync
 
-/sbin/resize2fs @LK_ROOT_DEV@
-
-sync;sync
-
 # Install our binary packages.
 /usr/local/qr-linux/installPkgs.sh
