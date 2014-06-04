@@ -122,6 +122,14 @@ echo $hostName >> /etc/hostname
 # it doesn't exist
 touch /etc/apt/sources.list
 
+##
+## Some other administrative tasks
+## 
+/bin/rm /sbin/insserv
+/bin/ln -s /usr/lib/insserv/insserv /sbin/insserv
+locale-gen en_US.UTF-8
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lib/insserv dpkg-reconfigure locales
+
 sync;sync
 
 # Install our binary packages.

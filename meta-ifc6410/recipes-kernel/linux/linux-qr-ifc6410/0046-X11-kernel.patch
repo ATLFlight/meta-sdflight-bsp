@@ -14,6 +14,28 @@ index ba810a9..be16d3b 100644
  	if (panel_pixclock_freq > 58000000)
  		/* pm_qos_rate should be in Khz */
  		pm_qos_rate = panel_pixclock_freq / 1000 ;
+diff --git a/drivers/video/msm/mdp4_overlay.c b/drivers/video/msm/mdp4_overlay.c
+index 7f1cd0a..cda67c2 100644
+--- a/drivers/video/msm/mdp4_overlay.c
++++ b/drivers/video/msm/mdp4_overlay.c
+@@ -1239,7 +1239,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pipe)
+ 		pipe->element0 = C3_ALPHA;	/* alpha */
+ 		pipe->bpp = 4;		/* 4 bpp */
+ 		break;
+-	case MDP_RGBA_8888:
++	case MDP_BGRA_8888:
+ 		pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
+ 		pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
+ 		pipe->a_bit = 3;	/* alpha, 4 bits */
+@@ -1273,7 +1273,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pipe)
+ 		pipe->element0 = C2_R_Cr;	/* R */
+ 		pipe->bpp = 4;		/* 4 bpp */
+ 		break;
+-	case MDP_BGRA_8888:
++	case MDP_RGBA_8888:
+ 		pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
+ 		pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
+ 		pipe->a_bit = 3;	/* alpha, 4 bits */
 diff --git a/drivers/video/msm/msm_fb.c b/drivers/video/msm/msm_fb.c
 index 6d2a537..3b1eeb9 100644
 --- a/drivers/video/msm/msm_fb.c
@@ -54,26 +76,3 @@ index 6d2a537..3b1eeb9 100644
  		var->blue.length = 8;
  		var->green.length = 8;
  		var->red.length = 8;
-diff --git a/drivers/video/msm/mdp4_overlay.c b/drivers/video/msm/mdp4_overlay.c
-index 7f1cd0a..cda67c2 100644
---- a/drivers/video/msm/mdp4_overlay.c
-+++ b/drivers/video/msm/mdp4_overlay.c
-@@ -1239,7 +1239,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pip
-                pipe->element0 = C3_ALPHA;      /* alpha */
-                pipe->bpp = 4;          /* 4 bpp */
-                break;
--       case MDP_RGBA_8888:
-+       case MDP_BGRA_8888:
-                pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
-                pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
-                pipe->a_bit = 3;        /* alpha, 4 bits */
-@@ -1273,7 +1273,7 @@ int mdp4_overlay_format2pipe(struct mdp4_overlay_pipe *pip
-                pipe->element0 = C2_R_Cr;       /* R */
-                pipe->bpp = 4;          /* 4 bpp */
-                break;
--       case MDP_BGRA_8888:
-+       case MDP_RGBA_8888:
-                pipe->frame_format = MDP4_FRAME_FORMAT_LINEAR;
-                pipe->fetch_plane = OVERLAY_PLANE_INTERLEAVED;
-                pipe->a_bit = 3;        /* alpha, 4 bits */
-
