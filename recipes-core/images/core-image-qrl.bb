@@ -45,7 +45,7 @@ MULTISTRAP_GENERAL_unpack = 'true'
 MULTISTRAP_GENERAL_arch   = 'armhf'
 MULTISTRAP_GENERAL_configscript = '${WORKDIR}/config.sh'
 
-MULTISTRAP_SOURCE_Raring = "http://crd-thor-01/ports//"
+MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com/"
 MULTISTRAP_SUITE_Raring = "raring"
 MULTISTRAP_COMPONENTS_Raring = "main universe"
 MULTISTRAP_DEBOOTSTRAP_Raring = "1"
