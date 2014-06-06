@@ -25,7 +25,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "LNX.LX.1.0.14.05.1"
+PV = "LNX.LX.1.0.14.06.0"
 
 IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
@@ -45,7 +45,7 @@ MULTISTRAP_GENERAL_unpack = 'true'
 MULTISTRAP_GENERAL_arch   = 'armhf'
 MULTISTRAP_GENERAL_configscript = '${WORKDIR}/config.sh'
 
-MULTISTRAP_SOURCE_Raring = "http://ports.ubuntu.com/"
+MULTISTRAP_SOURCE_Raring = "http://crd-thor-01/ports//"
 MULTISTRAP_SUITE_Raring = "raring"
 MULTISTRAP_COMPONENTS_Raring = "main universe"
 MULTISTRAP_DEBOOTSTRAP_Raring = "1"
@@ -117,9 +117,8 @@ fixup_sysroot() {
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
-    install ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
+    install -m 644 ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
 
-    ln -s ${IMAGE_ROOTFS}/usr/lib/insserv/insserv ${IMAGE_ROOTFS}/sbin 
     # Install qrl-*.sh
     mkdir -p ${IMAGE_ROOTFS}/usr/local/qr-linux
     install -m 644 ${WORKDIR}/qrl-common-inc.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
