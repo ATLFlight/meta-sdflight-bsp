@@ -42,6 +42,7 @@ LINUX_VERSION_EXTENSION_ifc6410 = "-ifc6410"
 do_fetch_prepend() {
     import shutil
     import glob
+
     import os
     # Where to look for downloaded patches
     src = d.getVar('COREBASE', True)+'/../inforce-ifc6410-rel2.0/kernel'
@@ -49,8 +50,29 @@ do_fetch_prepend() {
     f = open(patchesFile, 'w+')
     for patchFilePath in sorted(glob.glob(src+"/*.patch")):
         patchFile = os.path.basename(patchFilePath)
-        f.write('patch '+ patchFile +'\n')
+        if not patchFile.startswith("0024") and not patchFile.startswith("0029"):
+            f.write('patch '+ patchFile +'\n')
     f.close()
+}
+
+## Override bluetooth kernel components
+do_kernel_checkout_append() {
+    btsrc=${COREBASE}/../kernel-v3.4.66
+    btdst=${WORKDIR}/linux 
+    # Note that at this point we are in a headless state, that will
+    # be converted to a branch (KERNEL_BRANCH) in do_patch.
+    	
+    # Copy baseline bluetooth
+    /bin/cp -fr ${btsrc}/net/bluetooth/* ${btdst}/net/bluetooth
+    /bin/cp -fr ${btsrc}/include/net/bluetooth/* ${btdst}/include/net/bluetooth
+    /bin/cp -fr ${btsrc}/drivers/bluetooth/* ${btdst}/drivers/bluetooth
+	
+    pushd ${btdst}
+    git status
+    echo "Commiting baseline bluetooth"
+    git add -A
+    git commit -m "Updated bluetooth baseline" 
+    popd .
 }
 
 # Copy the *patch files from top level dir to recipe's dir

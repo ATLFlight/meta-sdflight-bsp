@@ -1,8 +1,6 @@
 #patch 0000-allow-uninitialized-warning.patch
-#patch 0008-modified-drivers-bluetooth-Kconfig.patch
 patch 0001-HACK-msm_fb-for-8064-debian.patch
-#patch 0009-Update-to-Bluez-4.101.patch
-#patch 0010-Add-support-for-QC-chip-to-Bluetooth-stack.patch
+patch 0010-Add-support-for-3680-to-Bluetooth-stack.patch
 patch 0101-SOM-bringup-with-basic-BSP-updates.patch
 patch 0102-SOM-USB2-bringup.patch
 patch 0104-SOM-Disable-Audio-devices.patch

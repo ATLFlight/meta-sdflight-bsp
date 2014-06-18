@@ -38,7 +38,7 @@ SRC_URI += "file://defconfig \
             file://som8064.scc \
             file://som8064.cfg \
             file://som8064-user-config.cfg \
-			file://som8064-user-patches.scc \
+            file://som8064-user-patches.scc \
            "
 
 LINUX_VERSION ?= "3.4"
@@ -53,3 +53,23 @@ COMPATIBLE_MACHINE_som8064 = "som8064"
 LINUX_VERSION_EXTENSION_som8064 = "-som8064"
 
 PROVIDES += "kernel-module-cfg80211"
+
+## Override bluetooth kernel components
+do_kernel_checkout_append() {
+    btsrc=${COREBASE}/../kernel-v3.4.66
+    btdst=${WORKDIR}/linux 
+    # Note that at this point we are in a headless state, that will
+    # be converted to a branch (KERNEL_BRANCH) in do_patch.
+    	
+    # Copy baseline bluetooth
+    /bin/cp -fr ${btsrc}/net/bluetooth/* ${btdst}/net/bluetooth
+    /bin/cp -fr ${btsrc}/include/net/bluetooth/* ${btdst}/include/net/bluetooth
+    /bin/cp -fr ${btsrc}/drivers/bluetooth/* ${btdst}/drivers/bluetooth
+	
+    pushd ${btdst}
+    git status
+    echo "Commiting baseline bluetooth"
+    git add -A
+    git commit -m "Updated bluetooth baseline" 
+    popd .
+}

@@ -1,0 +1,188 @@
+From c05cbf0b9f83e43f08ab0ffd59d6eb5f42e89c68 Mon Sep 17 00:00:00 2001
+From: Gene Marsh <gmarsh@codeaurora.org>
+Date: Wed, 11 Jun 2014 14:52:44 -0700
+Subject: [PATCH] Add support for 3680 to Bluetooth stack.
+
+---
+ drivers/bluetooth/Kconfig    |   37 +++++++++++++++++++++++++++++++++++++
+ drivers/bluetooth/Makefile   |    5 +++++
+ drivers/bluetooth/hci_smd.c  |   16 +---------------
+ drivers/bluetooth/hci_uart.h |    1 +
+ include/net/bluetooth/hci.h  |    1 +
+ net/bluetooth/Kconfig        |    2 ++
+ 6 files changed, 47 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/bluetooth/Kconfig b/drivers/bluetooth/Kconfig
+index 5ccf142..bb5990d 100644
+--- a/drivers/bluetooth/Kconfig
++++ b/drivers/bluetooth/Kconfig
+@@ -2,6 +2,16 @@
+ menu "Bluetooth device drivers"
+ 	depends on BT
+ 
++config BT_HCISMD
++	tristate "HCI SMD driver"
++	help
++	  Bluetooth HCI SMD driver.
++          This driver is required if you want to use Bluetoth device with
++	  SMD interface.
++
++	  Say Y here to compile support for Bluetooth USB devices into the
++          kernel or say M to compile is as a module (hci_smd).
++
+ config BT_HCIBTUSB
+ 	tristate "HCI USB driver"
+ 	depends on USB
+@@ -81,6 +91,17 @@ config BT_HCIUART_LL
+ 
+ 	  Say Y here to compile support for HCILL protocol.
+ 
++config BT_HCIUART_IBS
++	bool "HCI_IBS protocol support"
++	depends on BT_HCIUART
++	default n
++	help
++	  HCI_IBS (HCI In-Band Sleep) is a serial protocol for communication
++	  between Bluetooth device and host. This protocol is required for
++	  UART clock control for some Qualcomm Bluetooth devices.
++
++	  Say Y here to compile support for HCI_IBS protocol.
++
+ config BT_HCIBCM203X
+ 	tristate "HCI BCM203x USB driver"
+ 	depends on USB
+@@ -104,6 +125,14 @@ config BT_HCIBPA10X
+ 	  Say Y here to compile support for HCI BPA10x devices into the
+ 	  kernel or say M to compile it as module (bpa10x).
+ 
++config BT_MSM_SLEEP
++	tristate "MSM Bluesleep driver"
++	depends on BT && SERIAL_MSM_HS
++	default n
++	help
++	  Bluetooth MSM bluesleep driver.
++	  This driver provides support for BTS sleep.
++
+ config BT_HCIBFUSB
+ 	tristate "HCI BlueFRITZ! USB driver"
+ 	depends on USB
+@@ -207,6 +236,14 @@ config BT_MRVL_SDIO
+ 	  Say Y here to compile support for Marvell BT-over-SDIO driver
+ 	  into the kernel or say M to compile it as module.
+ 
++config MSM_BT_POWER
++	tristate "MSM Bluetooth Power Control"
++	depends on ARCH_MSM && RFKILL
++	default m
++	help
++	  Provides a parameter to switch on/off power from PMIC
++	  to Bluetooth device.
++
+ config BT_ATH3K
+ 	tristate "Atheros firmware download driver"
+ 	depends on BT_HCIBTUSB
+diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
+index f4460f4..a20a056 100644
+--- a/drivers/bluetooth/Makefile
++++ b/drivers/bluetooth/Makefile
+@@ -2,6 +2,7 @@
+ # Makefile for the Linux Bluetooth HCI device drivers.
+ #
+ 
++obj-$(CONFIG_BT_HCISMD)		+= hci_smd.o
+ obj-$(CONFIG_BT_HCIVHCI)	+= hci_vhci.o
+ obj-$(CONFIG_BT_HCIUART)	+= hci_uart.o
+ obj-$(CONFIG_BT_HCIBCM203X)	+= bcm203x.o
+@@ -28,4 +29,8 @@ hci_uart-$(CONFIG_BT_HCIUART_H4)	+= hci_h4.o
+ hci_uart-$(CONFIG_BT_HCIUART_BCSP)	+= hci_bcsp.o
+ hci_uart-$(CONFIG_BT_HCIUART_LL)	+= hci_ll.o
+ hci_uart-$(CONFIG_BT_HCIUART_ATH3K)	+= hci_ath.o
++hci_uart-$(CONFIG_BT_HCIUART_IBS)	+= hci_ibs.o
+ hci_uart-objs				:= $(hci_uart-y)
++obj-$(CONFIG_BT_MSM_SLEEP)              += msm_bt_sleep.o
++msm_bt_sleep-objs                       := bluesleep.o
++obj-$(CONFIG_MSM_BT_POWER)		+= bluetooth-power.o
+diff --git a/drivers/bluetooth/hci_smd.c b/drivers/bluetooth/hci_smd.c
+index 90e7263..1626ef7 100644
+--- a/drivers/bluetooth/hci_smd.c
++++ b/drivers/bluetooth/hci_smd.c
+@@ -147,13 +147,6 @@ static int hci_smd_close(struct hci_dev *hdev)
+ 		return -EPERM;
+ }
+ 
+-
+-static void hci_smd_destruct(struct hci_dev *hdev)
+-{
+-	if (NULL != hdev->driver_data)
+-		kfree(hdev->driver_data);
+-}
+-
+ static void hci_smd_recv_data(void)
+ {
+ 	int len = 0;
+@@ -486,13 +479,9 @@ static int hci_smd_register_smd(struct hci_smd_data *hsmd)
+ 
+ 	hsmd->hdev = hdev;
+ 	hdev->bus = HCI_SMD;
+-	hdev->driver_data = NULL;
+ 	hdev->open  = hci_smd_open;
+ 	hdev->close = hci_smd_close;
+ 	hdev->send  = hci_smd_send_frame;
+-	hdev->destruct = hci_smd_destruct;
+-	hdev->owner = THIS_MODULE;
+-
+ 
+ 	tasklet_init(&hsmd->rx_task,
+ 			hci_smd_rx, (unsigned long) hsmd);
+@@ -545,10 +534,7 @@ static void hci_smd_deregister_dev(struct hci_smd_data *hsmd)
+ 		BT_INFO("HCI device un-registration going on");
+ 
+ 		if (hsmd->hdev) {
+-			if (hci_unregister_dev(hsmd->hdev) < 0)
+-				BT_ERR("Can't unregister HCI device %s",
+-					hsmd->hdev->name);
+-
++			hci_unregister_dev(hsmd->hdev);
+ 			hci_free_dev(hsmd->hdev);
+ 			hsmd->hdev = NULL;
+ 		}
+diff --git a/drivers/bluetooth/hci_uart.h b/drivers/bluetooth/hci_uart.h
+index 6cf6ab22..70bef61 100644
+--- a/drivers/bluetooth/hci_uart.h
++++ b/drivers/bluetooth/hci_uart.h
+@@ -43,6 +43,7 @@
+ #define HCI_UART_H4DS	3
+ #define HCI_UART_LL	4
+ #define HCI_UART_ATH3K	5
++#define HCI_UART_IBS	6
+ 
+ #define HCI_UART_RAW_DEVICE	0
+ #define HCI_UART_RESET_ON_INIT	1
+diff --git a/include/net/bluetooth/hci.h b/include/net/bluetooth/hci.h
+index d47e523..09e3566 100644
+--- a/include/net/bluetooth/hci.h
++++ b/include/net/bluetooth/hci.h
+@@ -51,6 +51,7 @@
+ #define HCI_RS232	4
+ #define HCI_PCI		5
+ #define HCI_SDIO	6
++#define HCI_SMD         7
+ 
+ /* HCI controller types */
+ #define HCI_BREDR	0x00
+diff --git a/net/bluetooth/Kconfig b/net/bluetooth/Kconfig
+index 3537d38..fc4543a 100644
+--- a/net/bluetooth/Kconfig
++++ b/net/bluetooth/Kconfig
+@@ -11,6 +11,8 @@ menuconfig BT
+ 	select CRYPTO_BLKCIPHER
+ 	select CRYPTO_AES
+ 	select CRYPTO_ECB
++	select CRYPTO_HMAC
++	select CRYPTO_SHA256
+ 	help
+ 	  Bluetooth is low-cost, low-power, short-range wireless technology.
+ 	  It was designed as a replacement for cables and other short-range
+-- 
+1.7.9.5
+
