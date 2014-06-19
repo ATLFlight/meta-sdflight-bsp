@@ -3,5 +3,7 @@ AUTHOR = "Gene W. Marsh <gmarsh@codeaurora.org>"
 
 inherit core-image-qrl
 
-IMAGE_FEATURES += "ubuntu userpkgs"
+
+
+IMAGE_FEATURES += "ubuntu userpkgs ubuntuXubuntu"
 

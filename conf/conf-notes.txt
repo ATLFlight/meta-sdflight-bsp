@@ -1,0 +1,5 @@
+Common targets are:
+    core-image-qrl
+    core-image-qrl-xslim
+    core-image-qrl-xubuntu
+
