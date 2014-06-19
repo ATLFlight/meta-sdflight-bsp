@@ -66,10 +66,11 @@ do_kernel_checkout_append() {
     /bin/cp -fr ${btsrc}/include/net/bluetooth/* ${btdst}/include/net/bluetooth
     /bin/cp -fr ${btsrc}/drivers/bluetooth/* ${btdst}/drivers/bluetooth
 	
-    pushd ${btdst}
+    curdir=`pwd`
+    cd ${btdst}
     git status
     echo "Commiting baseline bluetooth"
     git add -A
     git commit -m "Updated bluetooth baseline" 
-    popd .
+    cd ${curdir}
 }
