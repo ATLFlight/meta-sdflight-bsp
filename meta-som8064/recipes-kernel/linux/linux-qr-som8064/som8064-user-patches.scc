@@ -13,3 +13,5 @@ patch 0112-HSUART-configuration.patch
 patch 0113-Slimbus-audio-codec-and-Mic-I2S-configuration.patch
 patch 0114-X11-updates.patch
 patch 0115-Fix-proc-fs-net-activity-stats.patch
+patch 0116-SOM-JDI-MIPI-Display.patch
+

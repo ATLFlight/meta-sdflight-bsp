@@ -1,0 +1,821 @@
+diff --git a/arch/arm/mach-msm/board-8064-display.c b/arch/arm/mach-msm/board-8064-display.c
+index 24f8f9f..7c87418 100644
+--- a/arch/arm/mach-msm/board-8064-display.c
++++ b/arch/arm/mach-msm/board-8064-display.c
+@@ -63,6 +63,7 @@ static struct resource msm_fb_resources[] = {
+ #define MIPI_VIDEO_CHIMEI_WXGA_PANEL_NAME "mipi_video_chimei_wxga"
+ #define HDMI_PANEL_NAME "hdmi_msm"
+ #define MHL_PANEL_NAME "hdmi_msm,mhl_8334"
++#define JDI_PANEL_NAME "mipi_video_jdi_fhd"
+ #define TVOUT_PANEL_NAME "tvout_msm"
+ 
+ #define LVDS_PIXEL_MAP_PATTERN_1	1
+@@ -91,6 +92,13 @@ static void set_mdp_clocks_for_wuxga(void);
+ static int msm_fb_detect_panel(const char *name)
+ {
+ 	u32 version;
++
++	if (machine_is_apq8064_som()) {
++		if (!strncmp(name, JDI_PANEL_NAME,
++				strnlen(JDI_PANEL_NAME,
++					PANEL_NAME_MAX_LEN)))
++			return 0;
++	}
+ 	if (machine_is_apq8064_liquid()) {
+ 		version = socinfo_get_platform_version();
+ 		if ((SOCINFO_VERSION_MAJOR(version) == 1) &&
+@@ -349,10 +357,11 @@ static struct platform_device wfd_device = {
+ #define HDMI_HPD_GPIO		72
+ 
+ static bool dsi_power_on;
++static int gpio26, mpp3;
+ static int mipi_dsi_panel_power(int on)
+ {
+ 	static struct regulator *reg_lvs7, *reg_l2, *reg_l11, *reg_ext_3p3v;
+-	static int gpio36, gpio25, gpio26, mpp3;
++	static int gpio36, gpio25;
+ 	int rc;
+ 
+ 	pr_debug("%s: on=%d\n", __func__, on);
+@@ -392,6 +401,18 @@ static int mipi_dsi_panel_power(int on)
+ 				return -EINVAL;
+ 		}
+ 
++		if (machine_is_apq8064_som()) {
++			mpp3   = 86;   /* backlight_en */
++			gpio25 = 32;   /* lcd_reset_n */
++			gpio26 = PM8921_GPIO_PM_TO_SYS(23); /* pwm_backlight_ctrl */
++			gpio36 = 35; /* lcd1_pwr_en_n */
++		} else {
++			 mpp3   = PM8921_MPP_PM_TO_SYS(3);   /* backlight_en */
++			 gpio25 = PM8921_GPIO_PM_TO_SYS(25); /* lcd_reset_n */
++			 gpio26 = PM8921_GPIO_PM_TO_SYS(26); /* pwm_backlight_ctrl */
++			 gpio36 = PM8921_GPIO_PM_TO_SYS(36); /* lcd1_pwr_en_n */
++		}
++
+ 		if (machine_is_apq8064_liquid()) {
+ 			reg_ext_3p3v = regulator_get(&msm_mipi_dsi1_device.dev,
+ 				"dsi1_vccs_3p3v");
+@@ -401,34 +422,48 @@ static int mipi_dsi_panel_power(int on)
+ 				reg_ext_3p3v = NULL;
+ 				return -ENODEV;
+ 			}
+-			mpp3 = PM8921_MPP_PM_TO_SYS(3);
++			// mpp3 = PM8921_MPP_PM_TO_SYS(3);
+ 			rc = gpio_request(mpp3, "backlight_en");
+ 			if (rc) {
+ 				pr_err("request mpp3 failed, rc=%d\n", rc);
+ 				return -ENODEV;
+ 			}
++			gpio_direction_output(mpp3, 0);
+ 		}
+ 
+-		gpio25 = PM8921_GPIO_PM_TO_SYS(25);
++		if (machine_is_apq8064_som()) {
++			// mpp3 = PM8921_MPP_PM_TO_SYS(3);
++			rc = gpio_request(mpp3, "backlight_en");
++			if (rc) {
++				pr_err("request mpp3 failed, rc=%d\n", rc);
++				return -ENODEV;
++			}
++			gpio_direction_output(mpp3, 0);
++		}
++
++		// gpio25 = PM8921_GPIO_PM_TO_SYS(25);
+ 		rc = gpio_request(gpio25, "disp_rst_n");
+ 		if (rc) {
+ 			pr_err("request gpio 25 failed, rc=%d\n", rc);
+ 			return -ENODEV;
+ 		}
++		gpio_direction_output(gpio25, 0);
+ 
+-		gpio26 = PM8921_GPIO_PM_TO_SYS(26);
++		// gpio26 = PM8921_GPIO_PM_TO_SYS(26);
+ 		rc = gpio_request(gpio26, "pwm_backlight_ctrl");
+ 		if (rc) {
+ 			pr_err("request gpio 26 failed, rc=%d\n", rc);
+ 			return -ENODEV;
+ 		}
++		gpio_direction_output(gpio26, 0);
+ 
+-		gpio36 = PM8921_GPIO_PM_TO_SYS(36); /* lcd1_pwr_en_n */
++		// gpio36 = PM8921_GPIO_PM_TO_SYS(36); /* lcd1_pwr_en_n */
+ 		rc = gpio_request(gpio36, "lcd1_pwr_en_n");
+ 		if (rc) {
+ 			pr_err("request gpio 36 failed, rc=%d\n", rc);
+ 			return -ENODEV;
+ 		}
++		gpio_direction_output(gpio36, 0);
+ 
+ 		dsi_power_on = true;
+ 	}
+@@ -471,18 +506,40 @@ static int mipi_dsi_panel_power(int on)
+ 			}
+ 			gpio_set_value_cansleep(mpp3, 1);
+ 		}
++		if (machine_is_apq8064_som()) {
++			gpio_set_value_cansleep(mpp3, 1);
++		}
++
++		if (machine_is_apq8064_som()) {
++			gpio_set_value_cansleep(gpio36, 1);
++		} else {
++			gpio_set_value_cansleep(gpio36, 0);
++		}
+ 
+-		gpio_set_value_cansleep(gpio36, 0);
+ 		gpio_set_value_cansleep(gpio25, 1);
++
++		if (machine_is_apq8064_som()) {
++			gpio_set_value_cansleep(gpio26, 1);
++		}
+ 		if (socinfo_get_pmic_model() == PMIC_MODEL_PM8917)
+ 			gpio_set_value_cansleep(gpio26, 1);
+ 	} else {
+ 		if (socinfo_get_pmic_model() == PMIC_MODEL_PM8917)
+ 			gpio_set_value_cansleep(gpio26, 0);
++
+ 		gpio_set_value_cansleep(gpio25, 0);
+-		gpio_set_value_cansleep(gpio36, 1);
+ 
+-		if (machine_is_apq8064_liquid()) {
++		if (machine_is_apq8064_som()) {
++			gpio_set_value_cansleep(gpio36, 0);
++		} else {
++			gpio_set_value_cansleep(gpio36, 0);
++		}
++
++		if (machine_is_apq8064_som()) {
++			gpio_set_value_cansleep(gpio26, 0);
++		}
++
++		if (machine_is_apq8064_liquid() || machine_is_apq8064_som()) {
+ 			gpio_set_value_cansleep(mpp3, 0);
+ 
+ 			rc = regulator_disable(reg_ext_3p3v);
+@@ -705,6 +762,47 @@ static struct platform_device mipi_dsi2lvds_bridge_device = {
+ 	.dev.platform_data = &mipi_dsi2lvds_pdata,
+ };
+ 
++#ifdef CONFIG_FB_MSM_MIPI_DSI
++static int mipi_jdi_set_bl(int level)
++{
++	int ret = 0;
++	int rc;
++	int gpio26;
++
++	if ( level > 0 ) {
++		gpio_set_value_cansleep(gpio26, 1);
++		gpio_set_value_cansleep(mpp3, 1);
++	} else {
++		gpio_set_value_cansleep(gpio26, 0);
++		gpio_set_value_cansleep(mpp3, 0);
++	}
++
++	if (ret)
++		pr_err("%s: can't set lcd backlight!\n", __func__);
++
++ 	return ret;
++}
++
++static struct platform_device mipi_dsi_jdi_panel_device = {
++	.name = "mipi_video_jdi_fhd",
++	.id = 0,
++};
++
++static struct msm_panel_common_pdata mipi_jdi_pdata = {
++	.pmic_backlight = mipi_jdi_set_bl,
++};
++
++
++static struct platform_device mipi_jdi_bridge_device = {
++	.name = "mipi_video_jdi_bridge",
++	.id = 0,
++	.dev    = {
++		.platform_data = &mipi_jdi_pdata,
++	}
++};
++#endif
++
++
+ static int toshiba_gpio[] = {LPM_CHANNEL};
+ static struct mipi_dsi_panel_platform_data toshiba_pdata = {
+ 	.gpio = toshiba_gpio,
+@@ -1012,13 +1110,18 @@ error:
+ void __init apq8064_init_fb(void)
+ {
+ 	platform_device_register(&msm_fb_device);
+-	platform_device_register(&lvds_chimei_panel_device);
++	if (machine_is_apq8064_som())
++		platform_device_register(&mipi_dsi_jdi_panel_device);
++	if (machine_is_apq8064_liquid())
++		platform_device_register(&lvds_chimei_panel_device);
+ 
+ #ifdef CONFIG_FB_MSM_WRITEBACK_MSM_PANEL
+ 	platform_device_register(&wfd_panel_device);
+ 	platform_device_register(&wfd_device);
+ #endif
+ 
++	if (machine_is_apq8064_som())
++		platform_device_register(&mipi_jdi_bridge_device);
+ 	if (machine_is_apq8064_liquid())
+ 		platform_device_register(&mipi_dsi2lvds_bridge_device);
+ 	if (machine_is_apq8064_mtp())
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 9d0be58..58717fb 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -81,11 +81,13 @@ static struct gpiomux_setting som_gpio_spi5_config = {
+ 	.pull = GPIOMUX_PULL_NONE,
+ };
+ 
++#if 0
+ static struct gpiomux_setting som_gpio_spi8_config = {
+ 	.func = GPIOMUX_FUNC_8,
+ 	.drv = GPIOMUX_DRV_2MA,
+ 	.pull = GPIOMUX_PULL_NONE,
+ };
++#endif
+ 
+ /* Chip selects for SPI clients */
+ static struct gpiomux_setting gpio_spi_cs_config = {
+@@ -761,12 +763,15 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 			[GPIOMUX_SUSPENDED] = &som_gpio_spi5_config,
+ 		},
+ 	},
++	// Needed for MIPI Display on Carrier Board
++#if 0
+ 	{
+ 		.gpio      = APQ8064_SOM_GSBI7_SPI_CS3,
+ 		.settings = {
+ 			[GPIOMUX_SUSPENDED] = &som_gpio_spi8_config,
+ 		},
+ 	},
++#endif
+ };
+ 
+ static struct msm_gpiomux_config apq8064_gsbi_configs[] __initdata = {
+diff --git a/arch/arm/mach-msm/board-8064-pmic.c b/arch/arm/mach-msm/board-8064-pmic.c
+index 9958464..ef797bf 100644
+--- a/arch/arm/mach-msm/board-8064-pmic.c
++++ b/arch/arm/mach-msm/board-8064-pmic.c
+@@ -116,7 +116,11 @@ struct pm8xxx_mpp_init {
+ static struct pm8xxx_gpio_init pm8921_gpios[] __initdata = {
+ 	PM8921_GPIO_OUTPUT(14, 1, HIGH),	/* HDMI Mux Selector */
+ 	PM8921_GPIO_OUTPUT_BUFCONF(25, 0, LOW, CMOS), /* DISP_RESET_N */
++#ifdef CONFIG_MACH_APQ8064_SOM
++	PM8921_GPIO_OUTPUT_FUNC(23, 0, PM_GPIO_FUNC_2), /* Bl: Off, PWM mode */
++#else
+ 	PM8921_GPIO_OUTPUT_FUNC(26, 0, PM_GPIO_FUNC_2), /* Bl: Off, PWM mode */
++#endif
+ 	PM8921_GPIO_OUTPUT_VIN(30, 1, PM_GPIO_VIN_VPH), /* SMB349 susp line */
+ 	PM8921_GPIO_OUTPUT_BUFCONF(36, 1, LOW, OPEN_DRAIN),
+ 	PM8921_GPIO_OUTPUT_FUNC(44, 0, PM_GPIO_FUNC_2),
+diff --git a/arch/arm/mach-msm/board-8064-regulator.c b/arch/arm/mach-msm/board-8064-regulator.c
+index eafe1be..af7121a 100644
+--- a/arch/arm/mach-msm/board-8064-regulator.c
++++ b/arch/arm/mach-msm/board-8064-regulator.c
+@@ -183,6 +183,9 @@ VREG_CONSUMERS(S4) = {
+ 	REGULATOR_SUPPLY("vddp",		"0-0048"),
+ 	REGULATOR_SUPPLY("hdmi_lvl_tsl",	"hdmi_msm.0"),
+ 	REGULATOR_SUPPLY("vdd-io",		"spi0.2"),
++	REGULATOR_SUPPLY("dsi1_vddio",      "mipi_dsi.1"),
++	REGULATOR_SUPPLY("dsi_pll_vddio",   "mdp.0"),
++
+ };
+ VREG_CONSUMERS(S5) = {
+ 	REGULATOR_SUPPLY("8921_s5",		NULL),
+@@ -225,8 +228,10 @@ VREG_CONSUMERS(LVS7) = {
+ 	REGULATOR_SUPPLY("8921_lvs7",		NULL),
+ 	REGULATOR_SUPPLY("pll_vdd",		"pil_riva"),
+ 	REGULATOR_SUPPLY("lvds_vdda",		"lvds.0"),
++#if 0
+ 	REGULATOR_SUPPLY("dsi1_vddio",		"mipi_dsi.1"),
+ 	REGULATOR_SUPPLY("dsi_pll_vddio",	"mdp.0"),
++#endif
+ 	REGULATOR_SUPPLY("hdmi_vdda",		"hdmi_msm.0"),
+ };
+ VREG_CONSUMERS(USB_OTG) = {
+diff --git a/drivers/video/msm/Kconfig b/drivers/video/msm/Kconfig
+index a676ed7..8dfa2034 100644
+--- a/drivers/video/msm/Kconfig
++++ b/drivers/video/msm/Kconfig
+@@ -189,6 +189,11 @@ config FB_MSM_MIPI_DSI_RENESAS
+ 	select FB_MSM_MIPI_DSI
+ 	default n
+ 
++config FB_MSM_MIPI_DSI_JDI
++	bool
++	select FB_MSM_MIPI_DSI
++	default n
++
+ config FB_MSM_MIPI_DSI_TRULY
+ 	bool
+ 	select FB_MSM_MIPI_DSI
+@@ -356,6 +361,11 @@ config FB_MSM_MIPI_ORISE_CMD_720P_PT
+ 	select FB_MSM_MIPI_DSI_ORISE
+ 	default n
+ 
++config FB_MSM_MIPI_JDI_VIDEO_FHD_PT
++	bool
++	select FB_MSM_MIPI_DSI_JDI
++	default n
++
+ config FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT
+ 	bool
+ 	select FB_MSM_MIPI_DSI_RENESAS
+@@ -561,6 +571,7 @@ config FB_MSM_MIPI_PANEL_DETECT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WSVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WUXGA
++	select FB_MSM_MIPI_JDI_VIDEO_FHD_PT
+ 	select FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT
+ 	select FB_MSM_MIPI_RENESAS_CMD_FWVGA_PT
+ 	select FB_MSM_MIPI_TRULY_VIDEO_WVGA_PT
+@@ -606,6 +617,7 @@ config FB_MSM_LCDC_MIPI_PANEL_AUTO_DETECT
+ 	select FB_MSM_LCDC_TOSHIBA_FWVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WSVGA_PT
++	select FB_MSM_MIPI_JDI_VIDEO_FHD_PT
+ 	select FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT
+ 	select FB_MSM_MIPI_RENESAS_CMD_FWVGA_PT
+ 	select FB_MSM_MIPI_NOVATEK_VIDEO_QHD_PT
+@@ -628,6 +640,7 @@ config FB_MSM_LVDS_MIPI_PANEL_DETECT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WSVGA_PT
+ 	select FB_MSM_MIPI_TOSHIBA_VIDEO_WUXGA
++	select FB_MSM_MIPI_JDI_VIDEO_FHD_PT
+ 	select FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT
+ 	select FB_MSM_MIPI_RENESAS_CMD_FWVGA_PT
+ 	select FB_MSM_MIPI_TRULY_VIDEO_WVGA_PT
+@@ -705,6 +718,10 @@ config FB_MSM_MIPI_ORISE_VIDEO_720P_PT_PANEL
+ config FB_MSM_MIPI_ORISE_CMD_720P_PT_PANEL
+ 	bool "MIPI ORISE CMD 720P PT Panel"
+ 	select FB_MSM_MIPI_ORISE_CMD_720P_PT
++   
++config FB_MSM_MIPI_JDI_VIDEO_FHD_PT_PANEL
++   bool "MIPI JDI ACX450FHD PT Panel"
++   select FB_MSM_MIPI_JDI_VIDEO_FHD_PT
+ 
+ config FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT_PANEL
+ 	bool "MIPI Renesas Video FWVGA PT Panel"
+diff --git a/drivers/video/msm/Makefile b/drivers/video/msm/Makefile
+index ac9d590..a4b2d79 100644
+--- a/drivers/video/msm/Makefile
++++ b/drivers/video/msm/Makefile
+@@ -79,6 +79,7 @@ obj-$(CONFIG_FB_MSM_MIPI_DSI_TOSHIBA) += mipi_toshiba.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_NOVATEK) += mipi_novatek.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_ORISE) += mipi_orise.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_RENESAS) += mipi_renesas.o
++obj-$(CONFIG_FB_MSM_MIPI_DSI_JDI) += mipi_jdi_acx450.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_TRULY) += mipi_truly.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_NT35510) += mipi_NT35510.o
+ obj-$(CONFIG_FB_MSM_MIPI_DSI_NT35516) += mipi_truly_tft540960_1_e.o
+@@ -124,6 +125,7 @@ obj-y += mipi_toshiba_video_wvga_pt.o mipi_toshiba_video_wsvga_pt.o mipi_toshiba
+ obj-y += mipi_novatek_video_qhd_pt.o mipi_novatek_cmd_qhd_pt.o
+ obj-y += mipi_orise_video_720p_pt.o mipi_orise_cmd_720p_pt.o
+ obj-y += mipi_renesas_video_fwvga_pt.o mipi_renesas_cmd_fwvga_pt.o
++obj-y += mipi_jdi_acx450_video_fhd_pt.o
+ obj-y += mipi_NT35510_video_wvga_pt.o mipi_NT35510_cmd_wvga_pt.o
+ obj-y += mipi_truly_tft540960_1_e_video_qhd_pt.o mipi_truly_tft540960_1_e_cmd_qhd_pt.o
+ obj-y += mipi_NT35590_cmd_720p_pt.o mipi_NT35590_video_720p_pt.o
+@@ -139,6 +141,7 @@ obj-$(CONFIG_FB_MSM_MIPI_ORISE_VIDEO_720P_PT) += mipi_orise_video_720p_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_ORISE_CMD_720P_PT) += mipi_orise_cmd_720p_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_NOVATEK_CMD_QHD_PT) += mipi_novatek_cmd_qhd_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT) += mipi_renesas_video_fwvga_pt.o
++obj-$(CONFIG_FB_MSM_MIPI_JDI_VIDEO_FHD_PT) += mipi_jdi_acx450_video_fhd_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_RENESAS_CMD_FWVGA_PT) += mipi_renesas_cmd_fwvga_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_RENESAS_VIDEO_FWVGA_PT) += mipi_renesas_video_fwvga_pt.o
+ obj-$(CONFIG_FB_MSM_MIPI_TRULY_VIDEO_WVGA_PT) += mipi_truly_video_wvga_pt.o
+diff --git a/drivers/video/msm/mipi_jdi_acx450.c b/drivers/video/msm/mipi_jdi_acx450.c
+new file mode 100644
+index 0000000..29c6438
+--- /dev/null
++++ b/drivers/video/msm/mipi_jdi_acx450.c
+@@ -0,0 +1,192 @@
++/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "msm_fb.h"
++#include "mipi_dsi.h"
++#include "mipi_jdi_acx450.h"
++#include <mach/socinfo.h>
++
++static struct msm_panel_common_pdata *mipi_jdi_acx450_pdata;
++
++static struct dsi_buf jdi_acx450_tx_buf;
++static struct dsi_buf jdi_acx450_rx_buf;
++
++static int mipi_jdi_acx450_lcd_init(void);
++
++#if 0
++      qcom,mdss-dsi-on-command = [
++         15 01 00 00 00 00 02 55 00
++         15 01 00 00 00 00 02 53 2C
++         15 01 00 00 00 00 02 35 00
++         05 01 00 00 78 00 02 29 00
++         05 01 00 00 78 00 02 11 00
++         ];
++      qcom,mdss-dsi-off-command = [
++         05 01 00 00 02 00 02 28 00
++         05 01 00 00 79 00 02 10 00
++         ];
++#endif
++
++static char config_CMD_01[ 2 ] = { 0x55, 0x00 }; 
++static char config_CMD_02[ 2 ] = { 0x53, 0x2C }; 
++static char config_CMD_03[ 2 ] = { 0x35, 0x00 }; 
++static char config_CMD_04[ 2 ] = { 0x29, 0x00 }; 
++static char config_CMD_05[ 2 ] = { 0x11, 0x00 }; 
++
++static struct dsi_cmd_desc jdi_acx450_display_on_cmds[] = {
++   { 0x15, 0x01, 0x00, 0x00, 0x00, 0x02, config_CMD_01 },
++   { 0x15, 0x01, 0x00, 0x00, 0x00, 0x02, config_CMD_02 },
++   { 0x15, 0x01, 0x00, 0x00, 0x00, 0x02, config_CMD_03 },
++   { 0x05, 0x01, 0x00, 0x00, 0x78, 0x02, config_CMD_04 },
++   { 0x05, 0x01, 0x00, 0x00, 0x78, 0x02, config_CMD_05 }
++};
++
++
++static char config_CMD_10[ 2 ] = { 0x28, 0x00 }; 
++static char config_CMD_11[ 2 ] = { 0x10, 0x2C }; 
++static struct dsi_cmd_desc jdi_acx450_display_off_cmds[] = {
++   { 0x05, 0x01, 0x00, 0x00, 0x02, 0x02, config_CMD_10 },
++   { 0x05, 0x01, 0x00, 0x00, 0x79, 0x02, config_CMD_11 },
++};
++
++
++
++static int mipi_jdi_acx450_lcd_on(struct platform_device *pdev)
++{
++	struct msm_fb_data_type *mfd;
++	struct mipi_panel_info *mipi;
++
++	mfd = platform_get_drvdata(pdev);
++	mipi  = &mfd->panel_info.mipi;
++
++   pr_err( "mipi_jdi_acx450_lcd_on()\n" );
++
++	if (!mfd)
++		return -ENODEV;
++	if (mfd->key != MFD_KEY)
++		return -EINVAL;
++
++	// Wyngnut - mipi_set_tx_power_mode(1);
++	mipi_dsi_cmds_tx(&jdi_acx450_tx_buf, jdi_acx450_display_on_cmds,
++			ARRAY_SIZE(jdi_acx450_display_on_cmds));
++	// Wyngnut - mipi_set_tx_power_mode(0);
++
++	return 0;
++}
++
++static int mipi_jdi_acx450_lcd_off(struct platform_device *pdev)
++{
++	struct msm_fb_data_type *mfd;
++
++   pr_err( "mipi_jdi_acx450_lcd_off()\n" );
++
++	mfd = platform_get_drvdata(pdev);
++
++	if (!mfd)
++		return -ENODEV;
++	if (mfd->key != MFD_KEY)
++		return -EINVAL;
++
++	mipi_dsi_cmds_tx(&jdi_acx450_tx_buf, jdi_acx450_display_off_cmds,
++			ARRAY_SIZE(jdi_acx450_display_off_cmds));
++
++	return 0;
++}
++
++static int __devinit mipi_jdi_acx450_lcd_probe(struct platform_device *pdev)
++{
++   pr_err( "mipi_jdi_acx450_lcd_probe()\n" );
++	if (pdev->id == 0) {
++		mipi_jdi_acx450_pdata = pdev->dev.platform_data;
++		return 0;
++	}
++
++	msm_fb_add_device(pdev);
++
++	return 0;
++}
++
++static void mipi_jdi_acx450_set_backlight(struct msm_fb_data_type *mfd)
++{
++	int ret = -EPERM;
++	int bl_level;
++
++	bl_level = mfd->bl_level;
++
++	if (mipi_jdi_acx450_pdata && mipi_jdi_acx450_pdata->pmic_backlight)
++		ret = mipi_jdi_acx450_pdata->pmic_backlight(bl_level);
++	else
++		pr_err("%s(): Backlight level set failed", __func__);
++}
++
++static struct platform_driver this_driver = {
++	.probe  = mipi_jdi_acx450_lcd_probe,
++	.driver = {
++		.name   = "mipi_video_jdi_bridge",
++	},
++};
++
++static struct msm_fb_panel_data jdi_acx450_panel_data = {
++	.on		= mipi_jdi_acx450_lcd_on,
++	.off	= mipi_jdi_acx450_lcd_off,
++	.set_backlight = mipi_jdi_acx450_set_backlight,
++};
++
++int mipi_jdi_acx450_device_register(struct msm_panel_info *pinfo,
++					u32 channel, u32 panel)
++{
++	struct platform_device *pdev = NULL;
++	int ret;
++
++   pr_err( "mipi_jdi_acx450_device_register()\n" );
++
++	ret = mipi_jdi_acx450_lcd_init();
++	if (ret) {
++		pr_err("mipi_jdi_acx450_lcd_init() failed with ret %u\n", ret);
++		return ret;
++	}
++
++	pdev = platform_device_alloc("mipi_video_jdi_bridge", (panel << 8)|channel);
++	if (!pdev)
++		return -ENOMEM;
++
++	jdi_acx450_panel_data.panel_info = *pinfo;
++
++	ret = platform_device_add_data(pdev, &jdi_acx450_panel_data,
++		sizeof(jdi_acx450_panel_data));
++	if (ret) {
++		pr_err("%s: platform_device_add_data failed!\n", __func__);
++		goto err_device_put;
++	}
++
++	ret = platform_device_add(pdev);
++	if (ret) {
++		pr_err("%s: platform_device_register failed!\n", __func__);
++		goto err_device_put;
++	}
++
++   pr_err( "mipi_jdi_acx450_device_register() Successful\n" );
++
++	return 0;
++
++err_device_put:
++	platform_device_put(pdev);
++	return ret;
++}
++
++static int mipi_jdi_acx450_lcd_init(void)
++{
++	mipi_dsi_buf_alloc(&jdi_acx450_tx_buf, DSI_BUF_SIZE);
++	mipi_dsi_buf_alloc(&jdi_acx450_rx_buf, DSI_BUF_SIZE);
++
++	return platform_driver_register(&this_driver);
++}
+diff --git a/drivers/video/msm/mipi_jdi_acx450.h b/drivers/video/msm/mipi_jdi_acx450.h
+new file mode 100644
+index 0000000..4032364
+--- /dev/null
++++ b/drivers/video/msm/mipi_jdi_acx450.h
+@@ -0,0 +1,19 @@
++/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#ifndef MIPI_JDI_ACX450_H
++#define MIPI_JDI_ACX450_H
++
++int mipi_jdi_acx450_device_register(struct msm_panel_info *pinfo,
++					u32 channel, u32 panel);
++
++#endif  /* MIPI_JDI_ACX450_H */
+diff --git a/drivers/video/msm/mipi_jdi_acx450_video_fhd_pt.c b/drivers/video/msm/mipi_jdi_acx450_video_fhd_pt.c
+new file mode 100644
+index 0000000..00d44ba
+--- /dev/null
++++ b/drivers/video/msm/mipi_jdi_acx450_video_fhd_pt.c
+@@ -0,0 +1,179 @@
++/* Copyright (c) 2011-2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++#include "msm_fb.h"
++#include "mipi_dsi.h"
++#include "mipi_jdi_acx450.h"
++
++static struct msm_panel_info pinfo;
++
++static struct mipi_dsi_phy_ctrl dsi_video_mode_phy_db = {
++   /* DSIPHY_REGULATOR_CTRL */
++   .regulator = {0x03, 0x0a, 0x04, 0x00, 0x20}, /* common 8960 */
++   /* DSIPHY_CTRL */
++   .ctrl = {0x5f, 0x00, 0x00, 0x10},            /* common 8960 */
++   /* DSIPHY_STRENGTH_CTRL */
++   .strength = {0xff, 0x00, 0x06, 0x00},        /* common 8960 */
++   /* DSIPHY_TIMING_CTRL */                     /* panel specific */
++   .timing = { 0xE1, 0x37, 0x25, 0x00, 0x67, 0x6D, 0x2A, 0x3A, 0x3F, 0x03, 0x04 },
++   // New .timing = { 0xE4, 0x99, 0x39, 0x00, 0x3F, 0xA5, 0x3A, 0x9B, 0x3F, 0x03, 0x04 },
++   /* DSIPHY_PLL_CTRL */
++   .pll = { 0x00,                               /* common 8960 */
++   /* VCO */
++   0xa2, 0x01, 0x19,                            /* Panel Specific */
++   0x00, 0x50, 0x48, 0x63,
++   0x77, 0x88, 0x99,                            /* Auto update by dsi-mipi driver */
++   0x00, 0x14, 0x03, 0x00, 0x02,                /* common 8960 */
++   0x00, 0x20, 0x00, 0x01 },                    /* common 8960 */
++};
++
++static int __init mipi_video_jdi_fnd_pt_init(void)
++{
++	int ret;
++
++   pr_err( "mipi_video_jdi_fnd_pt_init()\n" ); 
++
++	if (msm_fb_detect_client("mipi_video_jdi_fhd"))
++		return 0;
++
++	pinfo.xres = 1080;
++	pinfo.yres = 1920;
++	pinfo.type = MIPI_VIDEO_PANEL;
++	pinfo.pdest = DISPLAY_1;
++	pinfo.wait_cycle = 0;
++	pinfo.bpp = 24;
++
++	pinfo.lcdc.h_back_porch = 64;
++	pinfo.lcdc.h_front_porch = 96;
++	pinfo.lcdc.h_pulse_width = 16;
++	pinfo.lcdc.hsync_skew = 0;
++
++	pinfo.lcdc.v_front_porch = 3;
++	pinfo.lcdc.v_pulse_width = 1;
++   pinfo.lcdc.v_back_porch = 4;
++
++	pinfo.lcdc.border_clr = 0;	/* blk */
++	pinfo.lcdc.underflow_clr = 0xff;	/* blue */
++	pinfo.bl_max = 4095;
++	pinfo.bl_min = 1;
++	pinfo.fb_num = 2;
++
++	pinfo.mipi.mode = DSI_VIDEO_MODE;
++
++	pinfo.mipi.pulse_mode_hsa_he = FALSE;
++	pinfo.mipi.hfp_power_stop = FALSE;
++	pinfo.mipi.hbp_power_stop = FALSE;
++	pinfo.mipi.hsa_power_stop = FALSE;
++
++	pinfo.mipi.eof_bllp_power_stop = TRUE;
++	pinfo.mipi.bllp_power_stop = TRUE;
++	pinfo.mipi.traffic_mode = DSI_NON_BURST_SYNCH_PULSE;
++	pinfo.mipi.dst_format = DSI_VIDEO_DST_FORMAT_RGB888;
++	pinfo.mipi.vc = 0;
++	pinfo.mipi.rgb_swap = DSI_RGB_SWAP_BGR;
++	pinfo.mipi.data_lane0 = TRUE;
++	pinfo.mipi.data_lane1 = TRUE;
++	pinfo.mipi.data_lane2 = TRUE;
++	pinfo.mipi.data_lane3 = TRUE;
++   pinfo.mipi.esc_byte_ratio = 6;
++	pinfo.mipi.t_clk_post = 0x04;
++	pinfo.mipi.t_clk_pre = 0x1b;
++	pinfo.mipi.stream = 0; /* dma_p */
++	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
++	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
++	pinfo.mipi.frame_rate = 60;
++	pinfo.mipi.dsi_phy_db = &dsi_video_mode_phy_db;
++
++	ret = mipi_jdi_acx450_device_register(&pinfo, MIPI_DSI_PRIM,
++						MIPI_DSI_PANEL_FWVGA_PT);
++	if (ret)
++		pr_err("%s: failed to register device!\n", __func__);
++
++	return ret;
++}
++
++module_init(mipi_video_jdi_fnd_pt_init);
++
++
++
++#if 0
++/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++/*---------------------------------------------------------------------------
++ * This file is autogenerated file using gcdb parser. Please do not edit it.
++ * Update input XML file to add a new entry or update variable in this file
++ * VERSION = "1.0"
++ *---------------------------------------------------------------------------*/
++&mdss_mdp {
++	dsi_jdi_1080_vid: qcom,mdss_dsi_jdi_1080p_video {
++		qcom,mdss-dsi-panel-name = "jdi 1080p video mode dsi panel";
++		qcom,mdss-dsi-panel-controller = <&mdss_dsi0>;
++		qcom,mdss-dsi-panel-type = "dsi_video_mode";
++		qcom,mdss-dsi-panel-destination = "display_1";
++		qcom,mdss-dsi-panel-framerate = <60>;
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-dsi-panel-width = <1080>;
++		qcom,mdss-dsi-panel-height = <1920>;
++		qcom,mdss-dsi-h-front-porch = <96>;
++		qcom,mdss-dsi-h-back-porch = <64>;
++		qcom,mdss-dsi-h-pulse-width = <16>;
++		qcom,mdss-dsi-h-sync-skew = <0>;
++		qcom,mdss-dsi-v-back-porch = <4>;
++		qcom,mdss-dsi-v-front-porch = <3>;
++		qcom,mdss-dsi-v-pulse-width = <1>;
++		qcom,mdss-dsi-h-left-border = <0>;
++		qcom,mdss-dsi-h-right-border = <0>;
++		qcom,mdss-dsi-v-top-border = <0>;
++		qcom,mdss-dsi-v-bottom-border = <0>;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-underflow-color = <0xff>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-dsi-on-command = [15 01 00 00 00 00 02 55 00
++			15 01 00 00 00 00 02 53 2C
++			15 01 00 00 00 00 02 35 00
++			05 01 00 00 78 00 02 29 00
++			05 01 00 00 78 00 02 11 00];
++		qcom,mdss-dsi-off-command = [05 01 00 00 02 00 02 28 00
++				 05 01 00 00 79 00 02 10 00];
++		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
++		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
++		qcom,mdss-dsi-h-sync-pulse = <0>;
++		qcom,mdss-dsi-traffic-mode = "burst_mode";
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-dsi-lane-1-state;
++		qcom,mdss-dsi-lane-2-state;
++		qcom,mdss-dsi-lane-3-state;
++		qcom,mdss-dsi-panel-timings = [e1 37 25 00 67 6b 2a 3a 59 03 04 00];
++		qcom,mdss-dsi-t-clk-post = <0x04>;
++		qcom,mdss-dsi-t-clk-pre = <0x1b>;
++		qcom,mdss-dsi-bl-min-level = <1>;
++		qcom,mdss-dsi-bl-max-level = <4095>;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
++		qcom,mdss-dsi-reset-sequence = <1 20>, <0 200>, <1 20>;
++	};
++};
++#endif
+diff --git a/drivers/video/msm/msm_fb.c b/drivers/video/msm/msm_fb.c
+index b1d1f35..2b18fad 100644
+--- a/drivers/video/msm/msm_fb.c
++++ b/drivers/video/msm/msm_fb.c
+@@ -995,7 +995,9 @@ static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 				mfd->panel_power_on = TRUE;
+ 				up(&mfd->sem);
+ 				mfd->panel_driver_on = mfd->op_enable;
+-			}
++			} 
++		} else {
++			msm_fb_set_backlight(mfd, 1);
+ 		}
+ 		break;
+ 
+@@ -1004,7 +1006,7 @@ static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
+ 	case FB_BLANK_NORMAL:
+ 	case FB_BLANK_POWERDOWN:
+ 	default:
+-                return 0;
++		return 0;
+ 		if (mfd->panel_power_on) {
+ 			int curr_pwr_state;
+ 
