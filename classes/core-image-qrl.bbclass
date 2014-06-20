@@ -130,6 +130,7 @@ rename_images() {
     rm -f ${DEPLOY_DIR_IMAGE}/userdata-${PN}.img
     install -d ${DEPLOY_DIR_IMAGE}/out
     cp ${DEPLOY_DIR_IMAGE}/${IMAGE_LINK_NAME}.ext4 ${DEPLOY_DIR_IMAGE}/out/userdata-${PN}.img
+    ln -s userdata-${PN}.img ${DEPLOY_DIR_IMAGE}/out/userdata.img
 }
 
 IMAGE_POSTPROCESS_COMMAND = "rename_images"
