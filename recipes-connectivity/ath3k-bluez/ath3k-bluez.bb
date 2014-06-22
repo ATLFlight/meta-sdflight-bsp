@@ -24,7 +24,7 @@ do_install_append() {
 	# install -m 0644 ${S}/input/input.conf ${D}/${sysconfdir}/bluetooth/
 	# at_console doesn't really work with the current state of OE, so punch some more holes so people can actually use BT
 	# install -m 0644 ${WORKDIR}/bluetooth.conf ${D}/${sysconfdir}/dbus-1/system.d/
-	install -m 0644 ${WORKDIR}/bt.init.sh ${D}/usr/bin/
+	install -m 0755 ${WORKDIR}/bt.init.sh ${D}/usr/bin/
 }
 
 addtask do_copy_ath3k_files after do_unpack before do_patch
