@@ -1,0 +1,403 @@
+From 45bd2530585e9d95a9063e9412cd4d43aff1626f Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Thu, 8 May 2014 13:10:07 -0700
+Subject: [PATCH] Camera interface configuration
+
+---
+ arch/arm/mach-msm/board-8064-camera.c    | 37 +++++++++++++++++++++++++++++---
+ arch/arm/mach-msm/board-8064-gpiomux.c   | 12 +++++++++++
+ arch/arm/mach-msm/board-8064-pmic.c      |  2 ++
+ arch/arm/mach-msm/board-8064-regulator.c | 12 ++++++++++-
+ arch/arm/mach-msm/board-8064.c           | 30 ++++++++++++++++++--------
+ arch/arm/mach-msm/devices-8064.c         |  4 ++++
+ 6 files changed, 84 insertions(+), 13 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-camera.c b/arch/arm/mach-msm/board-8064-camera.c
+index da395da..b0d9d34 100644
+--- a/arch/arm/mach-msm/board-8064-camera.c
++++ b/arch/arm/mach-msm/board-8064-camera.c
+@@ -112,6 +112,7 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &cam_settings[0],
+ 		},
+ 	},
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	{
+ 		.gpio = 2,
+ 		.settings = {
+@@ -119,6 +120,7 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &cam_settings[0],
+ 		},
+ 	},
++#endif
+ 	{
+ 		.gpio = 3,
+ 		.settings = {
+@@ -147,6 +149,7 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &cam_settings[0],
+ 		},
+ 	},
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	{
+ 		.gpio = 107,
+ 		.settings = {
+@@ -154,6 +157,8 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &cam_settings[0],
+ 		},
+ 	},
++#endif
++#ifdef CONFIG_CAMERA_I2C_GSBI4
+ 	{
+ 		.gpio = 10,
+ 		.settings = {
+@@ -182,6 +187,7 @@ static struct msm_gpiomux_config apq8064_cam_common_configs[] = {
+ 			[GPIOMUX_SUSPENDED] = &cam_settings[8],
+ 		},
+ 	},
++#endif
+ };
+ 
+ 
+@@ -447,6 +453,13 @@ static struct gpio apq8064_common_cam_gpio[] = {
+ 
+ static struct gpio apq8064_back_cam_gpio[] = {
+ 	{5, GPIOF_DIR_IN, "CAMIF_MCLK"},
++#ifdef CONFIG_CAMERA_I2C_GSBI3
++	{8, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
++	{9, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
++#else
++	{12, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
++	{13, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
++#endif
+ 	{CAML_RSTN, GPIOF_DIR_OUT, "CAM_RESET"},
+ };
+ 
+@@ -468,8 +481,13 @@ static struct msm_camera_gpio_conf apq8064_back_cam_gpio_conf = {
+ 
+ static struct gpio apq8064_front_cam_gpio[] = {
+ 	{4, GPIOF_DIR_IN, "CAMIF_MCLK"},
++#ifdef CONFIG_CAMERA_I2C_GSBI3
++	{8, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
++	{9, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
++#else
+ 	{12, GPIOF_DIR_IN, "CAMIF_I2C_DATA"},
+ 	{13, GPIOF_DIR_IN, "CAMIF_I2C_CLK"},
++#endif
+ 	{CAMR_RSTN, GPIOF_DIR_OUT, "CAM_RESET"},
+ };
+ 
+@@ -490,9 +508,14 @@ static struct msm_camera_gpio_conf apq8064_front_cam_gpio_conf = {
+ };
+ 
+ static struct msm_camera_i2c_conf apq8064_back_cam_i2c_conf = {
++#ifdef CONFIG_CAMERA_I2C_GSBI3
++	.use_i2c_mux = 0,
++#else
+ 	.use_i2c_mux = 1,
+ 	.mux_dev = &msm8960_device_i2c_mux_gsbi4,
+-	.i2c_mux_mode = MODE_L,
++	/*.i2c_mux_mode = MODE_L,*/
++	.i2c_mux_mode = MODE_R, /* For SOM only gpio 12,13 are under I2C */
++#endif
+ };
+ 
+ static struct i2c_board_info msm_act_main_cam_i2c_info = {
+@@ -521,9 +544,14 @@ static struct msm_actuator_info msm_act_main_cam_1_info = {
+ 
+ 
+ static struct msm_camera_i2c_conf apq8064_front_cam_i2c_conf = {
++#ifdef CONFIG_CAMERA_I2C_GSBI3
++	.use_i2c_mux = 0,
++#else
+ 	.use_i2c_mux = 1,
+ 	.mux_dev = &msm8960_device_i2c_mux_gsbi4,
+-	.i2c_mux_mode = MODE_L,
++	/*.i2c_mux_mode = MODE_L,*/
++	.i2c_mux_mode = MODE_R, /* For SOM only gpio 12,13 are under I2C */
++#endif
+ };
+ 
+ static struct msm_camera_sensor_flash_data flash_imx135 = {
+@@ -739,8 +767,11 @@ void __init apq8064_init_cam(void)
+ 		sensor_board_info_imx074.mount_angle = 180;
+ 
+ 	platform_device_register(&msm_camera_server);
+-	if (socinfo_get_platform_subtype() != PLATFORM_SUBTYPE_SGLTE2)
++	if (socinfo_get_platform_subtype() != PLATFORM_SUBTYPE_SGLTE2) {
++#ifdef CONFIG_CAMERA_I2C_GSBI4
+ 		platform_device_register(&msm8960_device_i2c_mux_gsbi4);
++#endif
++	}
+ 	platform_device_register(&msm8960_device_csiphy0);
+ 	platform_device_register(&msm8960_device_csiphy1);
+ 	platform_device_register(&msm8960_device_csid0);
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 9d0be58..a11ed2b 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -210,6 +210,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[7],
+ 		}
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI4
+ 	{
+ 		.gpio = 12,
+ 		.settings = {
+@@ -217,6 +218,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[6],
+ 		}
+ 	},
++#endif
+ 	{
+ 		.gpio = 18,
+ 		.settings = {
+@@ -224,6 +226,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[9],
+ 		}
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI4
+ 	{
+ 		.gpio = 11,
+ 		.settings = {
+@@ -238,6 +241,8 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[9],
+ 		}
+ 	},
++#endif
++#ifndef CONFIG_CAMERA_I2C_GSBI3
+ 	{
+ 		.gpio = 9,
+ 		.settings = {
+@@ -245,6 +250,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[2],
+ 		}
+ 	},
++#endif
+ 	{
+ 		.gpio = 26,
+ 		.settings = {
+@@ -252,6 +258,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[1],
+ 		}
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI3
+ 	{
+ 		.gpio = 8,
+ 		.settings = {
+@@ -259,6 +266,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[3],
+ 		}
+ 	},
++#endif
+ 	{
+ 		.gpio = 7,
+ 		.settings = {
+@@ -301,6 +309,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[3],
+ 		}
+ 	},
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	{
+ 		.gpio = 5,
+ 		.settings = {
+@@ -322,6 +331,7 @@ struct msm_gpiomux_config vcap_configs[] = {
+ 			[GPIOMUX_ACTIVE] =		&gpio_vcap_config[6],
+ 		}
+ 	},
++#endif
+ 	{
+ 		.gpio = 2,
+ 		.settings = {
+@@ -675,6 +685,7 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
+ 		},
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI4
+ 	{
+ 		.gpio      = 12,		/* GSBI4 QUP I2C_CLK */
+ 		.settings = {
+@@ -689,6 +700,7 @@ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
+ 		},
+ 	},
++#endif
+ 	{
+ 		.gpio      = 14,		/* GSBI6 UART TX */
+ 		.settings = {
+diff --git a/arch/arm/mach-msm/board-8064-pmic.c b/arch/arm/mach-msm/board-8064-pmic.c
+index 9958464..bc2565d 100644
+--- a/arch/arm/mach-msm/board-8064-pmic.c
++++ b/arch/arm/mach-msm/board-8064-pmic.c
+@@ -133,6 +133,8 @@ static struct pm8xxx_gpio_init pm8921_gpios[] __initdata = {
+ 	PM8921_GPIO_OUTPUT(4, 0, HIGH),               /* BALL_GPIO_22 */
+ 	PM8921_GPIO_OUTPUT(18, 0, HIGH),              /* BALL_GPIO_23 */
+ 	PM8921_GPIO_OUTPUT(19, 0, HIGH),              /* BALL_GPIO_24 */
++	PM8921_GPIO_OUTPUT(28, 1, MED),               /* CAM1_RST_N */
++	PM8921_GPIO_OUTPUT(31, 1, MED),               /* CAM1_STANDBY_N */
+ #endif
+ 
+ };
+diff --git a/arch/arm/mach-msm/board-8064-regulator.c b/arch/arm/mach-msm/board-8064-regulator.c
+index eafe1be..c447ef1 100644
+--- a/arch/arm/mach-msm/board-8064-regulator.c
++++ b/arch/arm/mach-msm/board-8064-regulator.c
+@@ -60,12 +60,14 @@ VREG_CONSUMERS(L7) = {
+ };
+ VREG_CONSUMERS(L8) = {
+ 	REGULATOR_SUPPLY("8921_l8",		NULL),
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	REGULATOR_SUPPLY("cam_vana",		"4-001a"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0010"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0048"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-006c"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0034"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0020"),
++#endif
+ };
+ VREG_CONSUMERS(L9) = {
+ 	REGULATOR_SUPPLY("8921_l9",		NULL),
+@@ -78,6 +80,14 @@ VREG_CONSUMERS(L10) = {
+ VREG_CONSUMERS(L11) = {
+ 	REGULATOR_SUPPLY("8921_l11",		NULL),
+ 	REGULATOR_SUPPLY("dsi1_avdd",		"mipi_dsi.1"),
++#ifdef CONFIG_MACH_APQ8064_SOM
++	REGULATOR_SUPPLY("cam_vana",		"4-001a"),
++	REGULATOR_SUPPLY("cam_vana",		"4-0010"),
++	REGULATOR_SUPPLY("cam_vana",		"4-0048"),
++	REGULATOR_SUPPLY("cam_vana",		"4-006c"),
++	REGULATOR_SUPPLY("cam_vana",		"4-0034"),
++	REGULATOR_SUPPLY("cam_vana",		"4-0020"),
++#endif
+ };
+ VREG_CONSUMERS(L12) = {
+ 	REGULATOR_SUPPLY("cam_vdig",		"4-001a"),
+@@ -668,7 +678,7 @@ apq8064_rpm_regulator_init_data[] __devinitdata = {
+ 	RPM_LDO(L7,  0, 1, 0, 1850000, 2950000, NULL,          0,     0),
+ 	RPM_LDO(L8,  0, 1, 0, 2800000, 2800000, NULL,          0,     0),
+ 	RPM_LDO(L9,  0, 1, 0, 3000000, 3000000, NULL,          0,     0),
+-	RPM_LDO(L10, 0, 1, 0, 2900000, 2900000, NULL,          0,     0),
++	RPM_LDO(L10, 1, 1, 0, 2900000, 2900000, NULL,          0,     0),
+ 	RPM_LDO(L11, 0, 1, 0, 3000000, 3000000, NULL,          0,     0),
+ 	RPM_LDO(L12, 0, 1, 0, 1200000, 1200000, "8921_s4",     0,     0),
+ 	RPM_LDO(L13, 0, 0, 0, 2220000, 2220000, NULL,          0,     0),
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 1443fea..7f94c2b 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2405,7 +2405,9 @@ static struct platform_device gpio_ir_recv_pdev = {
+ 
+ static struct platform_device *common_not_mpq_devices[] __initdata = {
+ 	&apq8064_device_qup_i2c_gsbi1,
++ #ifndef CONFIG_CAMERA_I2C_GSBI3
+ 	&apq8064_device_qup_i2c_gsbi3,
++ #endif
+ };
+ 
+ static struct platform_device *early_common_devices[] __initdata = {
+@@ -2733,7 +2735,7 @@ static struct msm_i2c_platform_data apq8064_i2c_qup_gsbi1_pdata = {
+ };
+ 
+ static struct msm_i2c_platform_data apq8064_i2c_qup_gsbi3_pdata = {
+-	.clk_freq = 384000,
++	.clk_freq = 100000,
+ 	.src_clk_rate = 24000000,
+ };
+ 
+@@ -3192,6 +3194,12 @@ static void __init register_i2c_devices(void)
+ 	int i;
+ 
+ #ifdef CONFIG_MSM_CAMERA
++	struct i2c_registry apq8064_som_camera_i2c_devices = {
++		I2C_APQ_SOM,
++		APQ_8064_GSBI3_QUP_I2C_BUS_ID,
++		apq8064_camera_board_info.board_info,
++		apq8064_camera_board_info.num_i2c_board_info,
++	};
+ 	struct i2c_registry apq8064_camera_i2c_devices = {
+ 		I2C_SURF | I2C_FFA | I2C_LIQUID | I2C_RUMI,
+ 		APQ_8064_GSBI4_QUP_I2C_BUS_ID,
+@@ -3221,13 +3229,16 @@ static void __init register_i2c_devices(void)
+ 						apq8064_i2c_devices[i].len);
+ 	}
+ #ifdef CONFIG_MSM_CAMERA
+-	/* SOM: no camera i2c device */
+-	if (!machine_is_apq8064_som()) {
+-		if (apq8064_camera_i2c_devices.machs & mach_mask) {
++	if (machine_is_apq8064_som()) {
++		if (apq8064_som_camera_i2c_devices.machs & mach_mask) {
++			i2c_register_board_info(apq8064_som_camera_i2c_devices.bus,
++				apq8064_som_camera_i2c_devices.info,
++				apq8064_som_camera_i2c_devices.len);
++		} 
++	} else {
+ 			i2c_register_board_info(apq8064_camera_i2c_devices.bus,
+ 				apq8064_camera_i2c_devices.info,
+ 				apq8064_camera_i2c_devices.len);
+-		}
+ 	}
+ #endif
+ 
+@@ -3373,7 +3384,9 @@ static void __init apq8064_common_init(void)
+ 		/* Add GSBI4 I2C Device for non-fusion3 platform */
+ 		if (socinfo_get_platform_subtype() !=
+ 					PLATFORM_SUBTYPE_SGLTE2) {
++#ifndef CONFIG_CAMERA_I2C_GSBI4
+ 			platform_device_register(&apq8064_device_qup_i2c_gsbi4);
++#endif
+ 		}
+ 	}
+ 
+@@ -3494,12 +3507,11 @@ static void __init apq8064_cdp_init(void)
+ 	/* SOM: temp disabled */
+ 	if(!machine_is_apq8064_som()) {
+ 		apq8064_init_gpu();
+-		platform_add_devices(apq8064_footswitch, apq8064_num_footswitch);
+ 	}
++
++	platform_add_devices(apq8064_footswitch, apq8064_num_footswitch);
+ #ifdef CONFIG_MSM_CAMERA
+-	/* SOM: temp disabled */
+-	if(!machine_is_apq8064_som()) 
+-		apq8064_init_cam();
++	apq8064_init_cam();
+ #endif
+ 
+ 	if (machine_is_mpq8064_hrd() || machine_is_mpq8064_dtv()) {
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index 58482d9..04edcbe 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -308,6 +308,7 @@ static struct resource resources_qup_i2c_gsbi3[] = {
+ 		.end	= GSBI3_QUP_IRQ,
+ 		.flags	= IORESOURCE_IRQ,
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI3
+ 	{
+ 		.name	= "i2c_clk",
+ 		.start	= 9,
+@@ -320,6 +321,7 @@ static struct resource resources_qup_i2c_gsbi3[] = {
+ 		.end	= 8,
+ 		.flags	= IORESOURCE_IO,
+ 	},
++#endif
+ };
+ 
+ static struct resource resources_qup_i2c_gsbi1[] = {
+@@ -459,6 +461,7 @@ static struct resource resources_qup_i2c_gsbi4[] = {
+ 		.end	= GSBI4_QUP_IRQ,
+ 		.flags	= IORESOURCE_IRQ,
+ 	},
++#ifndef CONFIG_CAMERA_I2C_GSBI4
+ 	{
+ 		.name	= "i2c_clk",
+ 		.start	= 11,
+@@ -471,6 +474,7 @@ static struct resource resources_qup_i2c_gsbi4[] = {
+ 		.end	= 10,
+ 		.flags	= IORESOURCE_IO,
+ 	},
++#endif
+ };
+ 
+ struct platform_device apq8064_device_qup_i2c_gsbi4 = {
+-- 
+1.8.2.1
+

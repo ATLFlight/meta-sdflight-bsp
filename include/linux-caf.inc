@@ -38,6 +38,12 @@ do_install_append(){
 	if [ -n "${KMETA}" ]; then
 		rm -rf ${STAGING_KERNEL_DIR}/${KMETA}
 	fi
+
+    # linux kernel headers
+    install -d ${STAGING_INCDIR}/linux-headers
+    cd ${WORKDIR}/linux
+    oe_runmake headers_install O=${STAGING_INCDIR}/linux-headers
+
 }
 
 # extra tasks

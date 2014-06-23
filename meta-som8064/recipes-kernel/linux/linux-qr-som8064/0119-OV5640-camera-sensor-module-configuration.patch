@@ -1,0 +1,159 @@
+From 03c0d2e7c238809658279c9fa791daa0637557e2 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Tue, 17 Jun 2014 15:09:20 -0700
+Subject: [PATCH] OV5640 camera sensor module configuration
+
+Change-Id: I6f4f48b1fcaeea2149643c179d8088e3ef2aee05
+---
+ arch/arm/mach-msm/board-8064-camera.c    | 35 ++++++++++++++++++++++++++++++++
+ arch/arm/mach-msm/board-8064-regulator.c |  4 ++++
+ arch/arm/mach-msm/clock-8960.c           |  1 +
+ drivers/media/video/msm/Kconfig          |  4 ++--
+ drivers/media/video/msm/Makefile         |  2 +-
+ drivers/media/video/msm/sensors/Makefile |  1 +
+ 6 files changed, 44 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064-camera.c b/arch/arm/mach-msm/board-8064-camera.c
+index b0d9d34..1a81bd8 100644
+--- a/arch/arm/mach-msm/board-8064-camera.c
++++ b/arch/arm/mach-msm/board-8064-camera.c
+@@ -718,6 +718,35 @@ static struct msm_camera_sensor_info msm_camera_sensor_mt9m114_data = {
+ 	.sensor_type = YUV_SENSOR,
+ };
+ 
++#ifdef CONFIG_OV5640
++static struct msm_camera_sensor_flash_data flash_ov5640 = {
++    .flash_type = MSM_CAMERA_FLASH_NONE
++};
++
++static struct msm_camera_csi_lane_params ov5640_csi_lane_params = {
++    .csi_lane_assign = 0xE4,
++    .csi_lane_mask = 0x3,
++};
++
++static struct msm_camera_sensor_platform_info sensor_board_info_ov5640 =
++{
++    .mount_angle = 0,
++    .gpio_conf = &apq8064_back_cam_gpio_conf,
++    .i2c_conf = &apq8064_back_cam_i2c_conf,
++    .csi_lane_params = &ov5640_csi_lane_params,
++};
++
++static struct msm_camera_sensor_info msm_camera_sensor_ov5640_data = {
++    .sensor_name = "ov5640",
++    .pdata = &msm_camera_csi_device_data[0],
++    .flash_data = &flash_ov5640,
++    .sensor_platform_info = &sensor_board_info_ov5640,
++    .csi_if = 1,
++    .camera_type = BACK_CAMERA_2D,
++    .sensor_type = YUV_SENSOR,
++};
++#endif
++
+ static struct msm_camera_sensor_flash_data flash_ov2720 = {
+ 	.flash_type	= MSM_CAMERA_FLASH_NONE,
+ };
+@@ -799,6 +828,12 @@ static struct i2c_board_info apq8064_camera_i2c_boardinfo[] = {
+ 	I2C_BOARD_INFO("ov2720", 0x6C),
+ 	.platform_data = &msm_camera_sensor_ov2720_data,
+ 	},
++#ifdef CONFIG_OV5640
++	{
++	I2C_BOARD_INFO("ov5640", 0x3c),
++	.platform_data = &msm_camera_sensor_ov5640_data,
++	},
++#endif
+ 	{
+ 	I2C_BOARD_INFO("sc628a", 0x6E),
+ 	},
+diff --git a/arch/arm/mach-msm/board-8064-regulator.c b/arch/arm/mach-msm/board-8064-regulator.c
+index c447ef1..2917403 100644
+--- a/arch/arm/mach-msm/board-8064-regulator.c
++++ b/arch/arm/mach-msm/board-8064-regulator.c
+@@ -87,6 +87,7 @@ VREG_CONSUMERS(L11) = {
+ 	REGULATOR_SUPPLY("cam_vana",		"4-006c"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0034"),
+ 	REGULATOR_SUPPLY("cam_vana",		"4-0020"),
++	REGULATOR_SUPPLY("cam_vana",		"3-003c"),
+ #endif
+ };
+ VREG_CONSUMERS(L12) = {
+@@ -96,6 +97,7 @@ VREG_CONSUMERS(L12) = {
+ 	REGULATOR_SUPPLY("cam_vdig",		"4-006c"),
+ 	REGULATOR_SUPPLY("cam_vdig",		"4-0034"),
+ 	REGULATOR_SUPPLY("cam_vdig",		"4-0020"),
++	REGULATOR_SUPPLY("cam_vdig",		"3-003c"),
+ 	REGULATOR_SUPPLY("8921_l12",		NULL),
+ };
+ VREG_CONSUMERS(L13) = {
+@@ -116,6 +118,7 @@ VREG_CONSUMERS(L16) = {
+ 	REGULATOR_SUPPLY("cam_vaf",		"4-006c"),
+ 	REGULATOR_SUPPLY("cam_vaf",		"4-0034"),
+ 	REGULATOR_SUPPLY("cam_vaf",		"4-0020"),
++	REGULATOR_SUPPLY("cam_vaf",		"3-003c"),
+ };
+ VREG_CONSUMERS(L17) = {
+ 	REGULATOR_SUPPLY("8921_l17",		NULL),
+@@ -226,6 +229,7 @@ VREG_CONSUMERS(LVS5) = {
+ 	REGULATOR_SUPPLY("cam_vio",		"4-006c"),
+ 	REGULATOR_SUPPLY("cam_vio",		"4-0034"),
+ 	REGULATOR_SUPPLY("cam_vio",		"4-0020"),
++	REGULATOR_SUPPLY("cam_vio",		"3-003c"),
+ };
+ VREG_CONSUMERS(LVS6) = {
+ 	REGULATOR_SUPPLY("8921_lvs6",		NULL),
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index 09a2669..c007738 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5435,6 +5435,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-0010"),
+ 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-0034"),
+ 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-0020"),
++	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"3-003c"),
+ 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-0048"),
+ 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-006c"),
+ 	CLK_LOOKUP("csi_src_clk",	csi0_src_clk.c,		"msm_csid.0"),
+diff --git a/drivers/media/video/msm/Kconfig b/drivers/media/video/msm/Kconfig
+index e08c673..750256c 100644
+--- a/drivers/media/video/msm/Kconfig
++++ b/drivers/media/video/msm/Kconfig
+@@ -38,8 +38,8 @@ config IMX074
+ 	SONY 13.5 MP Bayer Sensor
+ config OV5640
+ 	bool "Sensor OV5640 (YUV 5M)"
+-	depends on MSM_CAMERA && !MSM_CAMERA_V4L2
+-	default n
++	depends on MSM_CAMERA 
++	default y
+ 	---help---
+ 	Omni 5M YUV Sensor
+ 
+diff --git a/drivers/media/video/msm/Makefile b/drivers/media/video/msm/Makefile
+index 2ae33ca..1547aeb 100644
+--- a/drivers/media/video/msm/Makefile
++++ b/drivers/media/video/msm/Makefile
+@@ -51,7 +51,7 @@ endif
+ obj-$(CONFIG_QS_S5K4E1) += qs_s5k4e1.o qs_s5k4e1_reg.o
+ obj-$(CONFIG_VB6801) += vb6801.o
+ obj-$(CONFIG_IMX072) += imx072.o imx072_reg.o
+-obj-$(CONFIG_OV5640) += ov5640.o
++#obj-$(CONFIG_OV5640) += ov5640.o
+ obj-$(CONFIG_MT9D112) += mt9d112.o mt9d112_reg.o
+ 
+ obj-$(CONFIG_MT9D113) += mt9d113.o mt9d113_reg.o
+diff --git a/drivers/media/video/msm/sensors/Makefile b/drivers/media/video/msm/sensors/Makefile
+index 25b1374..a900985 100644
+--- a/drivers/media/video/msm/sensors/Makefile
++++ b/drivers/media/video/msm/sensors/Makefile
+@@ -5,6 +5,7 @@ EXTRA_CFLAGS += -Idrivers/media/video/msm/eeprom
+ EXTRA_CFLAGS += -Idrivers/media/video/msm/csi
+ obj-$(CONFIG_MSM_CAMERA_SENSOR) += msm_sensor_common.o msm_sensor.o msm_sensor_bayer.o msm_sensor_init.o
+ obj-$(CONFIG_OV5647) += ov5647_v4l2.o
++obj-$(CONFIG_OV5640) += ov5640_v4l2.o
+ obj-$(CONFIG_OV8825) += ov8825_v4l2.o
+ obj-$(CONFIG_IMX074) += imx074_v4l2.o
+ obj-$(CONFIG_S5K3L1YX) += s5k3l1yx.o
+-- 
+1.8.2.1
+
