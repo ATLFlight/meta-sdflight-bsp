@@ -102,7 +102,7 @@ buildBootloader () {
   fi
 
   # Compile the cross compiler
-  bitbake gcc-cross 
+  MACHINE=${optMachine} bitbake gcc-cross 
 
   # Compile the libgcc.a
   # Note there is an error during this phase, but the libgcc.a is copmiled and seems to work
@@ -111,7 +111,7 @@ buildBootloader () {
 
   if [ ! -f $LIBGCCFILE ]; then
     set +e
-    bitbake libgcc
+    MACHINE=${optMachine} bitbake libgcc
     set -e
   fi
 
@@ -121,7 +121,7 @@ buildBootloader () {
   fi
 
   # Update the lk sources
-  bitbake -c patch lk
+  MACHINE=${optMachine} bitbake -c patch lk
 
   LKBOOTLOADERFILE=$BUILDDIR/tmp-eglibc/work/arm-linux-gnueabi/lk/1.0-r9/lk-1.0/build-msm8960/emmc_appsboot.mbn
 
@@ -161,7 +161,7 @@ then
    meta-qr-linux/scripts/linaro-fetch.sh
 fi
 
-if [[ $build_lk = 1 && ${optMachine} = ${MACHINE_SOM8064} ]]
+if [[ $build_lk = 1 ]]
 then
   buildBootloader
 fi
