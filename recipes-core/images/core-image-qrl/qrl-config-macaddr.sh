@@ -15,7 +15,7 @@ usage() {
     echo "Configure MAC address of specified interface to specified value"
     echo "usage: $prog -h -i <wlan|eth> -m <aa:bb:cc:dd:ee:ff|auto|random>"
     echo "       -h:  Help"
-    echo "       -i:  wlan=Set WLAN MAC, eth=Set ethernet MAC"
+    echo "       -i:  wlan=Set WLAN MAC, eth=Set ethernet MAC, bt=Set BT MAC"
     echo "       -m:  aa:bb:cc:dd:ee:ff=Set MAC address to specified value"
     echo "            auto=Set MAC address correctly from the appropriate file"
     echo "            random=Set MAC address to a randomly generated value"
@@ -37,9 +37,9 @@ do
 	    if expr "$optIntf" : '-.*' > /dev/null; then
 		usage "[ERROR] Missing value for -i"
 	    fi
-	    if [ ${optIntf} != "wlan" ] && [ ${optIntf} != "eth" ]
+	    if [ ${optIntf} != "wlan" ] && [ ${optIntf} != "eth" ] && [ ${optIntf} != "bt" ]
 	    then
-		usage "[ERROR] -i only takes wlan or eth"
+		usage "[ERROR] -i only takes wlan, bt, or eth"
 	    fi
 	    ;;
 	-m)
