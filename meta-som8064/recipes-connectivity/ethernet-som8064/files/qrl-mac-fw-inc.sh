@@ -26,6 +26,21 @@ QRL_NV_FILE_EXT=bin
 QRL_NV_FILE_DEST_DIR=${QRL_LIB_FIRMWARE}/wlan/prima # Where to copy NV file
 
 ##
+## setAutoBTMacInNVFile:
+##    Use btnvtool to set a random MAC addr if none exists, otherwise
+##    use the existing MAC addr.
+setAutoBTMACInNVFile() {
+    /usr/bin/btnvtool -O
+    globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
+}
+##
+## setBTMACInNVFile:
+##   Use btnvtool to set a MAC address.
+setBTMACInNVFile() {
+    /usr/bin/btnvtool -b $1
+    globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
+}
+##
 ## getWlanMACFromNVFile:
 ##    Read the WCNSS NV file and extract the MAC address from it.
 ##    Returns 0 or 1, and sets globalWlanMAC
@@ -45,7 +60,6 @@ getWlanMACFromNVFile() {
     fi
     return 0
 }
-    
 ##
 ## setWlanMACInNVFile:
 ##    Set the provided MAC address to the WCNSS NV file in /lib/firmware.
@@ -113,6 +127,29 @@ configMACAddr() {
 	eth)
 	    echo "[ERROR] Can't set ethernet MAC address for this device type"
 	    return 1
+	    ;;
+	bt)
+	    case $macAddr in
+		auto)
+		    setAutoBTMACInNVFile
+                    retval=$?
+		    echo "[INFO] BT Mac address: ${globalBTMAC}"
+		    ;;
+		random)
+                    # Get a 2-digit random nunmber for changing the MAC address
+		    mac=$(( 1+$(od -An -N2 -i /dev/random)%(100) ))
+		    randMac=${QRL_RAND_MAC_ROOT}${mac}
+		    echo "[INFO] Generated random MAC address: $randMac"
+		    setBTMACInNVFile ${randMac}
+                    retval=$?
+		    ;;
+		*)
+		    setBTMACInNVFile $macAddr
+                    retval=$?
+		    echo "[INFO] BT Mac address: ${globalBTMAC}"
+		    ;;
+	    esac
+	    return $retval
 	    ;;
 	*)
 	    echo "[ERROR] Don't undertand interface: $interface"
