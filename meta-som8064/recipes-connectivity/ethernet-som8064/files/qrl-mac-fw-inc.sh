@@ -25,6 +25,8 @@ QRL_NV_FILE_NAME=WCNSS_qcom_wlan_nv # The NV.bin file name and extension
 QRL_NV_FILE_EXT=bin
 QRL_NV_FILE_DEST_DIR=${QRL_LIB_FIRMWARE}/wlan/prima # Where to copy NV file
 
+QRL_BT_NV_FILE_NAME=bt_nv # The NV.bin file name
+
 ##
 ## setAutoBTMacInNVFile:
 ##    Use btnvtool to set a random MAC addr if none exists, otherwise
@@ -208,6 +210,8 @@ copyMACAddr() {
     qrlNVFileDir=${QRL_DEFAULT_MOUNTROOT}/${QRL_PARTITION_NAME_PERSIST}
     wifiMdtNVFile=${qrlNVFileDir}/${QRL_NV_FILE_NAME}.${QRL_NV_FILE_EXT}
     wifiMdtNVDstFile=${QRL_NV_FILE_DEST_DIR}/${QRL_NV_FILE_NAME}.${QRL_NV_FILE_EXT}
+    btNVFile=${qrlNVFileDir}/.${QRL_BT_NV_FILE_NAME}.${QRL_NV_FILE_EXT}
+    btNVDstFile=${QRL_LIB_FIRMWARE}/${QRL_BT_NV_FILE_NAME}.${QRL_NV_FILE_EXT}
 
     mountPartition ${QRL_PARTITION_NAME_PERSIST}
     if [ $? -gt 0 ]
@@ -219,15 +223,35 @@ copyMACAddr() {
     if [ -f ${wifiMdtNVFile} ]; then
 	/bin/cp ${wifiMdtNVFile} ${wifiMdtNVDstFile}
     else
-	echo "[WARNING] NV File not found or mount failed"
+	echo "[WARNING] WLAN NV File not found or mount failed"
 	return 1
     fi
     
     if [ ! -f ${wifiMdtNVDstFile} ]; then
-	echo "[ERROR] NV File not found, Giving up"
+	echo "[ERROR] WLAN NV File not found, Giving up"
+	return 1
+    else
+        echo "[INFO] Copied WLAN MAC address"
+    fi
+
+    if [ ! -f ${btNVFile} ]; then
+        # Generate a random BT MAC if file does not exist yet
+        setAutoBTMACInNVFile
+    fi
+
+    if [ -f ${btNVFile} ]; then
+	/bin/cp ${btNVFile} ${btNVDstFile}
+    else
+	echo "[WARNING] BT NV File not found or mount failed"
 	return 1
     fi
-    echo "[INFO] Copied MAC address"
+    
+    if [ ! -f ${btNVDstFile} ]; then
+	echo "[ERROR] BT NV File not found, Giving up"
+	return 1
+    else
+        echo "[INFO] Copied BT MAC address"
+    fi
     return 0
 }
 

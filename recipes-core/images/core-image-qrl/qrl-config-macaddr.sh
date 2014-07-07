@@ -13,7 +13,7 @@ usage() {
     prog=`basename $0` 1>&2
     echo "$prog : $*"
     echo "Configure MAC address of specified interface to specified value"
-    echo "usage: $prog -h -i <wlan|eth> -m <aa:bb:cc:dd:ee:ff|auto|random>"
+    echo "usage: $prog -h -i <wlan|eth|bt> -m <aa:bb:cc:dd:ee:ff|auto|random>"
     echo "       -h:  Help"
     echo "       -i:  wlan=Set WLAN MAC, eth=Set ethernet MAC, bt=Set BT MAC"
     echo "       -m:  aa:bb:cc:dd:ee:ff=Set MAC address to specified value"
