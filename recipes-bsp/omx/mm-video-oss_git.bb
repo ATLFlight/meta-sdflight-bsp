@@ -1,7 +1,7 @@
 DESCRIPTION = "OpenMAX video for MSM chipsets"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
-${LICENSE};md5=3775480a712fc46a69647678acb234cb \
+${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10\
 					file://${S}/libstagefrighthw/NOTICE;md5=384ada94f865c1c1442771ab380fb00c \
 					file://${S}/libstagefrighthw/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e"
 
