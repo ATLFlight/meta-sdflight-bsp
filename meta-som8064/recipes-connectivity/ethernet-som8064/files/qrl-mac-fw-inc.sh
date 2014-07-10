@@ -43,6 +43,18 @@ setBTMACInNVFile() {
     globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
 }
 ##
+## getEthMAC
+##   Use ifconfig to get a MAC address.
+getEthMAC() {
+    globalEthMAC=`ifconfig eth0 2>&1 | sed -e "/HWaddr/!d" -e "s/.*HWaddr\ //"`
+}
+##
+## getBTMACFromNVFile:
+##   Use btnvtool to get a MAC address.
+getBTMACFromNVFile() {
+    globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
+}
+##
 ## getWlanMACFromNVFile:
 ##    Read the WCNSS NV file and extract the MAC address from it.
 ##    Returns 0 or 1, and sets globalWlanMAC
@@ -84,6 +96,51 @@ setWlanMACInNVFile() {
     macToUse=":${1}" # Prepend a :, for the sed step next
     macToUseHex=$( echo ${macToUse} | sed 's/:/\\x/g' )
     ${PRINTF} ${macToUseHex} | ${DD} of=${nvFile} bs=1 seek=10 count=6 conv=notrunc > /dev/null
+}
+
+##
+## displayMACAddr:
+##    Display the MAC address for interface ($1)
+##    
+displayMACAddr() {
+    local interface=$1
+
+    case $interface in
+	wlan)
+		getWlanMACFromNVFile
+		if [ $? -eq 0 ]
+		then
+			echo "[INFO] Read MAC from NV file: ${globalWlanMAC}"
+		else
+			echo "[ERROR] Could not get MAC from NV file"
+			return 1
+		fi
+	    ;;
+	eth)
+		getEthMAC
+		if [ $? -eq 0 ]
+		then
+			echo "[INFO] Read MAC from ifconfig: ${globalEthMAC}"
+		else
+			echo "[ERROR] Could not get MAC"
+			return 1
+		fi
+	    ;;
+	bt)
+		getBTMACFromNVFile
+		if [ $? -eq 0 ]
+		then
+			echo "[INFO] Read MAC from NV file: ${globalBTMAC}"
+		else
+			echo "[ERROR] Could not get MAC from NV file"
+			return 1
+		fi
+	    ;;
+	*)
+	    echo "[ERROR] Don't undertand interface: $interface"
+	    return 1
+	    ;;
+    esac
 }
 
 ##

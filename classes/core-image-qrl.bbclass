@@ -23,6 +23,7 @@ SRC_URI += " \
    file://qrl-common-inc.sh \
    file://qrl-copy-firmware.sh \
    file://qrl-config-macaddr.sh \
+   file://qrl-display-macaddr.sh \
    "
 
 DEPENDS += "virtual/kernel update-rc.d-native"
