@@ -28,10 +28,30 @@ QRL_NV_FILE_DEST_DIR=${QRL_LIB_FIRMWARE}/wlan/prima # Where to copy NV file
 QRL_BT_NV_FILE_NAME=bt_nv # The NV.bin file name
 
 ##
+## createBluetoothUser:
+##    btnvtool requires the user bluetooth:bluetooth to update the .bt_nv.bin file
+##    
+createBluetoothUser() {
+    userBT=bluetooth
+    createGroup="-g $userBT"
+    id $userBT > /dev/null || {
+       echo "User $userBT doesn't exist. Creating."
+       grep $userBT /etc/group || {
+          echo "Creating group $userBT"
+          createGroup="-U"
+       }
+       useradd $createGroup $userBT || {
+          echo "[ERROR] could not create user/group $userBT"
+          exit 1
+       }
+    }
+}
+##
 ## setAutoBTMacInNVFile:
 ##    Use btnvtool to set a random MAC addr if none exists, otherwise
 ##    use the existing MAC addr.
 setAutoBTMACInNVFile() {
+    createBluetoothUser
     /usr/bin/btnvtool -O
     globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
 }
@@ -39,6 +59,7 @@ setAutoBTMACInNVFile() {
 ## setBTMACInNVFile:
 ##   Use btnvtool to set a MAC address.
 setBTMACInNVFile() {
+    createBluetoothUser
     /usr/bin/btnvtool -b $1
     globalBTMAC=`btnvtool -p 2>&1 | sed -e /board/\!d -e s/--board-address\:\ //`
 }
