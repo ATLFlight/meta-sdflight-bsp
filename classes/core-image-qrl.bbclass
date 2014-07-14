@@ -123,6 +123,7 @@ fixup_sysroot() {
     install -m 644 ${WORKDIR}/qrl-common-inc.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
     install -m 755 ${WORKDIR}/qrl-config-macaddr.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
     install -m 755 ${WORKDIR}/qrl-copy-firmware.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
+    install -m 755 ${WORKDIR}/qrl-display-macaddr.sh ${IMAGE_ROOTFS}/usr/local/qr-linux
 }
 
 IMAGE_PREPROCESS_COMMAND = "fixup_sysroot"
