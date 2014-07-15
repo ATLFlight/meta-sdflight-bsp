@@ -102,6 +102,10 @@ fixup_conf() {
 MULTISTRAP_PREPROCESS_COMMAND = "fixup_conf"
 
 fixup_sysroot() {
+    CURDIR=`pwd`
+    cd ${THISDIR}
+    BUILDLABEL=$(git describe)
+    cd ${CURDIR}
     install ${WORKDIR}/resize ${IMAGE_ROOTFS}${sysconfdir}/init.d/resize
     update-rc.d -r ${IMAGE_ROOTFS} resize start 20 2 .
     install -d ${IMAGE_ROOTFS}/usr/local/qr-linux
@@ -111,7 +115,7 @@ fixup_sysroot() {
     install -m 644 ${WORKDIR}/fstab ${IMAGE_ROOTFS}${sysconfdir}/fstab
     install -m 644 ${WORKDIR}/interfaces ${IMAGE_ROOTFS}${sysconfdir}/network/interfaces
     install -m 644 ${WORKDIR}/wpa_supplicant.conf ${IMAGE_ROOTFS}${sysconfdir}/wpa_supplicant/wpa_supplicant.conf
-    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un` > ${IMAGE_ROOTFS}${sysconfdir}/qrl-version
+    echo ${PN}-${PV}-`date '+%F-%T'`-`id -un`-${BUILDLABEL} > ${IMAGE_ROOTFS}${sysconfdir}/qrl-version
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
