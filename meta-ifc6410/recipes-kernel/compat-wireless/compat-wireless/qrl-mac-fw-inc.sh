@@ -109,15 +109,13 @@ getEthMACFromAndroid() {
 		addrFound=1
 	    else
 		echo "[WARNING] Ethernet MAC address not found at ${addrFile}. Giving up"
-		return 1
 	    fi
 	else 
 	    echo "[ERROR] Couldn't mount partition ${QRL_PARTITION_NAME_USERDATA}"
-	    return 1
 	fi
     fi
 
-    if [ ${addrFile} -eq 0 ]
+    if [ ${addrFound} -eq 0 ]
     then
 	echo "[ERROR] No MAC address found"
 	return 1
@@ -218,8 +216,7 @@ doConfigMACAddr() {
 	    file=/etc/network/if-pre-up.d/eth0-config-macaddr
 	    sed -i -e "s/hw ether.*/hw ether ${macToUse}/" ${file}
 	    retVal=$?
-	    # Disabling touching the persist partition
-	    # setEthMACPersistently ${macToUse}
+	    setEthMACPersistently ${macToUse}
 	    touch ${QRL_CHECK_FILE}
 	    return $retVal
 	    ;;
