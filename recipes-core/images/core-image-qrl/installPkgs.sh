@@ -53,7 +53,7 @@ checkInstallPkgs () {
 	# Install camera packages separately, because of dependencies
     if [ -d ${pkgDir}/camera ]
 	then
-	  dpkg --install ${pkgDir}/camera/mm-camera-lib_*.deb > /dev/null 2>&1
+	  dpkg --install ${pkgDir}/camera/mm-camera-lib-prebuilt_*.deb > /dev/null 2>&1
 	  dpkg --install ${pkgDir}/camera/mm-still_*.deb > /dev/null 2>&1
 	  dpkg --install ${pkgDir}/camera/mm-camera_*.deb > /dev/null 2>&1
 	  dpkg --install ${pkgDir}/camera/libcamera0_*.deb > /dev/null 2>&1
