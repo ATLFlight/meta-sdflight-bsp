@@ -1,0 +1,13 @@
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index d24de75..6398880 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -1783,7 +1783,7 @@ void __init apq8064_init_gpiomux(void)
+ 	}
+ 
+ #ifdef CONFIG_USB_EHCI_MSM_HSIC
+-	if (machine_is_apq8064_mtp())
++	if (machine_is_apq8064_mtp() || machine_is_apq8064_som())
+ 		msm_gpiomux_install(apq8064_hsic_configs,
+ 				ARRAY_SIZE(apq8064_hsic_configs));
+ #endif

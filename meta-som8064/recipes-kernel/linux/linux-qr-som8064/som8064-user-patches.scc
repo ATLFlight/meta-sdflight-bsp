@@ -15,5 +15,5 @@ patch 0114-X11-updates.patch
 patch 0115-Fix-proc-fs-net-activity-stats.patch
 patch 0116-SOM-JDI-MIPI-Display.patch
 patch 0117-Camera-interface-configuration.patch
-#patch 0118-OV5640-camera-sensor-driver.patch
 patch 0119-OV5640-camera-sensor-module-configuration.patch
+patch 0120-HSIC-gpio-configuration.patch
