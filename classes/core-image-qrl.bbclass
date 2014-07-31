@@ -28,7 +28,7 @@ SRC_URI += " \
 
 DEPENDS += "virtual/kernel update-rc.d-native"
 
-PV = "LNX.LX.1.0.14.07.1"
+PV = "LNX.LX.1.0.14.07.2"
 
 # Overall multistrap configuration
 #     - From this the multistrap.conf file will be generated
