@@ -19,13 +19,20 @@ SRC_URI += "file://defconfig \
            "
 SRC_URI += "file://ifc6410-vendor-patches.scc"
 
+SRC_URI += "https://www.codeaurora.org/cgit/quic/la/kernel/msm/patch/\?id=e6fffec6636ffa3062891bae69a3895bbb73b148;patch=1;downloadfilename=arm-7668-1-fix-memset-related-crashes-caused-by-recent-gcc-4.7.2-optimizations.patch;name=memsetPatch1"
+SRC_URI[memsetPatch1.md5sum] = "f6c2c2bdfd9471c02024ed05b143271f"
+SRC_URI[memsetPatch1.sha256sum] = "9901c8c1171b2f529bfeb033acabc811aea4fea6dc65e8d6134317e1c518d4cd"
+SRC_URI += "https://www.codeaurora.org/cgit/quic/la/kernel/msm/patch/\?id=d1814ea12da067fda7bac933e06ef205163617f6;patch=1;downloadfilename=arm-7670-1-fix-the-memset-fix.patch;name=memsetPatch2"
+SRC_URI[memsetPatch2.md5sum] = "74dfd49a0d50fb88a3750956275510ad"
+SRC_URI[memsetPatch2.sha256sum] = "afd3fa8f7d5f72ac4707e16bdb0b680f54fafa56cb1e20de7ce2eb0a2e6ecf9d"
+
 LINUX_VERSION ?= "3.4"
 LINUX_VERSION_EXTENSION ?= "-${MACHINE}"
 
 PR = "r0"
 PV = "${LINUX_VERSION}+git${SRCPV}"
 
-GCCVERSION="4.7%"
+GCCVERSION="4.8%"
 
 COMPATIBLE_MACHINE_ifc6410 = "ifc6410"
 LINUX_VERSION_EXTENSION_ifc6410 = "-ifc6410"
