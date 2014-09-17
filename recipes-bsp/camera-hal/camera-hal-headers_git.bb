@@ -7,7 +7,7 @@ ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 PV = "1.1"
 PR = "r5"
 
-SRC_URI = "git://codeaurora.org/platform/hardware/qcom/camera;protocol=git"
+SRC_URI = "git://codeaurora.org/platform/hardware/qcom/camera;protocol=git;nobranch=1"
 
 SRC_URI_append_som8064 = " file://0001-som8064-baseline-for-linux.patch"
 SRC_URI_append_ifc6410 = " file://0001-ifc6410-baseline-for-linux.patch"

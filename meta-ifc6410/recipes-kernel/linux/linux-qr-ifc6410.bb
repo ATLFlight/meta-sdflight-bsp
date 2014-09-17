@@ -8,7 +8,8 @@ KBRANCH_DEFAULT = "linux-${MACHINE}"
 require include/linux-caf.inc
 
 
-SRC_URI = "git://codeaurora.org/kernel/msm.git;revision=${SRCREV};protocol=git;bareclone=1"
+#SRC_URI = "git://codeaurora.org/kernel/msm.git;branch=jb_2.5_auto;revision=${SRCREV};protocol=git;bareclone=1"
+SRC_URI = "git://codeaurora.org/kernel/msm.git;nobranch=1;revision=${SRCREV};protocol=git;bareclone=1"
 
 SRC_URI += "file://defconfig \
             file://ifc6410.scc \

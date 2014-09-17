@@ -185,44 +185,45 @@ addtask write_multistrap_conf before do_rootfs after do_fetch
 
 # Images are generally built explicitly, do not need to be part of world.
 EXCLUDE_FROM_WORLD = "1"
-do_rootfs[dirs] = "${TOPDIR} ${WORKDIR}/intercept_scripts"
-do_rootfs[lockfiles] += "${IMAGE_ROOTFS}.lock"
-do_rootfs[cleandirs] += "${S} ${WORKDIR}/intercept_scripts"
-do_rootfs[deptask] += "do_package_write_deb"
-do_rootfs[rdeptask] += "do_package_write_deb"
+# FIXME:ranand Disabled for now
+#do_rootfs[dirs] = "${TOPDIR} ${WORKDIR}/intercept_scripts"
+#do_rootfs[lockfiles] += "${IMAGE_ROOTFS}.lock"
+#do_rootfs[cleandirs] += "${S} ${WORKDIR}/intercept_scripts"
+#do_rootfs[deptask] += "do_package_write_deb"
+#do_rootfs[rdeptask] += "do_package_write_deb"
 
 # Must call real_do_rootfs() from inside here, rather than as a separate
 # task, so that we have a single fakeroot context for the whole process.
-do_rootfs[umask] = "022"
+#do_rootfs[umask] = "022"
 
-fakeroot do_rootfs() {
-        if [ -e ${IMAGE_ROOTFS} ]; then
-            rm -rf ${IMAGE_ROOTFS}
-        fi
-        if [ -e ${WORKDIR}/${MACHINE} ]; then
-            rm -rf ${WORKDIR}/${MACHINE}
-        fi
-        install -d ${IMAGE_ROOTFS}
-        install -d ${WORKDIR}/${MACHINE}
-
-        # Do any preprocessing for multistrap
-        ${MULTISTRAP_PREPROCESS_COMMAND}
-
-        # Construct the user space.
-        APT_CONFIG=${WORKDIR}/apt.conf /usr/sbin/multistrap -f ${WORKDIR}/multistrap.conf -d ${IMAGE_ROOTFS} --tidy-up --source-dir ${WORKDIR}/${MACHINE}
-
-        # Create the image directory
-        mkdir -p ${DEPLOY_DIR_IMAGE}
-
-        ${IMAGE_PREPROCESS_COMMAND}
-
-        ${@get_imagecmds(d)}
-
-        ${IMAGE_POSTPROCESS_COMMAND}
-
-        ${MACHINE_POSTPROCESS_COMMAND}
-
-}
+#fakeroot do_rootfs() {
+#        if [ -e ${IMAGE_ROOTFS} ]; then
+#            rm -rf ${IMAGE_ROOTFS}
+#        fi
+#        if [ -e ${WORKDIR}/${MACHINE} ]; then
+#            rm -rf ${WORKDIR}/${MACHINE}
+#        fi
+#        install -d ${IMAGE_ROOTFS}
+#        install -d ${WORKDIR}/${MACHINE}
+#
+#        # Do any preprocessing for multistrap
+#        ${MULTISTRAP_PREPROCESS_COMMAND}
+#
+#        # Construct the user space.
+#        APT_CONFIG=${WORKDIR}/apt.conf /usr/sbin/multistrap -f ${WORKDIR}/multistrap.conf -d ${IMAGE_ROOTFS} --tidy-up --source-dir ${WORKDIR}/${MACHINE}
+#
+#        # Create the image directory
+#        mkdir -p ${DEPLOY_DIR_IMAGE}
+#
+#        ${IMAGE_PREPROCESS_COMMAND}
+#
+#        ${@get_imagecmds(d)}
+#
+#        ${IMAGE_POSTPROCESS_COMMAND}
+#
+#        ${MACHINE_POSTPROCESS_COMMAND}
+#
+#}
 
 do_patch[noexec] = "1"
 do_configure[noexec] = "1"

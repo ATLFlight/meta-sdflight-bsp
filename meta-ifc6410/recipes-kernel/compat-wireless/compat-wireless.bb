@@ -9,7 +9,7 @@ LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 SRCREV = "88457d6774646e68a772cc8d180897f3937b36c2"
-SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=${SRCREV};protocol=git"
+SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=${SRCREV};protocol=git;nobranch=1"
 
 SRC_URI += " \
    file://0000-Kbuild.patch \
@@ -57,30 +57,35 @@ do_unpack_append() {
 
 do_setup_dirs() {
   cd ${S}
-  mkdir src
+  mkdir -p src
   ln -s ../drivers/ src/drivers
   ln -s ../net/ src/net
 }
+# FIXME:ranand Disabled for now
+# module_do_compile() {
+#    unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+# #   CROSS_COMPILE=${CROSS_COMPILE} make ARCH=arm KLIB_BUILD=${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build O=${WORKDIR} HAVE_CFG80211=1 BUILD_ATH6KL_VER_35=1
+#    CROSS_COMPILE=${CROSS_COMPILE} make ARCH=arm KLIB_BUILD=${STAGING_KERNEL_DIR} O=${WORKDIR} HAVE_CFG80211=1 BUILD_ATH6KL_VER_35=1
+# }
 
-module_do_compile() {
-   unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-   CROSS_COMPILE=${CROSS_COMPILE} make ARCH=arm KLIB_BUILD=${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build O=${WORKDIR} HAVE_CFG80211=1 BUILD_ATH6KL_VER_35=1
-}
+# module_do_install() {
+# 	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
+# #	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
+
+# 	# Install network interface
+# 	install -m 644 ${WORKDIR}/qca6234.cfg -D ${D}/etc/network/interfaces.d/qca6234.cfg
+
+# 	# Install qrl-copyFirmware.sh
+# 	install -m 644 ${WORKDIR}/qrl-mac-fw-inc.sh -D ${D}/usr/local/qr-linux/qrl-mac-fw-inc.sh
+
+# }
 
 module_do_install() {
-	unset CFLAGS CPPFLAGS CXXFLAGS LDFLAGS
-	CROSS_COMPILE=${CROSS_COMPILE} make V=1 -C ${STAGING_KERNEL_DIR}/source/../linux-${MACHINE}-standard-build ARCH=arm M=${S} O=${WORKDIR} INSTALL_MOD_PATH=${D} -j4 modules_install 
-
-	# Install network interface
-	install -m 644 ${WORKDIR}/qca6234.cfg -D ${D}/etc/network/interfaces.d/qca6234.cfg
-
-	# Install qrl-copyFirmware.sh
-	install -m 644 ${WORKDIR}/qrl-mac-fw-inc.sh -D ${D}/usr/local/qr-linux/qrl-mac-fw-inc.sh
-
+    echo "hello"
 }
 
 addtask do_setup_dirs after do_unpack before do_patch
 
-pkg_postinst_${PN}() {
-    /usr/local/qr-linux/qrl-copy-firmware.sh
-}
+# pkg_postinst_${PN}() {
+#     /usr/local/qr-linux/qrl-copy-firmware.sh
+# }

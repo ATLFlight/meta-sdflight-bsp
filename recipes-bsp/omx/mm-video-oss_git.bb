@@ -5,7 +5,7 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10\
 					file://${S}/libstagefrighthw/NOTICE;md5=384ada94f865c1c1442771ab380fb00c \
 					file://${S}/libstagefrighthw/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e"
 
-SRC_URI = "git://codeaurora.org/platform/hardware/qcom/media;protocol=git"
+SRC_URI = "git://codeaurora.org/platform/hardware/qcom/media;protocol=git;nobranch=1"
 
 PACKAGES = "${PN}"
 

@@ -19,10 +19,9 @@ PACKAGES = "${PN}"
 
 inherit autotools gettext
 
-SRC_URI = "git://codeaurora.org/platform/system/core;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
+SRC_URI = "git://codeaurora.org/platform/system/core;branch=redcloud;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
 SRC_URI += "file://0001-QR-Linux-Patches.patch"
 
-SRCREV="1c246a945e1e2338d5a647379cd79ae2351f213b"
 
 EXTRA_OECONF = "--disable-shared"
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"

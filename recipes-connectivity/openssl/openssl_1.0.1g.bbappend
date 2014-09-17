@@ -1,3 +1,4 @@
+PR="2.0"
 do_configure () {
 	cd util
 	perl perlpath.pl ${STAGING_BINDIR_NATIVE}
@@ -5,6 +6,7 @@ do_configure () {
 	ln -sf apps/openssl.pod crypto/crypto.pod ssl/ssl.pod doc/
 
 	os=${HOST_OS}
+        echo "====os=${os}============"
 	if [ "x$os" = "xlinux-uclibc" ]; then
 		os=linux
 	elif [ "x$os" = "xlinux-uclibceabi" ]; then
