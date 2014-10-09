@@ -12,7 +12,6 @@ kconf hardware ifc6410.cfg
 # Don't remove if you plan on using yocto-kernel with this BSP.
 
 kconf hardware ifc6410-user-config.cfg
-include ifc6410-vendor-patches.scc
 include ifc6410-patches.scc
 
 # These are config fragments needed for the kernel

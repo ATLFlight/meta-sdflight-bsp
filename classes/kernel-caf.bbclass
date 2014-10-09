@@ -102,14 +102,19 @@ do_lk_mkimage() {
       serialport="ttyHSL0"
       baudrate="115200"
   fi
+  # We depend on an initrd.img file being present in the WORKDIR. This will
+  # usually be downloaded by the recipe
+  set -x
   ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-${MACHINE}-standard-build/arch/arm/boot/zImage \
-	--ramdisk /dev/null \
-        --cmdline "noinitrd console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
+	--ramdisk ${WORKDIR}/initrd.img \
+	--ramdisk_offset 0x83000000 \
+        --cmdline "console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
 	--base 0x80200000 \
         --pagesize 2048 \
 	--output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
   install -d ${DEPLOY_DIR_IMAGE}/out
   cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/out/boot.img
+  set +x
 }
 
 addtask lk_mkimage after do_deploy and before do_package
