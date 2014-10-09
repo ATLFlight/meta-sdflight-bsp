@@ -27,6 +27,8 @@ SRC_URI += "https://releases.linaro.org/14.09/ubuntu/ifc6410/initrd.img-3.4.0-li
            "
 SRC_URI[initrd.md5sum] = "d92fb01531698e30615f26efa2999c6c"
 SRC_URI[initrd.sha256sum] = "d177ba515258df5fda6d34043261d694026c9e27f1ef8ec16674fa479c5b47fb"
+SRC_URI[defconfig.md5sum] = "dcd38ce1c5af4dc055fb0b68869fa9bc"
+SRC_URI[defconfig.sha256sum] = "081dd25e03f88770fceb3ea03be7fcaf06edad4633a521864526aeb9d47f1daa"
 
 LINUX_VERSION ?= "3.4"
 LINUX_VERSION_EXTENSION ?= "-${MACHINE}"
