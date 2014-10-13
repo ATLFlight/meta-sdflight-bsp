@@ -64,7 +64,7 @@ index 751e362..78a6eba 100755
  libcamera_la_LIBADD = -ldl
 +libcamera_la_LIBADD += -limage_omx_common
 +libcamera_la_LIBADD += -limageomxcore
-+libcamera_la_LIBADD += -lrt
++#libcamera_la_LIBADD += -lrt
 +
 +pkgconfigdir = $(libdir)/pkgconfig
 +pkgconfig_DATA = camera-hal.pc
