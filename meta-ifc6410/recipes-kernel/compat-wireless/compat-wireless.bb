@@ -14,7 +14,6 @@ SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=$
 SRC_URI += " \
    file://0000-Kbuild.patch \
    file://0001-compiler-warning.patch \
-   file://qrl-mac-fw-inc.sh \
    file://qca6234.cfg \
    "
 
@@ -74,9 +73,6 @@ do_setup_dirs() {
 
 # 	# Install network interface
 # 	install -m 644 ${WORKDIR}/qca6234.cfg -D ${D}/etc/network/interfaces.d/qca6234.cfg
-
-# 	# Install qrl-copyFirmware.sh
-# 	install -m 644 ${WORKDIR}/qrl-mac-fw-inc.sh -D ${D}/usr/local/qr-linux/qrl-mac-fw-inc.sh
 
 # }
 
