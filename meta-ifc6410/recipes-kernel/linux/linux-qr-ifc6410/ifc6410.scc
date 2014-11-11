@@ -6,7 +6,7 @@
 #
 
 kconf hardware defconfig
-kconf hardware ifc6410.cfg
+#kconf hardware ifc6410.cfg
 
 # These are used by yocto-kernel to add config fragments and features.
 # Don't remove if you plan on using yocto-kernel with this BSP.
@@ -15,5 +15,5 @@ kconf hardware ifc6410-user-config.cfg
 include ifc6410-patches.scc
 
 # These are config fragments needed for the kernel
-kconf hardware ltp.cfg
-kconf hardware panics.cfg
+#kconf hardware ltp.cfg
+#kconf hardware panics.cfg
