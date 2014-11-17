@@ -12,7 +12,7 @@ kconf hardware som8064.cfg
 
 kconf hardware som8064-user-config.cfg
 include som8064-user-patches.scc
-include som8064-vendor-patches.scc
+#include som8064-vendor-patches.scc
 
 # These are config fragments for the kernel
 kconf hardware ltp.cfg
