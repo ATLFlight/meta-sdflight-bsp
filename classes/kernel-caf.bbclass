@@ -106,12 +106,12 @@ do_lk_mkimage() {
   # usually be downloaded by the recipe
   set -x
   ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${WORKDIR}/linux-${MACHINE}-standard-build/arch/arm/boot/zImage \
-	--ramdisk ${WORKDIR}/initrd.img \
-	--ramdisk_offset 0x83000000 \
-        --cmdline "console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
-	--base 0x80200000 \
-        --pagesize 2048 \
-	--output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
+    --base 0x80200000 \
+    --ramdisk ${WORKDIR}/initrd.img \
+    --ramdisk_offset 0x02D00000 \
+    --cmdline "console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}" \
+    --pagesize 2048 \
+    --output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
   install -d ${DEPLOY_DIR_IMAGE}/out
   cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/out/boot.img
   set +x
