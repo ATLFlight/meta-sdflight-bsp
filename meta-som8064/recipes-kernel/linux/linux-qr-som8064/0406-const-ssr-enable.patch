@@ -1,0 +1,68 @@
+From bb844d6af1f74ee33ecc67a60699cd9fddf61873 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Wed, 4 Feb 2015 20:19:57 -0200
+Subject: [PATCH] ARM: mach-msm: Support subsystem restart in lpass-8960 and
+ wcnss-ssr-8960
+
+Add support for SSR feature in lpass-8960 and wcnss-ssr-8960 peripheral
+drivers. It was missing for only these two drivers.
+---
+ arch/arm/mach-msm/lpass-8960.c     |    7 +++----
+ arch/arm/mach-msm/wcnss-ssr-8960.c |    2 +-
+ 2 files changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/arch/arm/mach-msm/lpass-8960.c b/arch/arm/mach-msm/lpass-8960.c
+index 4bf9a9d..224b175 100644
+--- a/arch/arm/mach-msm/lpass-8960.c
++++ b/arch/arm/mach-msm/lpass-8960.c
+@@ -47,6 +47,7 @@ struct lpass_ssr {
+ 
+ static struct lpass_ssr lpass_ssr_8960;
+ static int q6_crash_shutdown;
++static struct subsys_device *lpass_8960_dev;
+ 
+ static int riva_notifier_cb(struct notifier_block *this, unsigned long code,
+ 								void *ss_handle)
+@@ -129,7 +130,7 @@ static void lpass_fatal_fn(struct work_struct *work)
+ 	set_ssr_magic_number("lpass");
+ 	msm_set_restart_mode(0x6d634130);
+ #endif
+-	panic(MODULE_NAME ": Resetting the SoC");
++	subsystem_restart_dev(lpass_8960_dev);
+ }
+ 
+ static void lpass_smsm_state_cb(void *data, uint32_t old_state,
+@@ -148,7 +149,7 @@ static void lpass_smsm_state_cb(void *data, uint32_t old_state,
+ 		set_ssr_magic_number("lpass");
+ 		msm_set_restart_mode(0x6d634130);
+ #endif
+-		panic(MODULE_NAME ": Resetting the SoC");
++		subsystem_restart_dev(lpass_8960_dev);
+ 	}
+ }
+ 
+@@ -211,8 +212,6 @@ static irqreturn_t lpass_wdog_bite_irq(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
+ 
+-static struct subsys_device *lpass_8960_dev;
+-
+ static struct subsys_desc lpass_8960 = {
+ 	.name = "lpass",
+ 	.shutdown = lpass_shutdown,
+diff --git a/arch/arm/mach-msm/wcnss-ssr-8960.c b/arch/arm/mach-msm/wcnss-ssr-8960.c
+index 380d46e..3743e59 100644
+--- a/arch/arm/mach-msm/wcnss-ssr-8960.c
++++ b/arch/arm/mach-msm/wcnss-ssr-8960.c
+@@ -35,7 +35,7 @@ static struct delayed_work cancel_vote_work;
+ static void *riva_ramdump_dev;
+ static int riva_crash;
+ static int ss_restart_inprogress;
+-static int enable_riva_ssr;
++static int enable_riva_ssr = 1;
+ static struct subsys_device *riva_8960_dev;
+ 
+ static void smsm_state_cb_hdlr(void *data, uint32_t old_state,
+-- 
+1.7.9.5
+

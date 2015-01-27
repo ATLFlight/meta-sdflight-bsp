@@ -57,6 +57,7 @@ patch 0201-revb-emmc-revision-fix.patch
 patch 0202-revb-usb-regulator-enable.patch
 patch 0203-revb-camera-rst.patch
 patch 0204-revb-disable-ps-hold-reset.patch
+patch 0205-revb-sdcard-hack-avoid-status-change-msgs.patch
 
 ## FastRPC ##
 patch 0300-Import-ADSP-driver-for-FastRPC.patch

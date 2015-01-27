@@ -57,6 +57,7 @@ patch 0201-revb-emmc-revision-fix.patch
 patch 0202-revb-usb-regulator-enable.patch
 patch 0203-revb-camera-rst.patch
 patch 0204-revb-disable-ps-hold-reset.patch
+patch 0205-revb-sdcard-hack-avoid-status-change-msgs.patch
 
 ## FastRPC ##
 patch 0300-Import-ADSP-driver-for-FastRPC.patch
@@ -78,4 +79,8 @@ patch 0402-const-serial.patch
 patch 0403-const-imu-fpga-reset.patch  
 patch 0404-const-gsbi3-i2c.patch
 patch 0405-const-stereo-hwenable.patch
-
+patch 0406-const-ssr-enable.patch
+patch 0407-const-ssr-independent-default.patch
+patch 0408-const-removed-pmic-gpio-keys.patch
+patch 0409-const-regulator-for-imu-enabled-at-poweron.patch
+patch 0410-const-disable-gsbi7-spi.patch

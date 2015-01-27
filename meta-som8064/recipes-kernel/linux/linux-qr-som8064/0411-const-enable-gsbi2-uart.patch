@@ -1,0 +1,117 @@
+From b944fbdad0cd2557d461982275827f097243276d Mon Sep 17 00:00:00 2001
+From: bharathr <bharathr@codeaurora.org>
+Date: Tue, 10 Mar 2015 22:36:13 -0700
+Subject: [PATCH] ATL-2465 Enable GSBI2 UART port on Constitution
+
+---
+ arch/arm/mach-msm/board-8064.c   |  4 +++-
+ arch/arm/mach-msm/clock-8960.c   |  4 ++--
+ arch/arm/mach-msm/devices-8064.c | 28 ++++++++++++++++++++++++++++
+ arch/arm/mach-msm/devices.h      |  1 +
+ 4 files changed, 34 insertions(+), 3 deletions(-)
+
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 59c3976..fb96d8a 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -3495,6 +3495,7 @@ static void __init apq8064_cdp_init(void)
+ 			platform_device_register(&apq8064_device_uart_gsbi1);
+ 			#endif
+ 			#endif
++			platform_device_register(&apq8064_device_uart_gsbi2);
+ 			platform_device_register(&apq8064_device_uart_gsbi5);
+ 		}
+ 		else {
+@@ -3527,7 +3528,8 @@ static void __init apq8064_cdp_init(void)
+ 		platform_device_register(&mpq8064_device_uartdm_gsbi6);
+ 	}
+ 
+-	if (machine_is_apq8064_cdp() || machine_is_apq8064_liquid())
++	if (machine_is_apq8064_cdp() || machine_is_apq8064_liquid()
++		|| machine_is_apq8064_som())
+ 		platform_device_register(&cdp_kp_pdev);
+ 
+ 	if (machine_is_apq8064_mtp())
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index bea1043..ea52375 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5301,7 +5301,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 
+ #ifdef CONFIG_MACH_APQ8064_SOM /* Constitution */
+ 	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c,	""),
+-	CLK_LOOKUP("core_clk",		gsbi2_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi2_uart_clk.c,	"msm_serial_hsl.2"),
+ 	CLK_LOOKUP("core_clk",		gsbi3_uart_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi4_uart_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi5_uart_clk.c,	"msm_serial_hsl.1"),
+@@ -5403,7 +5403,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 
+ #ifdef CONFIG_MACH_APQ8064_SOM /* Constitution */
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	""),
+-	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,	"msm_serial_hsl.2"),
+ 	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,	"qup_i2c.3"),
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,	"qup_i2c.4"),
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"qup_i2c.5"),
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index a39ac15..3ab251d 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -61,6 +61,7 @@
+ 
+ /* GSBI UART devices */
+ #define MSM_UART1DM_PHYS	(MSM_GSBI1_PHYS + 0x10000)
++#define MSM_UART2DM_PHYS	(MSM_GSBI2_PHYS + 0x10000)
+ #define MSM_UART3DM_PHYS	(MSM_GSBI3_PHYS + 0x40000)
+ #define MSM_UART4DM_PHYS	(MSM_GSBI4_PHYS + 0x40000)
+ #define MSM_UART5DM_PHYS	(MSM_GSBI5_PHYS + 0x40000)
+@@ -217,6 +218,33 @@ struct platform_device apq8064_device_uart_gsbi1 = {
+ 	.resource	= resources_uart_gsbi1,
+ };
+ 
++static struct resource resources_uart_gsbi2[] = {
++	{
++		.start	= APQ8064_GSBI2_UARTDM_IRQ,
++		.end	= APQ8064_GSBI2_UARTDM_IRQ,
++		.flags	= IORESOURCE_IRQ,
++	},
++	{
++		.start	= MSM_UART2DM_PHYS,
++		.end	= MSM_UART2DM_PHYS + PAGE_SIZE - 1,
++		.name	= "uartdm_resource",
++		.flags	= IORESOURCE_MEM,
++	},
++	{
++		.start	= MSM_GSBI2_PHYS,
++		.end	= MSM_GSBI2_PHYS + PAGE_SIZE - 1,
++		.name	= "gsbi_resource",
++		.flags	= IORESOURCE_MEM,
++	},
++};
++
++struct platform_device apq8064_device_uart_gsbi2 = {
++	.name	= "msm_serial_hsl",
++	.id	= 2,
++	.num_resources	= ARRAY_SIZE(resources_uart_gsbi2),
++	.resource	= resources_uart_gsbi2,
++};
++
+ #ifdef CONFIG_MACH_APQ8064_SOM
+ /* GSBI 1 used into UARTDM Mode for 8064 SOM */
+ static struct resource msm_uart_dm1_resources[] = {
+diff --git a/arch/arm/mach-msm/devices.h b/arch/arm/mach-msm/devices.h
+index 8f873cc..bc97280 100644
+--- a/arch/arm/mach-msm/devices.h
++++ b/arch/arm/mach-msm/devices.h
+@@ -88,6 +88,7 @@ extern struct platform_device msm8960_device_ebi1_ch1_erp;
+ 
+ extern struct platform_device apq8064_device_uart_gsbi1;
+ extern struct platform_device apq8064_device_uartdm_gsbi1;
++extern struct platform_device apq8064_device_uart_gsbi2;
+ extern struct platform_device apq8064_device_uart_gsbi3;
+ extern struct platform_device apq8064_device_uart_gsbi4;
+ extern struct platform_device apq8064_device_uartdm_gsbi4;
+-- 
+1.7.11.4
+
