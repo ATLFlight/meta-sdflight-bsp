@@ -6,9 +6,11 @@ LIC_FILES_CHKSUM = "file://${S}/LICENSE;md5=5a1abdab641eec675725c843f43f03af"
 HOMEPAGE = "https://www.codeaurora.org/gitweb/quic/la?p=kernel/lk.git"
 PROVIDES = "virtual/bootloader"
 
-SRC_URI  = "git://codeaurora.org/kernel/lk;protocol=git"
+SRC_URI  = "git://codeaurora.org/kernel/lk;protocol=git;nobranch=1"
 
 SRCREV_som8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+SRCREV_som8064-revB = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+SRCREV_som8064-const = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
 
 SRC_URI_append_som8064 = "\
          file://NOTICE \
@@ -18,6 +20,23 @@ SRC_URI_append_som8064 = "\
 	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
 	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch"
 
+SRC_URI_append_som8064-revB = "\
+         file://NOTICE \
+         file://0001-lk.patch \
+	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
+	 file://0102-SOM-Machine-type-definition.patch \
+	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
+	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch"
+
+SRC_URI_append_som8064-const = "\
+         file://NOTICE \
+         file://0001-lk.patch \
+	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
+	 file://0102-SOM-Machine-type-definition.patch \
+	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
+	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch \
+	 file://0200-const-bsp.patch \
+	 file://0201-const-disable-ps-hold-reset.patch"
 
 SRCREV_ifc6410 = "AU_LINUX_ANDROID_JB_2.5_AUTO.04.02.02.115.005"
 

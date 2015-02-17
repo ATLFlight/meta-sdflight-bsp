@@ -21,10 +21,13 @@ inherit autotools gettext
 
 SRC_URI = "git://codeaurora.org/platform/system/core;branch=redcloud;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
 SRC_URI += "file://0001-QR-Linux-Patches.patch"
+SRC_URI += "file://adb.conf"
 
 
 EXTRA_OECONF = "--disable-shared"
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"
+
+INSANE_SKIP_${PN} = "installed-vs-shipped"
 
 do_unpack_append() {
     import shutil
@@ -36,3 +39,7 @@ do_unpack_append() {
     shutil.move(wd+'/git', s)
 }
 
+do_install_append() {
+
+	install -m 0644 ${WORKDIR}/adb.conf -D ${D}${sysconfdir}/init/adb.conf
+}

@@ -1,0 +1,597 @@
+diff --git a/drivers/media/video/msm/csi/include/csi2.0/msm_ispif_hwreg.h b/drivers/media/video/msm/csi/include/csi2.0/msm_ispif_hwreg.h
+index 1864d40..5c86887 100644
+--- a/drivers/media/video/msm/csi/include/csi2.0/msm_ispif_hwreg.h
++++ b/drivers/media/video/msm/csi/include/csi2.0/msm_ispif_hwreg.h
+@@ -43,6 +43,10 @@
+ #define ISPIF_IRQ_STATUS_2_ADDR                 0x0120
+ #define ISPIF_IRQ_GLOBAL_CLEAR_CMD_ADDR         0x0124
+ 
++#define ISPIF_3D_TX_THRESHOLD                   0x0070
++#define ISPIF_3D_DESKEW_SIZE                    0x0074
++#define ISPIF_OUTPUT_SEL_ADDR                   0x0034
++
+ /*ISPIF RESET BITS*/
+ 
+ #define VFE_CLK_DOMAIN_RST           31
+@@ -68,6 +72,7 @@
+ #define ISPIF_RST_CMD_1_MASK         0xFC0F1FF9
+ 
+ #define PIX_INTF_0_OVERFLOW_IRQ      12
++#define PIX_INTF_1_OVERFLOW_IRQ      12
+ #define RAW_INTF_0_OVERFLOW_IRQ      25
+ #define RAW_INTF_1_OVERFLOW_IRQ      25
+ #define RAW_INTF_2_OVERFLOW_IRQ      12
+@@ -75,7 +80,7 @@
+ 
+ #define ISPIF_IRQ_STATUS_MASK        0x0A493249
+ #define ISPIF_IRQ_STATUS_1_MASK      0x02493249
+-#define ISPIF_IRQ_STATUS_2_MASK      0x00001249
++#define ISPIF_IRQ_STATUS_2_MASK      0x00071249
+ 
+ #define ISPIF_IRQ_STATUS_PIX_SOF_MASK	0x249
+ #define ISPIF_IRQ_STATUS_RDI0_SOF_MASK	0x492000
+diff --git a/drivers/media/video/msm/csi/msm_csi2_register.c b/drivers/media/video/msm/csi/msm_csi2_register.c
+index b10d820..ff9197c 100644
+--- a/drivers/media/video/msm/csi/msm_csi2_register.c
++++ b/drivers/media/video/msm/csi/msm_csi2_register.c
+@@ -20,19 +20,46 @@ int msm_csi_register_subdevs(struct msm_cam_media_controller *p_mctl,
+ {
+ 	int rc = -ENODEV;
+ 
++	CDBG("%s: regiser_csiphy_device core_index(%d)\n", __func__, core_index);
+ 	/* register csiphy subdev */
+-	p_mctl->csiphy_sdev = server_dev->csiphy_device[core_index];
+-	if (!p_mctl->csiphy_sdev)
++	p_mctl->csiphy_sdev[0] = server_dev->csiphy_device[core_index];
++	if (!p_mctl->csiphy_sdev[0])
+ 		goto out;
+-	v4l2_set_subdev_hostdata(p_mctl->csiphy_sdev, p_mctl);
++	v4l2_set_subdev_hostdata(p_mctl->csiphy_sdev[0], p_mctl);
+ 
+ 	/* register csid subdev */
+-	p_mctl->csid_sdev = server_dev->csid_device[core_index];
+-	if (!p_mctl->csid_sdev)
++	CDBG("%s: regiser_csid_device core_index(%d)\n", __func__, core_index);
++	p_mctl->csid_sdev[0] = server_dev->csid_device[core_index];
++	if (!p_mctl->csid_sdev[0])
+ 		goto out;
+-	v4l2_set_subdev_hostdata(p_mctl->csid_sdev, p_mctl);
++	v4l2_set_subdev_hostdata(p_mctl->csid_sdev[0], p_mctl);
++
++	/* In 3d mode, register secondary csid,csiphy subdevs */
++    /* NOTE: 3d mode, is for csi0 and csi1 only */
++    if(p_mctl->mode_3d) {
++		pr_info("%s: mode_3d csi registration\n", __func__);
++
++		if (core_index != 0 ) {
++			pr_err("%s: mode_3d configuration error: csi_id %d\n", 
++					__func__, core_index);
++			goto out;
++		}
++
++	   CDBG("%s: regiser_csiphy_device1 core_index(%d)\n", __func__, core_index);
++		p_mctl->csiphy_sdev[1] = server_dev->csiphy_device[1];
++		if (!p_mctl->csiphy_sdev[1])
++			goto out;
++		v4l2_set_subdev_hostdata(p_mctl->csiphy_sdev[1], p_mctl);
++
++	   CDBG("%s: regiser_csid_device1 core_index(%d)\n", __func__, core_index);
++		p_mctl->csid_sdev[1] = server_dev->csid_device[1];
++		if (!p_mctl->csid_sdev[1])
++			goto out;
++		v4l2_set_subdev_hostdata(p_mctl->csid_sdev[1], p_mctl);
++	}
+ 
+ 	/* register ispif subdev */
++	CDBG("%s: regiser_ispif_device core_index(%d)\n", __func__, core_index);
+ 	p_mctl->ispif_sdev = server_dev->ispif_device[0];
+ 	if (!p_mctl->ispif_sdev)
+ 		goto out;
+diff --git a/drivers/media/video/msm/csi/msm_csic_register.c b/drivers/media/video/msm/csi/msm_csic_register.c
+index e3fe3d4..02fec2c 100644
+--- a/drivers/media/video/msm/csi/msm_csic_register.c
++++ b/drivers/media/video/msm/csi/msm_csic_register.c
+@@ -20,10 +20,10 @@ int msm_csi_register_subdevs(struct msm_cam_media_controller *p_mctl,
+ {
+ 	int rc = -ENODEV;
+ 
+-	p_mctl->csic_sdev = server_dev->csic_device[core_index];
+-	if (!p_mctl->csic_sdev)
++	p_mctl->csic_sdev[0] = server_dev->csic_device[core_index];
++	if (!p_mctl->csic_sdev[0])
+ 		goto out;
+-	v4l2_set_subdev_hostdata(p_mctl->csic_sdev, p_mctl);
++	v4l2_set_subdev_hostdata(p_mctl->csic_sdev[0], p_mctl);
+ 
+ 	rc = 0;
+ 	p_mctl->ispif_sdev = NULL;
+diff --git a/drivers/media/video/msm/csi/msm_ispif.c b/drivers/media/video/msm/csi/msm_ispif.c
+index 108e631..dfd894572 100644
+--- a/drivers/media/video/msm/csi/msm_ispif.c
++++ b/drivers/media/video/msm/csi/msm_ispif.c
+@@ -27,6 +27,8 @@
+ 
+ #define MAX_CID 15
+ 
++#define DIV_CEIL(x, y) ((x/y + ((x%y) ? 1 : 0)))
++
+ static atomic_t ispif_irq_cnt;
+ static spinlock_t ispif_tasklet_lock;
+ static struct list_head ispif_tasklet_q;
+@@ -257,17 +259,27 @@ static int msm_ispif_config(struct ispif_device *ispif,
+ 	int rc = 0, i = 0;
+ 	uint8_t intftype;
+ 	uint8_t vfe_intf;
++	uint32_t threshold;
++	uint16_t output_sel;
++#if 0
++	params_list->output_param.is3D = 1;
++	params_list->output_param.x_output_size = 0x668;
++#endif
++	CDBG("%s: output_param.is3D: %d\n", __func__, params_list->output_param.is3D);
++	CDBG("%s: output_param.x_output_size: %d\n", __func__, params_list->output_param.x_output_size);
++   
+ 	params_len = params_list->len;
+ 	ispif_params = params_list->params;
+ 	CDBG("Enable interface\n");
+ 	msm_camera_io_w(0x00000000, ispif->base + ISPIF_IRQ_MASK_ADDR);
+ 	msm_camera_io_w(0x00000000, ispif->base + ISPIF_IRQ_MASK_1_ADDR);
+ 	msm_camera_io_w(0x00000000, ispif->base + ISPIF_IRQ_MASK_2_ADDR);
++
+ 	for (i = 0; i < params_len; i++) {
+ 		intftype = ispif_params[i].intftype;
+ 		vfe_intf = ispif_params[i].vfe_intf;
+-		CDBG("%s intftype %x, vfe_intf %d, csid %d\n", __func__,
+-			intftype, vfe_intf, ispif_params[i].csid);
++		CDBG("%s intftype %x, vfe_intf %d, csid %d cid_mask 0x%x\n", __func__,
++			intftype, vfe_intf, ispif_params[i].csid, ispif_params[i].cid_mask);
+ 		if ((intftype >= INTF_MAX) ||
+ 			(ispif->csid_version <= CSID_VERSION_V2 &&
+ 			vfe_intf > VFE0) ||
+@@ -288,6 +300,25 @@ static int msm_ispif_config(struct ispif_device *ispif,
+ 		msm_ispif_enable_intf_cids(ispif, intftype,
+ 			ispif_params[i].cid_mask, vfe_intf);
+ 	}
++
++	if (params_list->output_param.is3D) {
++
++		CDBG("Config ISPIF to 3D mode\n");
++		threshold =
++			DIV_CEIL(params_list->output_param.x_output_size, 12);
++		output_sel = msm_camera_io_r(ispif->base +
++						ISPIF_OUTPUT_SEL_ADDR);
++		msm_camera_io_w(output_sel | 0x3, ispif->base +
++						ISPIF_OUTPUT_SEL_ADDR);
++		msm_camera_io_w(threshold, ispif->base +
++						ISPIF_3D_TX_THRESHOLD);
++	} /*else {
++		msm_camera_io_w(output_sel, ispif->base +
++						ISPIF_OUTPUT_SEL_ADDR);
++	}*/
++
++	msm_camera_io_w(ISPIF_IRQ_GLOBAL_CLEAR_CMD, ispif->base +
++		 ISPIF_IRQ_GLOBAL_CLEAR_CMD_ADDR);
+ 	msm_camera_io_w(0x40, ispif->base + ISPIF_CTRL_ADDR);
+ 
+ 	msm_camera_io_w(ISPIF_IRQ_STATUS_MASK, ispif->base +
+@@ -302,8 +333,7 @@ static int msm_ispif_config(struct ispif_device *ispif,
+ 					ISPIF_IRQ_MASK_2_ADDR);
+ 	msm_camera_io_w(ISPIF_IRQ_STATUS_2_MASK, ispif->base +
+ 					ISPIF_IRQ_CLEAR_2_ADDR);
+-	msm_camera_io_w(ISPIF_IRQ_GLOBAL_CLEAR_CMD, ispif->base +
+-		 ISPIF_IRQ_GLOBAL_CLEAR_CMD_ADDR);
++
+ 	return rc;
+ }
+ 
+@@ -387,6 +417,9 @@ static void msm_ispif_intf_cmd(struct ispif_device *ispif, uint16_t intfmask,
+ 		msm_camera_io_w(global_intf_cmd_mask1,
+ 			ispif->base + ISPIF_INTF_CMD_1_ADDR +
+ 			(0x200 * vfe_intf));
++
++	CDBG("%s: global_intf_cmd_mask  (0x%x)\n", __func__, ispif->global_intf_cmd_mask); 
++	CDBG("%s: global_intf_cmd_mask1 (0x%x)\n", __func__, global_intf_cmd_mask1); 
+ }
+ 
+ static int msm_ispif_abort_intf_transfer(struct ispif_device *ispif,
+@@ -654,6 +687,8 @@ static inline void msm_ispif_read_irq_status(struct ispif_irq_status *out,
+ 			pr_err("%s: pix intf 0 overflow.\n", __func__);
+ 		if (out->ispifIrqStatus0 & (0x1 << RAW_INTF_0_OVERFLOW_IRQ))
+ 			pr_err("%s: rdi intf 0 overflow.\n", __func__);
++		if (out->ispifIrqStatus1 & (0x1 << PIX_INTF_1_OVERFLOW_IRQ))
++			pr_err("%s: pix intf 1 overflow.\n", __func__);
+ 		if (out->ispifIrqStatus1 & (0x1 << RAW_INTF_1_OVERFLOW_IRQ))
+ 			pr_err("%s: rdi intf 1 overflow.\n", __func__);
+ 		if (out->ispifIrqStatus2 & (0x1 << RAW_INTF_2_OVERFLOW_IRQ))
+@@ -776,12 +811,15 @@ static long msm_ispif_cmd(struct v4l2_subdev *sd, void *arg)
+ 		rc = msm_ispif_init(ispif, &cdata.cfg.csid_version);
+ 		break;
+ 	case ISPIF_SET_CFG:
+-		CDBG("%s len = %d, intftype = %d,.cid_mask = %d, csid = %d\n",
++		printk("%s len = %d, intftype = %d,.cid_mask = %d, csid = %d\n",
+ 			__func__,
+ 			cdata.cfg.ispif_params.len,
+ 			cdata.cfg.ispif_params.params[0].intftype,
+ 			cdata.cfg.ispif_params.params[0].cid_mask,
+ 			cdata.cfg.ispif_params.params[0].csid);
++		printk("%s 3D mode = %d\n",
++			__func__,
++			cdata.cfg.ispif_params.output_param.is3D);
+ 		rc = msm_ispif_config(ispif, &cdata.cfg.ispif_params);
+ 		break;
+ 
+diff --git a/drivers/media/video/msm/io/msm_camera_io_util.c b/drivers/media/video/msm/io/msm_camera_io_util.c
+index cede05d..a20e31f 100644
+--- a/drivers/media/video/msm/io/msm_camera_io_util.c
++++ b/drivers/media/video/msm/io/msm_camera_io_util.c
+@@ -22,6 +22,9 @@
+ #define BUFF_SIZE_128 128
+ static int gpio_ref_count;
+ 
++#undef CDBG
++#define CDBG(fmt, args...) do {} while (0)
++
+ void msm_camera_io_w(u32 data, void __iomem *addr)
+ {
+ 	CDBG("%s: %08x %08x\n", __func__, (int) (addr), (data));
+diff --git a/drivers/media/video/msm/msm.h b/drivers/media/video/msm/msm.h
+index 8e056ff..b3008dd 100644
+--- a/drivers/media/video/msm/msm.h
++++ b/drivers/media/video/msm/msm.h
+@@ -167,6 +167,8 @@ enum msm_camera_v4l2_subdev_notify {
+ 	NOTIFY_AXI_IRQ,
+ 	NOTIFY_GESTURE_EVT, /* arg = v4l2_event */
+ 	NOTIFY_GESTURE_CAM_EVT, /* arg = int */
++	NOTIFY_CSIPHY_CFG,
++	NOTIFY_CSID_CFG,
+ 	NOTIFY_INVALID
+ };
+ 
+@@ -288,9 +290,9 @@ struct msm_cam_media_controller {
+ 	/* the following reflect the HW topology information*/
+ 	struct v4l2_subdev *sensor_sdev; /* sensor sub device */
+ 	struct v4l2_subdev *act_sdev; /* actuator sub device */
+-	struct v4l2_subdev *csiphy_sdev; /*csiphy sub device*/
+-	struct v4l2_subdev *csid_sdev; /*csid sub device*/
+-	struct v4l2_subdev *csic_sdev; /*csid sub device*/
++	struct v4l2_subdev *csiphy_sdev[2]; /*csiphy sub device*/
++	struct v4l2_subdev *csid_sdev[2]; /*csid sub device*/
++	struct v4l2_subdev *csic_sdev[2]; /*csid sub device*/
+ 	struct v4l2_subdev *ispif_sdev; /* ispif sub device */
+ 	struct v4l2_subdev *gemini_sdev; /* gemini sub device */
+ 	struct v4l2_subdev *vpe_sdev; /* vpe sub device */
+@@ -299,6 +301,8 @@ struct msm_cam_media_controller {
+ 	struct v4l2_subdev *eeprom_sdev; /* eeprom sub device */
+ 	struct v4l2_subdev *cpp_sdev;/*cpp sub device*/
+ 
++	uint8_t mode_3d;
++
+ 	struct msm_cam_config_dev *config_device;
+ 
+ 	/*mctl session control information*/
+diff --git a/drivers/media/video/msm/msm_mctl.c b/drivers/media/video/msm/msm_mctl.c
+index 77e432b..0af1306 100644
+--- a/drivers/media/video/msm/msm_mctl.c
++++ b/drivers/media/video/msm/msm_mctl.c
+@@ -43,7 +43,7 @@
+ #include "msm_csi_register.h"
+ 
+ #ifdef CONFIG_MSM_CAMERA_DEBUG
+-#define D(fmt, args...) pr_debug("msm_mctl: " fmt, ##args)
++#define  D(fmt, args...) pr_debug("msm_mctl: " fmt, ##args)
+ #else
+ #define D(fmt, args...) do {} while (0)
+ #endif
+@@ -191,6 +191,12 @@ static int msm_get_sensor_info(
+ 	sdata = mctl->sdata;
+ 	D("%s: sensor_name %s\n", __func__, sdata->sensor_name);
+ 
++	if ((sdata->camera_type == BACK_CAMERA_3D) ||
++		(sdata->camera_type == BACK_CAMERA_INT_3D))
++		info.support_3d = true;
++	else
++		info.support_3d = false;
++
+ 	memcpy(&info.name[0], sdata->sensor_name, MAX_SENSOR_NAME);
+ 	info.flash_enabled = sdata->flash_data->flash_type !=
+ 					MSM_CAMERA_FLASH_NONE;
+@@ -282,7 +288,7 @@ static int msm_mctl_cmd(struct msm_cam_media_controller *p_mctl,
+ 		pr_err("%s: param is NULL", __func__);
+ 		return -EINVAL;
+ 	}
+-	D("%s:%d: cmd %d\n", __func__, __LINE__, cmd);
++	D("%s:%d: cmd %d\n", __func__, __LINE__, _IOC_NR(cmd));
+ 
+ 	/* ... call sensor, ISPIF or VEF subdev*/
+ 	switch (cmd) {
+@@ -500,23 +506,56 @@ static int msm_mctl_cmd(struct msm_cam_media_controller *p_mctl,
+ 			core, ioctl, VIDIOC_MSM_ISPIF_CFG, argp);
+ 		break;
+ 
+-	case MSM_CAM_IOCTL_CSIPHY_IO_CFG:
+-		if (p_mctl->csiphy_sdev)
+-			rc = v4l2_subdev_call(p_mctl->csiphy_sdev,
++	case MSM_CAM_IOCTL_CSIPHY_IO_CFG: {
++		struct csiphy_cfg_data cdata;
++		CDBG("%s: %d csiphy_io_cfg called\n", __func__, __LINE__);
++		if (copy_from_user(&cdata,
++			(void *)arg,
++			sizeof(struct csiphy_cfg_data))) {
++			pr_err("%s: %d failed\n", __func__, __LINE__);
++			return -EFAULT;
++		}
++		CDBG("%s: %d csiphy_io_cfg userparams got it\n", __func__, __LINE__);
++		if (p_mctl->csiphy_sdev[cdata.core_index]) {
++			CDBG("%s: %d csiphy_io_cfg icalling subdev core_index (%d)\n", __func__, __LINE__, cdata.core_index);
++			rc = v4l2_subdev_call(p_mctl->csiphy_sdev[cdata.core_index],
+ 				core, ioctl, VIDIOC_MSM_CSIPHY_CFG, argp);
++		}
++		CDBG("%s: %d csiphy_io_cfg done \n", __func__, __LINE__);
+ 		break;
++	}
+ 
+-	case MSM_CAM_IOCTL_CSIC_IO_CFG:
+-		if (p_mctl->csic_sdev)
+-			rc = v4l2_subdev_call(p_mctl->csic_sdev,
++	case MSM_CAM_IOCTL_CSIC_IO_CFG: {
++		struct csic_cfg_data cdata;
++		CDBG("%s: %d csic_io_cfg called\n", __func__, __LINE__);
++		if (copy_from_user(&cdata,
++			(void *)arg,
++			sizeof(struct csic_cfg_data))) {
++			pr_err("%s: %d failed\n", __func__, __LINE__);
++			return -EFAULT;
++		}
++		CDBG("%s: %d csic_io_cfg userparams got \n", __func__, __LINE__);
++		if (p_mctl->csic_sdev[cdata.core_index])
++			rc = v4l2_subdev_call(p_mctl->csic_sdev[cdata.core_index],
+ 				core, ioctl, VIDIOC_MSM_CSIC_CFG, argp);
+ 		break;
++	}
+ 
+-	case MSM_CAM_IOCTL_CSID_IO_CFG:
+-		if (p_mctl->csid_sdev)
+-			rc = v4l2_subdev_call(p_mctl->csid_sdev,
++	case MSM_CAM_IOCTL_CSID_IO_CFG: {
++		struct csid_cfg_data cdata;
++		CDBG("%s: %d csid_io_cfg called\n", __func__, __LINE__);
++		if (copy_from_user(&cdata,
++			(void *)arg,
++			sizeof(struct csid_cfg_data))) {
++			pr_err("%s: %d failed\n", __func__, __LINE__);
++			return -EFAULT;
++		}
++		CDBG("%s: %d csid_io_cfg userparams got \n", __func__, __LINE__);
++		if (p_mctl->csid_sdev[cdata.core_index])
++			rc = v4l2_subdev_call(p_mctl->csid_sdev[cdata.core_index],
+ 				core, ioctl, VIDIOC_MSM_CSID_CFG, argp);
+ 		break;
++	}
+ 
+ 	case MSM_CAM_IOCTL_AXI_INIT:
+ 		if (p_mctl->axi_sdev) {
+@@ -578,6 +617,12 @@ static int msm_mctl_open(struct msm_cam_media_controller *p_mctl,
+ 	s_ctrl = get_sctrl(p_mctl->sensor_sdev);
+ 	sinfo = (struct msm_camera_sensor_info *) s_ctrl->sensordata;
+ 	camdev = sinfo->pdata;
++
++	p_mctl->mode_3d = ((sinfo->camera_type == BACK_CAMERA_INT_3D) 
++					|| (sinfo->camera_type == BACK_CAMERA_3D)) ?  1 : 0;
++
++	CDBG("%s: pmctl in 3d mode? (%d)\n", __func__, p_mctl->mode_3d);
++
+ 	mutex_lock(&p_mctl->lock);
+ 	/* open sub devices - once only*/
+ 	if (!p_mctl->opencnt) {
+@@ -607,7 +652,7 @@ static int msm_mctl_open(struct msm_cam_media_controller *p_mctl,
+ 			goto act_power_up_failed;
+ 		}
+ 
+-		if (p_mctl->csic_sdev)
++		if (p_mctl->csic_sdev[0])
+ 			csi_info.is_csic = 1;
+ 		else
+ 			csi_info.is_csic = 0;
+@@ -653,8 +698,8 @@ static void msm_mctl_release(struct msm_cam_media_controller *p_mctl)
+ 		v4l2_subdev_call(p_mctl->sensor_sdev, core, ioctl,
+ 			VIDIOC_MSM_SENSOR_RELEASE, NULL);
+ 
+-		if (p_mctl->csic_sdev) {
+-			v4l2_subdev_call(p_mctl->csic_sdev, core, ioctl,
++		if (p_mctl->csic_sdev[0]) {
++			v4l2_subdev_call(p_mctl->csic_sdev[0], core, ioctl,
+ 				VIDIOC_MSM_CSIC_RELEASE, NULL);
+ 		}
+ 
+@@ -669,16 +714,35 @@ static void msm_mctl_release(struct msm_cam_media_controller *p_mctl)
+ 				VIDIOC_MSM_AXI_RELEASE, NULL);
+ 		}
+ 
+-		if (p_mctl->csiphy_sdev) {
+-			v4l2_subdev_call(p_mctl->csiphy_sdev, core, ioctl,
++		if (p_mctl->csiphy_sdev[0]) {
++			v4l2_subdev_call(p_mctl->csiphy_sdev[0], core, ioctl,
++				VIDIOC_MSM_CSIPHY_RELEASE,
++				sinfo->sensor_platform_info->csi_lane_params);
++		}
++
++		if (p_mctl->csid_sdev[0]) {
++			v4l2_subdev_call(p_mctl->csid_sdev[0], core, ioctl,
++				VIDIOC_MSM_CSID_RELEASE, NULL);
++		}
++
++		if (p_mctl->mode_3d) {
++
++		if (p_mctl->csic_sdev[1]) {
++			v4l2_subdev_call(p_mctl->csic_sdev[1], core, ioctl,
++				VIDIOC_MSM_CSIC_RELEASE, NULL);
++		}
++
++		if (p_mctl->csiphy_sdev[1]) {
++			v4l2_subdev_call(p_mctl->csiphy_sdev[1], core, ioctl,
+ 				VIDIOC_MSM_CSIPHY_RELEASE,
+ 				sinfo->sensor_platform_info->csi_lane_params);
+ 		}
+ 
+-		if (p_mctl->csid_sdev) {
+-			v4l2_subdev_call(p_mctl->csid_sdev, core, ioctl,
++		if (p_mctl->csid_sdev[1]) {
++			v4l2_subdev_call(p_mctl->csid_sdev[1], core, ioctl,
+ 				VIDIOC_MSM_CSID_RELEASE, NULL);
+ 		}
++		} /* end mode_3d */
+ 
+ 		if (p_mctl->act_sdev) {
+ 			v4l2_subdev_call(p_mctl->act_sdev, core, s_power, 0);
+diff --git a/drivers/media/video/msm/server/msm_cam_server.c b/drivers/media/video/msm/server/msm_cam_server.c
+index acb2be8..b474fcb 100644
+--- a/drivers/media/video/msm/server/msm_cam_server.c
++++ b/drivers/media/video/msm/server/msm_cam_server.c
+@@ -1867,6 +1867,30 @@ static void msm_cam_server_subdev_notify(struct v4l2_subdev *sd,
+ 				s_crystal_freq, *(uint32_t *)arg, 0);
+ 		}
+ 		break;
++	case NOTIFY_CSIPHY_CFG:
++		p_mctl = v4l2_get_subdev_hostdata(sd);
++		if (p_mctl) {
++			struct msm_camera_csiphy_params *params =
++				(struct msm_camera_csiphy_params *)arg;
++			if(p_mctl->csiphy_sdev[params->csiphy_index]) {
++				rc = v4l2_subdev_call(
++					p_mctl->csiphy_sdev[params->csiphy_index],
++					core, ioctl, VIDIOC_MSM_CSIPHY_CFG, arg);
++			}
++		}
++		break;
++	case NOTIFY_CSID_CFG:
++		p_mctl = v4l2_get_subdev_hostdata(sd);
++		if (p_mctl) {
++			struct msm_camera_csid_params *params =
++				(struct msm_camera_csid_params *)arg;
++			if(p_mctl->csid_sdev[params->csid_index]) {
++				rc = v4l2_subdev_call(
++					p_mctl->csid_sdev[params->csid_index],
++					core, ioctl, VIDIOC_MSM_CSID_CFG, arg);
++			}
++		}
++		break;
+ 	case NOTIFY_GESTURE_EVT:
+ 		rc = v4l2_subdev_call(g_server_dev.gesture_device,
+ 			core, ioctl, VIDIOC_MSM_GESTURE_EVT, arg);
+@@ -2865,19 +2889,27 @@ static int msm_set_mctl_subdev(struct msm_cam_media_controller *pmctl,
+ 	struct v4l2_subdev *temp_sdev = NULL;
+ 	switch (set_data->sdev_type) {
+ 	case CSIPHY_DEV:
+-		pmctl->csiphy_sdev = msm_cam_find_subdev_node
++		pr_err("%s: Ignore CSIPHY_DEV\n", __func__);
++		rc = -EINVAL;
++		break;
++		/*pmctl->csiphy_sdev = msm_cam_find_subdev_node
+ 			(&g_server_dev.csiphy_device[0], set_data->revision);
+-		temp_sdev = pmctl->csiphy_sdev;
++		temp_sdev = pmctl->csiphy_sdev;*/
+ 		break;
+ 	case CSID_DEV:
+-		pmctl->csid_sdev = msm_cam_find_subdev_node
++		pr_err("%s: Ignore CSID_DEV\n", __func__);
++		rc = -EINVAL;
++		break;
++	/*	pmctl->csid_sdev = msm_cam_find_subdev_node
+ 			(&g_server_dev.csid_device[0], set_data->revision);
+-		temp_sdev = pmctl->csid_sdev;
++		temp_sdev = pmctl->csid_sdev;*/
+ 		break;
+ 	case CSIC_DEV:
+-		pmctl->csic_sdev = msm_cam_find_subdev_node
++		pr_err("%s: Ignore CSIC_DEV\n", __func__);
++		rc = -EINVAL;
++		/*pmctl->csic_sdev = msm_cam_find_subdev_node
+ 			(&g_server_dev.csic_device[0], set_data->revision);
+-		temp_sdev = pmctl->csic_sdev;
++		temp_sdev = pmctl->csic_sdev;*/
+ 		break;
+ 	case ISPIF_DEV:
+ 		pmctl->ispif_sdev = msm_cam_find_subdev_node
+@@ -2914,15 +2946,19 @@ static int msm_unset_mctl_subdev(struct msm_cam_media_controller *pmctl,
+ 	struct msm_mctl_set_sdev_data *set_data)
+ {
+ 	int rc = 0;
++	pr_info("%s: unset %d\n", __func__, set_data->sdev_type);
+ 	switch (set_data->sdev_type) {
+ 	case CSIPHY_DEV:
+-		pmctl->csiphy_sdev = NULL;
++		pmctl->csiphy_sdev[0] = NULL;
++		pmctl->csiphy_sdev[1] = NULL;
+ 		break;
+ 	case CSID_DEV:
+-		pmctl->csid_sdev = NULL;
++		pmctl->csid_sdev[0] = NULL;
++		pmctl->csid_sdev[1] = NULL;
+ 		break;
+ 	case CSIC_DEV:
+-		pmctl->csic_sdev = NULL;
++		pmctl->csic_sdev[0] = NULL;
++		pmctl->csic_sdev[1] = NULL;
+ 		break;
+ 	case ISPIF_DEV:
+ 		pmctl->ispif_sdev = NULL;
+diff --git a/include/media/msm_camera.h b/include/media/msm_camera.h
+index 16b0fac..71baf63 100644
+--- a/include/media/msm_camera.h
++++ b/include/media/msm_camera.h
+@@ -1403,6 +1403,7 @@ struct msm_camera_csid_params {
+ 	uint8_t lane_cnt;
+ 	uint16_t lane_assign;
+ 	uint8_t phy_sel;
++	uint8_t csid_index;
+ 	struct msm_camera_csid_lut_params lut_params;
+ };
+ 
+@@ -1411,6 +1412,7 @@ struct msm_camera_csiphy_params {
+ 	uint8_t settle_cnt;
+ 	uint16_t lane_mask;
+ 	uint8_t combo_mode;
++	uint8_t csiphy_index;
+ };
+ 
+ struct msm_camera_csi2_params {
+@@ -1440,6 +1442,7 @@ enum csic_cfg_type_t {
+ struct csic_cfg_data {
+ 	enum csic_cfg_type_t cfgtype;
+ 	struct msm_camera_csi_params *csic_params;
++	uint8_t core_index;
+ };
+ 
+ enum csid_cfg_type_t {
+@@ -1453,6 +1456,7 @@ struct csid_cfg_data {
+ 		uint32_t csid_version;
+ 		struct msm_camera_csid_params *csid_params;
+ 	} cfg;
++	uint8_t core_index;
+ };
+ 
+ enum csiphy_cfg_type_t {
+@@ -1463,6 +1467,7 @@ enum csiphy_cfg_type_t {
+ struct csiphy_cfg_data {
+ 	enum csiphy_cfg_type_t cfgtype;
+ 	struct msm_camera_csiphy_params *csiphy_params;
++	uint8_t core_index;
+ };
+ 
+ #define CSI_EMBED_DATA 0x12
+@@ -1542,9 +1547,15 @@ struct msm_ispif_params {
+ 	uint8_t vfe_intf;
+ };
+ 
++struct msm_ispif_output_params {
++       uint8_t is3D;
++       uint32_t x_output_size;
++};
++
+ struct msm_ispif_params_list {
+ 	uint32_t len;
+ 	struct msm_ispif_params params[4];
++	struct msm_ispif_output_params output_param;
+ };
+ 
+ enum ispif_cfg_type_t {

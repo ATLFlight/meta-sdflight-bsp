@@ -1,0 +1,43 @@
+diff --git a/drivers/media/video/msm/Kconfig b/drivers/media/video/msm/Kconfig
+index 750256c..1fe6786 100644
+--- a/drivers/media/video/msm/Kconfig
++++ b/drivers/media/video/msm/Kconfig
+@@ -232,6 +232,20 @@ config VB6801
+ 	---help---
+ 	  5M with flash
+ 
++config QS_IMX111
++   bool "Sensor QS_IMX111 (BAYER 8M 3D)"
++   depends on MSM_CAMERA && ARCH_MSM8960
++   default n
++   ---help---
++     SONY 8 MP Bayer Sensor (3D)
++
++config QS_IMX111_ACT
++   bool "Actuator QS_IMX111 (BAYER 8M)"
++   depends on MSM_CAMERA && ARCH_MSM8960 && IMX111
++   default n
++   ---help---
++     Actuator for SONY 8 MP Bayer Sensor
++
+ config MSM_CAMERA_FLASH
+ 	bool "QTI MSM camera flash support"
+ 	depends on MSM_CAMERA
+diff --git a/drivers/media/video/msm/actuators/Makefile b/drivers/media/video/msm/actuators/Makefile
+index 70a3a19..6950e09 100644
+--- a/drivers/media/video/msm/actuators/Makefile
++++ b/drivers/media/video/msm/actuators/Makefile
+@@ -2,3 +2,4 @@ GCC_VERSION      := $(shell $(CONFIG_SHELL) $(PWD)/scripts/gcc-version.sh $(CROS
+ EXTRA_CFLAGS += -Idrivers/media/video/msm
+ EXTRA_CFLAGS += -Idrivers/media/video/msm/io
+ obj-$(CONFIG_MSM_ACTUATOR) += msm_actuator.o
++obj-$(CONFIG_QS_IMX111_ACT) += qs_imx111_act.o
+diff --git a/drivers/media/video/msm/sensors/Makefile b/drivers/media/video/msm/sensors/Makefile
+index a900985..32a716a 100644
+--- a/drivers/media/video/msm/sensors/Makefile
++++ b/drivers/media/video/msm/sensors/Makefile
+@@ -18,3 +18,4 @@ obj-$(CONFIG_WEBCAM_OV9726) += ov9726_v4l2.o
+ obj-$(CONFIG_OV7692) += ov7692_v4l2.o
+ obj-$(CONFIG_VX6953) += vx6953.o
+ obj-$(CONFIG_OV9724) += ov9724_v4l2.o
++obj-$(CONFIG_QS_IMX111) += qs_imx111_v4l2.o

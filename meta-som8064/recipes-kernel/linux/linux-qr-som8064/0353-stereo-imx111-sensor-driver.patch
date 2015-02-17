@@ -1,0 +1,880 @@
+diff --git a/drivers/media/video/msm/sensors/qs_imx111_v4l2.c b/drivers/media/video/msm/sensors/qs_imx111_v4l2.c
+new file mode 100644
+index 0000000..c265b05
+--- /dev/null
++++ b/drivers/media/video/msm/sensors/qs_imx111_v4l2.c
+@@ -0,0 +1,874 @@
++/* Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++#include <linux/delay.h>
++#include <linux/debugfs.h>
++#include <linux/types.h>
++#include <linux/i2c.h>
++#include <linux/uaccess.h>
++#include <linux/miscdevice.h>
++#include <linux/slab.h>
++#include <media/msm_camera.h>
++#include "msm_sensor.h"
++#include "msm.h"
++#include "msm_ispif.h"
++#include <mach/gpio.h>
++#include <mach/camera.h>
++
++/*#define CAMERA_OLDER*/
++
++#define SENSOR_NAME "qs_imx111"
++#define PLATFORM_DRIVER_NAME "msm_camera_qs_imx111"
++#define qs_imx111_obj qs_imx111_##obj
++/*
++* =============================================================
++*	SENSOR REGISTER DEFINES
++* ==============================================================
++*/
++/* Gain */
++#define REG_GLOBAL_GAIN					0x0204
++#define REG_GR_GAIN						0x0206
++#define REG_R_GAIN						0x0208
++#define REG_B_GAIN						0x020A
++#define REG_GB_GAIN						0x020C
++/*
++#define FULL_SIDE_BY_SIDE_3D_PREVIEW
++*/
++DEFINE_MUTEX(qs_imx111_mut);
++static struct msm_sensor_ctrl_t qs_imx111_s_ctrl;
++
++static struct msm_camera_i2c_reg_conf qs_imx111_start_settings[] = {
++	{0x0100, 0x01},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_stop_settings[] = {
++	{0x0100, 0x00},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_groupon_settings[] = {
++	{0x104, 0x01},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_groupoff_settings[] = {
++	{0x104, 0x00},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_prev_settings[] = {
++	{0x0305, 0x02},
++	{0x0307, 0x38},
++	{0x30A4, 0x02},
++	{0x303C, 0x4B},
++	{0x0340, 0x04},
++	{0x0341, 0xF8},
++	{0x0342, 0x0D},
++	{0x0343, 0xD0},
++	{0x0344, 0x00},
++	{0x0345, 0x08},
++	{0x0346, 0x00},
++	{0x0347, 0x30},
++	{0x0348, 0x0C},
++	{0x0349, 0xD7},
++	{0x034A, 0x09},
++	{0x034B, 0xCF},
++	{0x034C, 0x06},
++	{0x034D, 0x68},
++	{0x034E, 0x04},
++	{0x034F, 0xD0},
++	{0x0381, 0x01},
++	{0x0383, 0x03},
++	{0x0385, 0x01},
++	{0x0387, 0x03},
++	{0x303D, 0x10},
++	{0x303E, 0x40},
++	{0x3040, 0x08},
++	{0x3041, 0x97},
++	{0x3048, 0x01},
++	{0x304C, 0x6F},
++	{0x304D, 0x03},
++	{0x3064, 0x12},
++	{0x3073, 0x00},
++	{0x3074, 0x11},
++	{0x3075, 0x11},
++	{0x3076, 0x11},
++	{0x3077, 0x11},
++	{0x3079, 0x00},
++	{0x307A, 0x00},
++	{0x309B, 0x28},
++	{0x30A0, 0x14},
++	{0x30A1, 0x09},
++	{0x30AA, 0x03},
++	{0x30D5, 0x09},
++	{0x30D6, 0x01},
++	{0x30D7, 0x01},
++	{0x30D8, 0x64},
++	{0x30D9, 0x89},
++	{0x30DE, 0x02},
++	{0x30DF, 0x20},
++	{0x3102, 0x08},
++	{0x3103, 0x22},
++	{0x3104, 0x20},
++	{0x3105, 0x00},
++	{0x3106, 0x87},
++	{0x3107, 0x00},
++	{0x3108, 0x03},
++	{0x3109, 0x02},
++	{0x310A, 0x03},
++	{0x315C, 0x9C},
++	{0x315D, 0x9B},
++	{0x316E, 0x9D},
++	{0x316F, 0x9C},
++	{0x3318, 0x72},
++	{0x3348, 0xE0},
++};
++#ifndef FULL_SIDE_BY_SIDE_3D_PREVIEW
++static struct msm_camera_i2c_reg_conf qs_imx111_3d_prev_settings[] = {
++	{0x0305, 0x02},
++	{0x0307, 0x38},
++	{0x30A4, 0x02},
++	{0x303C, 0x4B},
++	{0x0340, 0x04},
++	{0x0341, 0xF8},
++	{0x0342, 0x0D},
++	{0x0343, 0xD0},
++	{0x0344, 0x00},
++	{0x0345, 0x08},
++	{0x0346, 0x00},
++	{0x0347, 0x30},
++	{0x0348, 0x0C},
++	{0x0349, 0xD7},
++	{0x034A, 0x09},
++	{0x034B, 0xCF},
++	{0x034C, 0x03},
++	{0x034D, 0x34},
++	{0x034E, 0x04},
++	{0x034F, 0xD0},
++	{0x0381, 0x05},
++	{0x0383, 0x03},
++	{0x0385, 0x01},
++	{0x0387, 0x03},
++	{0x303D, 0x10},
++	{0x303E, 0x40},
++	{0x3040, 0x08},
++	{0x3041, 0x97},
++	{0x3048, 0x01},
++	{0x304C, 0x6F},
++	{0x304D, 0x03},
++	{0x3064, 0x12},
++	{0x3073, 0x00},
++	{0x3074, 0x11},
++	{0x3075, 0x11},
++	{0x3076, 0x11},
++	{0x3077, 0x11},
++	{0x3079, 0x00},
++	{0x307A, 0x00},
++	{0x309B, 0x28},
++	{0x30A0, 0x14},
++	{0x30A1, 0x09},
++	{0x30AA, 0x03},
++	{0x30D5, 0x09},
++	{0x30D6, 0x00},
++	{0x30D7, 0x00},
++	{0x30D8, 0x00},
++	{0x30D9, 0x00},
++	{0x30DE, 0x04},
++	{0x30DF, 0x20},
++	{0x3102, 0x08},
++	{0x3103, 0x22},
++	{0x3104, 0x20},
++	{0x3105, 0x00},
++	{0x3106, 0x87},
++	{0x3107, 0x00},
++	{0x3108, 0x03},
++	{0x3109, 0x02},
++	{0x310A, 0x03},
++	{0x315C, 0x9C},
++	{0x315D, 0x9B},
++	{0x316E, 0x9D},
++	{0x316F, 0x9C},
++	{0x3318, 0x7A},
++	{0x3348, 0xE0},
++};
++#endif
++static struct msm_camera_i2c_reg_conf qs_imx111_video_settings[] = {
++	/* Video E 30 fps */
++	{0x0305, 0x02},
++	{0x0307, 0x32},
++	{0x30A4, 0x02},
++	{0x303C, 0x4B},
++	{0x0340, 0x07},
++	{0x0341, 0x5C},
++	{0x0342, 0x0D},
++	{0x0343, 0xAC},
++	{0x0344, 0x00},
++	{0x0345, 0x16},
++	{0x0346, 0x01},
++	{0x0347, 0x6E},
++	{0x0348, 0x0C},
++	{0x0349, 0xCB},
++	{0x034A, 0x08},
++	{0x034B, 0x93},
++	{0x034C, 0x07},
++	{0x034D, 0xA0},
++	{0x034E, 0x04},
++	{0x034F, 0x4A},
++	{0x0381, 0x01},
++	{0x0383, 0x01},
++	{0x0385, 0x01},
++	{0x0387, 0x01},
++	{0x303D, 0x10},
++	{0x303E, 0x00},
++	{0x3040, 0x08},
++	{0x3041, 0x91},
++	{0x3048, 0x00},
++	{0x304C, 0x67},
++	{0x304D, 0x03},
++	{0x3064, 0x10},
++	{0x3073, 0xA0},
++	{0x3074, 0x12},
++	{0x3075, 0x12},
++	{0x3076, 0x12},
++	{0x3077, 0x11},
++	{0x3079, 0x0A},
++	{0x307A, 0x0A},
++	{0x309B, 0x60},
++	{0x30A0, 0x15},
++	{0x30A1, 0x08},
++	{0x30AA, 0x03},
++	{0x30D5, 0x20},
++	{0x30D6, 0x85},
++	{0x30D7, 0x2A},
++	{0x30DE, 0x00},
++	{0x30DF, 0x21},
++	{0x3102, 0x08},
++	{0x3103, 0x1D},
++	{0x3104, 0x1E},
++	{0x3105, 0x00},
++	{0x3106, 0x74},
++	{0x3107, 0x00},
++	{0x3108, 0x03},
++	{0x3109, 0x02},
++	{0x310A, 0x03},
++	{0x315C, 0x37},
++	{0x315D, 0x36},
++	{0x316E, 0x38},
++	{0x316F, 0x37},
++	{0x3318, 0x63},
++	{0x3348, 0xA0},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_snap_settings[] = {
++	/* 22 fps */
++	{0x0305, 0x02},
++	{0x0307, 0x53},
++	{0x30A4, 0x02},
++	{0x303C, 0x4B},
++	{0x0340, 0x09},
++	{0x0341, 0xD4},
++	{0x0342, 0x0D},
++	{0x0343, 0xD0},
++	{0x0344, 0x00},
++	{0x0345, 0x08},
++	{0x0346, 0x00},
++	{0x0347, 0x30},
++	{0x0348, 0x0C},
++	{0x0349, 0xD7},
++	{0x034A, 0x09},
++	{0x034B, 0xCF},
++	{0x034C, 0x0C},
++	{0x034D, 0xD0},
++	{0x034E, 0x09},
++	{0x034F, 0xA0},
++	{0x0381, 0x01},
++	{0x0383, 0x01},
++	{0x0385, 0x01},
++	{0x0387, 0x01},
++	{0x303D, 0x00},
++	{0x303E, 0x41},
++	{0x3040, 0x08},
++	{0x3041, 0x97},
++	{0x3048, 0x00},
++	{0x304C, 0x6F},
++	{0x304D, 0x03},
++	{0x3064, 0x12},
++	{0x3073, 0x00},
++	{0x3074, 0x11},
++	{0x3075, 0x11},
++	{0x3076, 0x11},
++	{0x3077, 0x11},
++	{0x3079, 0x00},
++	{0x307A, 0x00},
++	{0x309B, 0x20},
++	{0x30A0, 0x14},
++	{0x30A1, 0x08},
++	{0x30AA, 0x03},
++	{0x30D5, 0x00},
++	{0x30D6, 0x85},
++	{0x30D7, 0x2A},
++	{0x30DE, 0x00},
++	{0x30DF, 0x20},
++	{0x3102, 0x10},
++	{0x3103, 0x44},
++	{0x3104, 0x40},
++	{0x3105, 0x00},
++	{0x3106, 0x0D},
++	{0x3107, 0x01},
++	{0x3108, 0x09},
++	{0x3109, 0x08},
++	{0x310A, 0x0F},
++	{0x315C, 0x5D},
++	{0x315D, 0x5C},
++	{0x316E, 0x5E},
++	{0x316F, 0x5D},
++	{0x3318, 0x60},
++	{0x3348, 0xE0},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_3d_snap_settings[] = {
++	/* 22 fps */
++	{0x0305, 0x02},
++	{0x0307, 0x53},
++	{0x30A4, 0x02},
++	{0x303C, 0x4B},
++	{0x0340, 0x09},
++	{0x0341, 0xD4},
++	{0x0342, 0x0D},
++	{0x0343, 0xD0},
++	{0x0344, 0x00},
++	{0x0345, 0x08},
++	{0x0346, 0x00},
++	{0x0347, 0x30},
++	{0x0348, 0x0C},
++	{0x0349, 0xD7},
++	{0x034A, 0x09},
++	{0x034B, 0xCF},
++	{0x034C, 0x06},
++	{0x034D, 0x68},
++	{0x034E, 0x09},
++	{0x034F, 0xA0},
++	{0x0381, 0x01},
++	{0x0383, 0x03},
++	{0x0385, 0x01},
++	{0x0387, 0x01},
++	{0x303D, 0x00},
++	{0x303E, 0x41},
++	{0x3040, 0x08},
++	{0x3041, 0x97},
++	{0x3048, 0x00},
++	{0x304C, 0x6F},
++	{0x304D, 0x03},
++	{0x3064, 0x12},
++	{0x3073, 0x00},
++	{0x3074, 0x11},
++	{0x3075, 0x11},
++	{0x3076, 0x11},
++	{0x3077, 0x11},
++	{0x3079, 0x00},
++	{0x307A, 0x00},
++	{0x309B, 0x20},
++	{0x30A0, 0x14},
++	{0x30A1, 0x08},
++	{0x30AA, 0x03},
++	{0x30D5, 0x09},
++	{0x30D6, 0x01},
++	{0x30D7, 0x01},
++	{0x30D8, 0x64},
++	{0x30D9, 0x89},
++	{0x30DE, 0x02},
++	{0x30DF, 0x20},
++	{0x3102, 0x10},
++	{0x3103, 0x44},
++	{0x3104, 0x40},
++	{0x3105, 0x00},
++	{0x3106, 0x0D},
++	{0x3107, 0x01},
++	{0x3108, 0x09},
++	{0x3109, 0x08},
++	{0x310A, 0x0F},
++	{0x315C, 0x5D},
++	{0x315D, 0x5C},
++	{0x316E, 0x5E},
++	{0x316F, 0x5D},
++	{0x3318, 0x70},
++	{0x3348, 0xE0},
++};
++
++static struct msm_camera_i2c_reg_conf qs_imx111_recommend_settings[] = {
++	{0x3080, 0x50},
++	{0x3087, 0x53},
++	{0x309D, 0x94},
++	{0x30B1, 0x03},
++	{0x30C6, 0x00},
++	{0x30C7, 0x00},
++	{0x3115, 0x0B},
++	{0x3118, 0x30},
++	{0x311D, 0x25},
++	{0x3121, 0x0A},
++	{0x3212, 0xF2},
++	{0x3213, 0x0F},
++	{0x3215, 0x0F},
++	{0x3217, 0x0B},
++	{0x3219, 0x0B},
++	{0x321B, 0x0D},
++	{0x321D, 0x0D},
++	{0x32AA, 0x11},
++	{0x3032, 0x40},
++};
++
++static struct v4l2_subdev_info qs_imx111_subdev_info[] = {
++	{
++	.code   = V4L2_MBUS_FMT_SBGGR10_1X10,
++	.colorspace = V4L2_COLORSPACE_JPEG,
++	.fmt    = 1,
++	.order    = 0,
++	},
++	/* more can be supported, to be added later */
++};
++
++static struct msm_camera_i2c_conf_array qs_imx111_init_conf[] = {
++	{&qs_imx111_recommend_settings[0],
++	ARRAY_SIZE(qs_imx111_recommend_settings), 0, MSM_CAMERA_I2C_BYTE_DATA}
++};
++
++static struct msm_camera_i2c_conf_array qs_imx111_confs[] = {
++	{&qs_imx111_snap_settings[0],
++	ARRAY_SIZE(qs_imx111_snap_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++	{&qs_imx111_prev_settings[0],
++	ARRAY_SIZE(qs_imx111_prev_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#if 0
++	{&qs_imx111_video_settings[0],
++	ARRAY_SIZE(qs_imx111_video_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#endif
++#ifndef FULL_SIDE_BY_SIDE_3D_PREVIEW
++	{&qs_imx111_3d_prev_settings[0],
++	ARRAY_SIZE(qs_imx111_3d_prev_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#else
++	{&qs_imx111_3d_snap_settings[0],
++	ARRAY_SIZE(qs_imx111_3d_snap_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#endif
++#ifndef FULL_SIDE_BY_SIDE_3D_PREVIEW
++	{&qs_imx111_3d_prev_settings[0],
++	ARRAY_SIZE(qs_imx111_3d_prev_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#else
++	{&qs_imx111_3d_snap_settings[0],
++	ARRAY_SIZE(qs_imx111_3d_snap_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++#endif
++	{&qs_imx111_3d_snap_settings[0],
++	ARRAY_SIZE(qs_imx111_3d_snap_settings), 0, MSM_CAMERA_I2C_BYTE_DATA},
++};
++
++static struct msm_sensor_output_info_t qs_imx111_dimensions[] = {
++	{
++		/* 22.5 fps */
++		.x_output = 0x0CD0, /* 3280 */
++		.y_output = 0x9A0, /* 2464 */
++		.line_length_pclk = 0xDD0, /* 3536 */
++		.frame_length_lines = 0x9D4, /* 2516 */
++		.vt_pixel_clk = 199200000,
++		.op_pixel_clk = 199200000,
++		.binning_factor = 1,
++	},
++	{
++		/* 30 fps preview */
++		.x_output = 0x668, /* 1640 */
++		.y_output = 0x4D0, /* 1232 */
++		.line_length_pclk = 0xDD0, /* 3536 */
++		.frame_length_lines = 0x4F8, /* 1272 */
++		.vt_pixel_clk = 134400000,
++		.op_pixel_clk = 134400000,
++		.binning_factor = 1,
++	},
++#if 0
++	{
++		/* 30 fps video */
++		.x_output = 0x7A0,
++		.y_output = 0x44A,
++		.line_length_pclk = 0xDAC,
++		.frame_length_lines = 0x75C,
++		.vt_pixel_clk = 120000000,
++		.op_pixel_clk = 120000000,
++		.binning_factor = 1,
++	},
++#endif
++#ifndef FULL_SIDE_BY_SIDE_3D_PREVIEW
++	{
++	/* 3D side by side half 30 fps preview */
++	.x_output = 0x334, /* 820 */
++	.y_output = 0x4D0, /* 1232 */
++	.line_length_pclk = 0xDD0, /* 3536 */
++	.frame_length_lines = 0x4F8, /* 1272 */
++	.vt_pixel_clk = 228570000,
++	.op_pixel_clk = 228570000,
++	.binning_factor = 1,
++	},
++#else
++	{
++	/* 3D side by side half 22.5 fps snapshot*/
++	.x_output = 0x668, /* 1640 */
++	.y_output = 0x9A0, /* 2464 */
++	.line_length_pclk = 0xDD0, /* 3536 */
++	.frame_length_lines = 0x9D4, /* 2516 */
++	.vt_pixel_clk = 199200000,
++	.op_pixel_clk = 199200000,
++	.binning_factor = 1,
++	},
++#endif
++#ifndef FULL_SIDE_BY_SIDE_3D_PREVIEW
++	{
++	/* 3D side by side half 30 fps preview */
++	.x_output = 0x334, /* 820 */
++	.y_output = 0x4D0, /* 1232 */
++	.line_length_pclk = 0xDD0, /* 3536 */
++	.frame_length_lines = 0x4F8, /* 1272 */
++	.vt_pixel_clk = 228570000,
++	.op_pixel_clk = 228570000,
++	.binning_factor = 1,
++	},
++#else
++	{
++	/* 3D side by side half 22.5 fps snapshot*/
++	.x_output = 0x668, /* 1640 */
++	.y_output = 0x9A0, /* 2464 */
++	.line_length_pclk = 0xDD0, /* 3536 */
++	.frame_length_lines = 0x9D4, /* 2516 */
++	.vt_pixel_clk = 199200000,
++	.op_pixel_clk = 199200000,
++	.binning_factor = 1,
++	},
++
++#endif
++	{
++	/* 3D side by side half 22.5 fps snapshot*/
++	.x_output = 0x668, /* 1640 */
++	.y_output = 0x9A0, /* 2464 */
++	.line_length_pclk = 0xDD0, /* 3536 */
++	.frame_length_lines = 0x9D4, /* 2516 */
++	.vt_pixel_clk = 228570000,
++	.op_pixel_clk = 228570000,
++	.binning_factor = 1,
++	},
++};
++
++#ifdef CAMERA_OLDER
++static struct msm_camera_csid_vc_cfg qs_imx111_cid_cfg[] = {
++	{0, CSI_RAW10, CSI_DECODE_10BIT},
++	{1, CSI_EMBED_DATA, CSI_DECODE_8BIT},
++	{2, CSI_RESERVED_DATA, CSI_DECODE_8BIT},
++};
++
++static struct msm_camera_csi2_params qs_imx111_csi_params[2] = {
++	{
++		.csid_params = {
++			.lane_cnt = 2,
++			.lane_assign = 0x9c,
++			.csid_index = 0,
++			.lut_params = {
++				.num_cid = 3,
++				.vc_cfg = qs_imx111_cid_cfg,
++			},
++		},
++		.csiphy_params = {
++			.lane_cnt = 2,
++			.lane_mask = 0x9,
++			.settle_cnt = 0x14,
++			.csiphy_index = 0,
++		},
++	},
++	{
++		.csid_params = {
++			.lane_cnt = 2,
++			.lane_assign = 0xe4,
++			.csid_index = 1,
++			.lut_params = {
++				.num_cid = 3,
++				.vc_cfg = qs_imx111_cid_cfg,
++			},
++		},
++		.csiphy_params = {
++			.lane_cnt = 2,
++			.lane_mask = 0x3,
++			.settle_cnt = 0x14,
++			.csiphy_index = 1,
++		},
++	},
++};
++
++static struct msm_camera_csi2_params *qs_imx111_csi_params_array[] = {
++	&qs_imx111_csi_params[0],
++	&qs_imx111_csi_params[0],
++	&qs_imx111_csi_params[0],
++	&qs_imx111_csi_params[0],
++	&qs_imx111_csi_params[0],
++};
++#endif
++
++static struct msm_sensor_output_reg_addr_t qs_imx111_reg_addr = {
++	.x_output = 0x34C,
++	.y_output = 0x34E,
++	.line_length_pclk = 0x342,
++	.frame_length_lines = 0x340,
++};
++
++static struct msm_sensor_id_info_t qs_imx111_id_info = {
++	.sensor_id_reg_addr = 0x0,
++	.sensor_id = 0x0111,
++};
++
++static struct msm_sensor_exp_gain_info_t qs_imx111_exp_gain_info = {
++	.coarse_int_time_addr = 0x202,
++	.global_gain_addr = 0x204,
++	.vert_offset = 5,
++};
++static const struct i2c_device_id qs_imx111_i2c_id[] = {
++	{SENSOR_NAME, (kernel_ulong_t)&qs_imx111_s_ctrl},
++	{ }
++};
++
++static struct i2c_driver qs_imx111_i2c_driver = {
++	.id_table = qs_imx111_i2c_id,
++	.probe  = msm_sensor_i2c_probe,
++	.driver = {
++		.name = SENSOR_NAME,
++	},
++};
++
++static struct msm_camera_i2c_client qs_imx111_sensor_i2c_client = {
++	.addr_type = MSM_CAMERA_I2C_WORD_ADDR,
++};
++
++#ifdef CAMERA_OLDER
++int32_t qs_imx111_sensor_setting(struct msm_sensor_ctrl_t *s_ctrl,
++			int update_type, int res)
++{
++	int32_t rc = 0;
++
++	v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++		NOTIFY_ISPIF_STREAM, (void *)ISPIF_STREAM(
++		PIX0, ISPIF_OFF_IMMEDIATELY));
++	usleep_range(9000, 10000);
++	v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++		NOTIFY_ISPIF_STREAM, (void *)ISPIF_STREAM(
++		PIX1, ISPIF_OFF_IMMEDIATELY));
++	usleep_range(9000, 10000);
++
++	s_ctrl->func_tbl->sensor_stop_stream(s_ctrl);
++	msleep(30);
++	if (update_type == MSM_SENSOR_REG_INIT) {
++		struct msm_camera_i2c_conf i2c_conf;
++		if (s_ctrl->sensordata->sensor_platform_info->i2c_conf) {
++			i2c_conf = *s_ctrl->sensordata->
++				sensor_platform_info->i2c_conf;
++			switch (s_ctrl->cam_mode) {
++			case MSM_SENSOR_MODE_2D_LEFT:
++				i2c_conf.i2c_mux_mode = MODE_L;
++				break;
++			case MSM_SENSOR_MODE_2D_RIGHT:
++				i2c_conf.i2c_mux_mode = MODE_R;
++				break;
++			case MSM_SENSOR_MODE_3D:
++				i2c_conf.i2c_mux_mode = MODE_DUAL;
++				break;
++			default:
++				pr_err("%s: Invalid cam_mode %d\n", __func__,
++					s_ctrl->cam_mode);
++				return -EINVAL;
++			}
++			msm_sensor_config_i2c_mux(&i2c_conf);
++		} else {
++			pr_err("%s: Invalid i2c_conf (NULL)\n", __func__);
++			return -EINVAL;
++		}
++		s_ctrl->curr_csi_params = NULL;
++		msm_sensor_enable_debugfs(s_ctrl);
++		msm_sensor_write_init_settings(s_ctrl);
++	} else if (update_type == MSM_SENSOR_UPDATE_PERIODIC) {
++		struct msm_camera_sensor_info *sinfo =
++			(struct msm_camera_sensor_info *) s_ctrl->sensordata;
++		struct msm_camera_device_platform_data *camdev = sinfo->pdata;
++		struct msm_ispif_params_list ispif_params;
++		uint32_t op_pixel_clk = s_ctrl->msm_sensor_reg->
++			output_settings[res].op_pixel_clk;
++
++		ispif_params.len = 1;
++		ispif_params.params[0].intftype = PIX0;
++		ispif_params.params[0].cid_mask = 0x0001;
++		ispif_params.params[0].csid = camdev[1].csid_core;
++		ispif_params.output_param.is3D = 0;
++		ispif_params.output_param.x_output_size =
++			qs_imx111_dimensions[res].x_output;
++
++		msm_sensor_write_res_settings(s_ctrl, res);
++		if (s_ctrl->curr_csi_params !=
++			s_ctrl->csi_params[res]) {
++			s_ctrl->curr_csi_params = s_ctrl->csi_params[res];
++			switch (s_ctrl->cam_mode) {
++			case MSM_SENSOR_MODE_3D:
++				ispif_params.len = 2;
++				ispif_params.params[1].intftype = PIX1;
++				ispif_params.params[1].cid_mask = 0x0001;
++				ispif_params.params[1].csid =
++					camdev[0].csid_core;
++				ispif_params.output_param.is3D = 1;
++
++			case MSM_SENSOR_MODE_2D_LEFT:
++				v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++					NOTIFY_CSID_CFG,
++					&s_ctrl->curr_csi_params[1]
++						.csid_params);
++				mb();
++				v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++					NOTIFY_CSIPHY_CFG,
++					&s_ctrl->curr_csi_params[1]
++						.csiphy_params);
++				mb();
++				msleep(20);
++
++				if (s_ctrl->cam_mode !=
++					MSM_SENSOR_MODE_3D)
++					break;
++			case MSM_SENSOR_MODE_2D_RIGHT:
++				if (s_ctrl->cam_mode !=
++					MSM_SENSOR_MODE_3D) {
++					ispif_params.params[0].csid =
++						camdev[0].csid_core;
++				}
++				v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++					NOTIFY_CSID_CFG,
++					&s_ctrl->curr_csi_params[0]
++						.csid_params);
++				mb();
++				v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++					NOTIFY_CSIPHY_CFG,
++					&s_ctrl->curr_csi_params[0]
++						.csiphy_params);
++				mb();
++				msleep(20);
++				break;
++			default:
++				break;
++			}
++			mb();
++			v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++				NOTIFY_CID_CHANGE, &ispif_params);
++		}
++
++		v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++			NOTIFY_PCLK_CHANGE, &op_pixel_clk);
++		v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++			NOTIFY_ISPIF_STREAM, (void *)ISPIF_STREAM(
++			PIX_0, ISPIF_ON_FRAME_BOUNDARY));
++		if (s_ctrl->cam_mode == MSM_SENSOR_MODE_3D) {
++			usleep_range(8000, 9000);
++			v4l2_subdev_notify(&s_ctrl->sensor_v4l2_subdev,
++			NOTIFY_ISPIF_STREAM, (void *)ISPIF_STREAM(
++			PIX_1, ISPIF_ON_FRAME_BOUNDARY));
++		}
++
++		s_ctrl->func_tbl->sensor_start_stream(s_ctrl);
++		msleep(30);
++	}
++	return rc;
++}
++#endif
++
++static int __init msm_sensor_init_module(void)
++{
++	return i2c_add_driver(&qs_imx111_i2c_driver);
++}
++
++static struct v4l2_subdev_core_ops qs_imx111_subdev_core_ops = {
++#ifndef CAMERA_OLDER
++	.s_ctrl = msm_sensor_v4l2_s_ctrl,
++	.queryctrl = msm_sensor_v4l2_query_ctrl,
++#endif
++	.ioctl = msm_sensor_subdev_ioctl,
++	.s_power = msm_sensor_power,
++};
++
++static struct v4l2_subdev_core_ops qs_imx111_subdev_core_ops;
++static struct v4l2_subdev_video_ops qs_imx111_subdev_video_ops = {
++	.enum_mbus_fmt = msm_sensor_v4l2_enum_fmt,
++};
++
++
++static struct v4l2_subdev_ops qs_imx111_subdev_ops = {
++	.core = &qs_imx111_subdev_core_ops,
++	.video  = &qs_imx111_subdev_video_ops,
++};
++
++static struct msm_sensor_fn_t qs_imx111_func_tbl = {
++	.sensor_start_stream = msm_sensor_start_stream,
++	.sensor_stop_stream = msm_sensor_stop_stream,
++	.sensor_group_hold_on = msm_sensor_group_hold_on,
++	.sensor_group_hold_off = msm_sensor_group_hold_off,
++	.sensor_set_fps = msm_sensor_set_fps,
++	.sensor_write_exp_gain = msm_sensor_write_exp_gain1,
++	.sensor_write_snapshot_exp_gain = msm_sensor_write_exp_gain1,
++#ifdef CAMERA_OLDER
++	.sensor_setting = qs_imx111_sensor_setting,
++#else
++	.sensor_setting = msm_sensor_setting,
++#endif
++	.sensor_set_sensor_mode = msm_sensor_set_sensor_mode,
++	.sensor_mode_init = msm_sensor_mode_init,
++	.sensor_get_output_info = msm_sensor_get_output_info,
++	.sensor_config = msm_sensor_config,
++	.sensor_power_up = msm_sensor_power_up,
++	.sensor_power_down = msm_sensor_power_down,
++#ifndef CAMERA_OLDER
++	/* new framework */
++	.sensor_get_csi_params = msm_sensor_get_csi_params,
++#endif
++};
++
++static struct msm_sensor_reg_t qs_imx111_regs = {
++	.default_data_type = MSM_CAMERA_I2C_BYTE_DATA,
++	.start_stream_conf = qs_imx111_start_settings,
++	.start_stream_conf_size = ARRAY_SIZE(qs_imx111_start_settings),
++	.stop_stream_conf = qs_imx111_stop_settings,
++	.stop_stream_conf_size = ARRAY_SIZE(qs_imx111_stop_settings),
++	.group_hold_on_conf = qs_imx111_groupon_settings,
++	.group_hold_on_conf_size = ARRAY_SIZE(qs_imx111_groupon_settings),
++	.group_hold_off_conf = qs_imx111_groupoff_settings,
++	.group_hold_off_conf_size =
++		ARRAY_SIZE(qs_imx111_groupoff_settings),
++	.init_settings = &qs_imx111_init_conf[0],
++	.init_size = ARRAY_SIZE(qs_imx111_init_conf),
++	.mode_settings = &qs_imx111_confs[0],
++	.output_settings = &qs_imx111_dimensions[0],
++	.num_conf = ARRAY_SIZE(qs_imx111_confs),
++};
++
++static struct msm_sensor_ctrl_t qs_imx111_s_ctrl = {
++	.msm_sensor_reg = &qs_imx111_regs,
++	.sensor_i2c_client = &qs_imx111_sensor_i2c_client,
++	.sensor_i2c_addr = 0x34,
++#ifdef CAMERA_OLDER
++	.sensor_eeprom_client = NULL,
++#endif
++	.sensor_output_reg_addr = &qs_imx111_reg_addr,
++	.sensor_id_info = &qs_imx111_id_info,
++	.sensor_exp_gain_info = &qs_imx111_exp_gain_info,
++	.cam_mode = MSM_SENSOR_MODE_INVALID,
++#ifdef CAMERA_OLDER
++	.csi_params = &qs_imx111_csi_params_array[0],
++#endif
++	.msm_sensor_mutex = &qs_imx111_mut,
++	.sensor_i2c_driver = &qs_imx111_i2c_driver,
++	.sensor_v4l2_subdev_info = qs_imx111_subdev_info,
++	.sensor_v4l2_subdev_info_size = ARRAY_SIZE(qs_imx111_subdev_info),
++	.sensor_v4l2_subdev_ops = &qs_imx111_subdev_ops,
++	.func_tbl = &qs_imx111_func_tbl,
++};
++
++module_init(msm_sensor_init_module);
++MODULE_DESCRIPTION("LG 8MP Bayer sensor driver");
++MODULE_LICENSE("GPL v2");

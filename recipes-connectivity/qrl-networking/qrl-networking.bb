@@ -10,6 +10,7 @@ PROVIDES = "qrl-networking"
 SRC_URI = "file://qrl-common-inc.sh \
            file://qrl-config-macaddr.sh \
            file://qrl-copy-firmware.sh \
+           file://qrl-checkpoint.sh \
           "
 
 PACKAGES = "${PN}"
@@ -22,4 +23,5 @@ do_install() {
     install -m 644 ${WORKDIR}/qrl-common-inc.sh ${D}${dest}
     install -m 755 ${WORKDIR}/qrl-config-macaddr.sh ${D}${dest}
     install -m 755 ${WORKDIR}/qrl-copy-firmware.sh ${D}${dest}
+    install -m 755 ${WORKDIR}/qrl-checkpoint.sh ${D}${dest}
 }

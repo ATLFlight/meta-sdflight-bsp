@@ -1,0 +1,453 @@
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index 7cab39a..bb4aec5 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -664,6 +664,85 @@ static struct msm_gpiomux_config apq8064_hdmi_configs[] __initdata = {
+ 	},
+ };
+ 
++static struct msm_gpiomux_config apq8064_constitution_gsbi_configs[] __initdata = {
++#if 0
++	/* NOTE: Since SOM gsbi4 is used for camera its configured 
++			 as part of camera data structures. */
++	{
++		.gpio      = 12,		/* GSBI4 QUP I2C_CLK */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
++		.gpio      = 13,		/* GSBI4 QUP I2C_DATA */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++#endif
++	{
++		.gpio      = 51,		/* GSBI5 UART TX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi5_suspended_cfg,
++			[GPIOMUX_ACTIVE] = &gsbi5_active_cfg,
++		},
++	},
++	{
++		.gpio      = 52,		/* GSBI5 UART RX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi5_suspended_cfg,
++			[GPIOMUX_ACTIVE] = &gsbi5_active_cfg,
++		},
++	},
++	{
++		.gpio      = 53,		/* GSBI5 I2C QUP SDA */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi5_suspended_cfg,
++			[GPIOMUX_ACTIVE] = &gsbi5_active_cfg,
++		},
++	},
++	{
++		.gpio      = 54,		/* GSBI5 I2C QUP SCL */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gsbi5_suspended_cfg,
++			[GPIOMUX_ACTIVE] = &gsbi5_active_cfg,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI7_SPI_MOSI,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi2_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI7_SPI_MISO,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi1_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI7_SPI_CS0,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi2_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI7_SPI_CLK,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi3_config,
++		},
++	},
++	{
++		.gpio      = APQ8064_SOM_GSBI7_SPI_CS1,
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &som_gpio_spi5_config,
++		},
++	},
++};
++
+ static struct msm_gpiomux_config apq8064_som_gsbi_configs[] __initdata = {
+ 	{
+ 		.gpio      = 8,		/* GSBI3 QUP I2C_CLK */
+@@ -1698,10 +1777,12 @@ void __init apq8064_init_gpiomux(void)
+ 				ARRAY_SIZE(apq8064_ethernet_configs));
+ 		#endif
+ 
+-		/* SOM: Serial */
+ 		if(machine_is_apq8064_som()) {
+-		msm_gpiomux_install(apq8064_som_gsbi_configs,
+-				ARRAY_SIZE(apq8064_som_gsbi_configs));
++		/* Constitution */
++		msm_gpiomux_install(apq8064_constitution_gsbi_configs,
++				ARRAY_SIZE(apq8064_constitution_gsbi_configs));
++		/*msm_gpiomux_install(apq8064_som_gsbi_configs,
++				ARRAY_SIZE(apq8064_som_gsbi_configs));*/
+ 		}
+ 		else {
+ 		msm_gpiomux_install(apq8064_gsbi_configs,
+@@ -1709,16 +1790,21 @@ void __init apq8064_init_gpiomux(void)
+ 		}
+ 	}
+ 
++	/* Constitution: no audio codec */
++	if (!machine_is_apq8064_som()) {
+ 	msm_gpiomux_install(apq8064_slimbus_config,
+ 			ARRAY_SIZE(apq8064_slimbus_config));
+ 
+ 	msm_gpiomux_install(apq8064_audio_codec_configs,
+ 			ARRAY_SIZE(apq8064_audio_codec_configs));
++	}
+ 
++	#if 0
+ 	if (machine_is_apq8064_som()) {
+ 		msm_gpiomux_install(apq8064_som_mic_i2s_config,
+ 			ARRAY_SIZE(apq8064_som_mic_i2s_config));
+ 	}
++	#endif
+ 
+ 	if (machine_is_mpq8064_cdp() || machine_is_mpq8064_hrd() ||
+ 		machine_is_mpq8064_dtv()) {
+@@ -1726,9 +1812,12 @@ void __init apq8064_init_gpiomux(void)
+ 			ARRAY_SIZE(mpq8064_spkr_i2s_config));
+ 	}
+ 
++	/* Constitution: no audio codec */
++	if (!machine_is_apq8064_som()) {
+ 	pr_debug("%s(): audio-auxpcm: Include GPIO configs"
+ 		" as audio is not the primary user"
+ 		" for these GPIO Pins\n", __func__);
++	}
+ 
+ 	if (machine_is_mpq8064_cdp() || machine_is_mpq8064_hrd() ||
+ 		machine_is_mpq8064_dtv())
+diff --git a/arch/arm/mach-msm/board-8064-pmic.c b/arch/arm/mach-msm/board-8064-pmic.c
+index 4cd9ad4..f66341c 100644
+--- a/arch/arm/mach-msm/board-8064-pmic.c
++++ b/arch/arm/mach-msm/board-8064-pmic.c
+@@ -114,13 +114,29 @@ struct pm8xxx_mpp_init {
+ 
+ /* Initial PM8921 GPIO configurations */
+ static struct pm8xxx_gpio_init pm8921_gpios[] __initdata = {
+-	PM8921_GPIO_OUTPUT(14, 1, HIGH),	/* HDMI Mux Selector */
+-	PM8921_GPIO_OUTPUT_BUFCONF(25, 0, LOW, CMOS), /* DISP_RESET_N */
+ #ifdef CONFIG_MACH_APQ8064_SOM
++#if 0
+ 	PM8921_GPIO_OUTPUT_FUNC(23, 0, PM_GPIO_FUNC_2), /* Bl: Off, PWM mode */
++	PM8921_GPIO_OUTPUT(3, 0, HIGH),               /* BALL_GPIO_21 */
++	PM8921_GPIO_OUTPUT(4, 0, HIGH),               /* BALL_GPIO_22 */
++	PM8921_GPIO_OUTPUT(18, 0, HIGH),              /* BALL_GPIO_23 */
++	PM8921_GPIO_OUTPUT(19, 0, HIGH),              /* BALL_GPIO_24 */
++#endif
++	PM8921_GPIO_OUTPUT(1, 1, MED),
++	PM8921_GPIO_OUTPUT(2, 1, MED),
++	PM8921_GPIO_OUTPUT(3, 0, MED),
++	PM8921_GPIO_OUTPUT(4, 0, MED),
++	PM8921_GPIO_OUTPUT(18, 0, MED),
++	PM8921_GPIO_OUTPUT(19, 0, MED),
++	PM8921_GPIO_OUTPUT(23, 0, MED),
++	PM8921_GPIO_OUTPUT(28, 1, MED),
++	PM8921_GPIO_OUTPUT(31, 1, MED),
++	PM8921_GPIO_OUTPUT(34, 0, MED),
++	PM8921_GPIO_OUTPUT(35, 0, MED),
+ #else
++	PM8921_GPIO_OUTPUT(14, 1, HIGH),	/* HDMI Mux Selector */
++	PM8921_GPIO_OUTPUT_BUFCONF(25, 0, LOW, CMOS), /* DISP_RESET_N */
+ 	PM8921_GPIO_OUTPUT_FUNC(26, 0, PM_GPIO_FUNC_2), /* Bl: Off, PWM mode */
+-#endif
+ 	PM8921_GPIO_OUTPUT_VIN(30, 1, PM_GPIO_VIN_VPH), /* SMB349 susp line */
+ 	PM8921_GPIO_OUTPUT_BUFCONF(36, 1, LOW, OPEN_DRAIN),
+ 	PM8921_GPIO_OUTPUT_FUNC(44, 0, PM_GPIO_FUNC_2),
+@@ -132,13 +148,6 @@ static struct pm8xxx_gpio_init pm8921_gpios[] __initdata = {
+ 	PM8921_GPIO_OUTPUT(34, 0, MED),
+ 	PM8921_GPIO_OUTPUT(13, 0, HIGH),               /* PCIE_CLK_PWR_EN */
+ 	PM8921_GPIO_INPUT(12, PM_GPIO_PULL_UP_30),     /* PCIE_WAKE_N */
+-#ifdef CONFIG_MACH_APQ8064_SOM
+-	PM8921_GPIO_OUTPUT(3, 0, HIGH),               /* BALL_GPIO_21 */
+-	PM8921_GPIO_OUTPUT(4, 0, HIGH),               /* BALL_GPIO_22 */
+-	PM8921_GPIO_OUTPUT(18, 0, HIGH),              /* BALL_GPIO_23 */
+-	PM8921_GPIO_OUTPUT(19, 0, HIGH),              /* BALL_GPIO_24 */
+-	PM8921_GPIO_OUTPUT(28, 1, MED),               /* CAM1_RST_N */
+-	PM8921_GPIO_OUTPUT(31, 1, MED),               /* CAM1_STANDBY_N */
+ #endif
+ 
+ };
+@@ -194,13 +203,16 @@ static struct pm8xxx_gpio_init pm8921_mpq_gpios[] __initdata = {
+ 
+ /* Initial PM8XXX MPP configurations */
+ static struct pm8xxx_mpp_init pm8xxx_mpps[] __initdata = {
++#ifdef CONFIG_MACH_APQ8064_SOM
++	PM8921_MPP_INIT(1, D_INPUT, PM8921_MPP_DIG_LEVEL_VPH, DIN_TO_INT),
++	PM8921_MPP_INIT(7, D_OUTPUT, PM8921_MPP_DIG_LEVEL_VPH, DOUT_CTRL_LOW),
++#else
+ 	PM8921_MPP_INIT(3, D_OUTPUT, PM8921_MPP_DIG_LEVEL_VPH, DOUT_CTRL_LOW),
+ 	/* External 5V regulator enable; shared by HDMI and USB_OTG switches. */
+ 	PM8921_MPP_INIT(7, D_OUTPUT, PM8921_MPP_DIG_LEVEL_VPH, DOUT_CTRL_LOW),
+ 	PM8921_MPP_INIT(8, D_OUTPUT, PM8921_MPP_DIG_LEVEL_S4, DOUT_CTRL_LOW),
+ 	/*MPP9 is used to detect docking station connection/removal on Liquid*/
+ 	PM8921_MPP_INIT(9, D_INPUT, PM8921_MPP_DIG_LEVEL_S4, DIN_TO_INT),
+-#ifndef CONFIG_MACH_APQ8064_SOM
+ 	/* PCIE_RESET_N */
+ 	PM8921_MPP_INIT(1, D_OUTPUT, PM8921_MPP_DIG_LEVEL_VPH, DOUT_CTRL_HIGH),
+ #endif
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 5689263..d319267 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2404,8 +2404,13 @@ static struct platform_device gpio_ir_recv_pdev = {
+ };
+ 
+ static struct platform_device *common_not_mpq_devices[] __initdata = {
++#ifdef CONFIG_MACH_APQ8064_SOM
++	/*&apq8064_device_qup_i2c_gsbi3,*/
++	&apq8064_device_qup_i2c_gsbi5,
++#else
+ 	&apq8064_device_qup_i2c_gsbi1,
+ 	&apq8064_device_qup_i2c_gsbi3,
++#endif
+ };
+ 
+ static struct platform_device *early_common_devices[] __initdata = {
+@@ -2559,7 +2564,7 @@ static struct platform_device *common_devices[] __initdata = {
+ 
+ static struct platform_device *cdp_devices[] __initdata = {
+ #ifdef CONFIG_MACH_APQ8064_SOM
+-	&apq8064_device_uart_gsbi6,
++	/*&apq8064_device_uart_gsbi6,*/
+ #else
+ 	&apq8064_device_uart_gsbi7,
+ #endif
+@@ -2742,6 +2747,11 @@ static struct msm_i2c_platform_data apq8064_i2c_qup_gsbi4_pdata = {
+ 	.src_clk_rate = 24000000,
+ };
+ 
++static struct msm_i2c_platform_data apq8064_i2c_qup_gsbi5_pdata = {
++	.clk_freq = 100000,
++	.src_clk_rate = 24000000,
++};
++
+ static struct msm_i2c_platform_data mpq8064_i2c_qup_gsbi5_pdata = {
+ 	.clk_freq = 100000,
+ 	.src_clk_rate = 24000000,
+@@ -2754,9 +2764,12 @@ static void __init apq8064_i2c_init(void)
+ 	void __iomem *gsbi_mem;
+ 
+ 	if(machine_is_apq8064_som()) {
+-		/* SOM TBD: gsbi3 and gsbi4 pdata needs to be updated */
++		apq8064_device_qup_i2c_gsbi5.dev.platform_data =
++					&apq8064_i2c_qup_gsbi5_pdata;
++		#if 0
+ 		apq8064_device_qup_i2c_gsbi3.dev.platform_data =
+ 					&apq8064_i2c_qup_gsbi3_pdata;
++		#endif
+ 		apq8064_device_qup_i2c_gsbi4.dev.platform_data =
+ 					&apq8064_i2c_qup_gsbi4_pdata;
+ 	} else {
+@@ -3377,6 +3390,7 @@ static void __init apq8064_common_init(void)
+ 	msm_hsic_pdata.swfi_latency =
+ 		msm_rpmrs_levels[0].latency_us;
+ 	if (machine_is_apq8064_som()) {
++		#if 0 /* Constitution */
+ 		apq8064_device_hsic_host.dev.platform_data = &msm_hsic_pdata;
+ 		/* Enable hsic host interface, though peripheral device is 
+ 		   not connected to it. Hence platform_device_register 
+@@ -3384,6 +3398,7 @@ static void __init apq8064_common_init(void)
+ 		*/
+ 		/*device_initialize(&apq8064_device_hsic_host.dev);*/
+ 		platform_device_register(&apq8064_device_hsic_host);
++		#endif
+ 	}
+ 	if (machine_is_apq8064_mtp()) {
+ 		msm_hsic_pdata.log2_irq_thresh = 5,
+@@ -3469,6 +3484,7 @@ static void __init apq8064_cdp_init(void)
+ 		platform_add_devices(cdp_devices, ARRAY_SIZE(cdp_devices));
+ 		
+ 		if(machine_is_apq8064_som()) {
++			#if 0
+ 			#ifdef CONFIG_SERIAL_MSM_HS
+ 			/* HSUART */
+ 			/* TBD: gpio line for irq */
+@@ -3479,6 +3495,8 @@ static void __init apq8064_cdp_init(void)
+ 			#else
+ 			platform_device_register(&apq8064_device_uart_gsbi1);
+ 			#endif
++			#endif
++			platform_device_register(&apq8064_device_uart_gsbi5);
+ 		}
+ 		else {
+ 			platform_device_register(&apq8064_device_uart_gsbi1);
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index 132328a..c3dd0e5 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5298,6 +5298,26 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("core_clk",		gp0_clk.c,		""),
+ 	CLK_LOOKUP("core_clk",		gp1_clk.c,		""),
+ 	CLK_LOOKUP("core_clk",		gp2_clk.c,		""),
++
++#ifdef CONFIG_MACH_APQ8064_SOM /* Constitution */
++	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi2_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi3_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi4_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi5_uart_clk.c,	"msm_serial_hsl.0"),
++	CLK_LOOKUP("core_clk",		gsbi6_uart_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi7_uart_clk.c,	""),
++
++	CLK_LOOKUP("core_clk",		gsbi1_qup_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi2_qup_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi4_qup_clk.c,	"qup_i2c.4"),
++	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"qup_i2c.5"),
++	CLK_LOOKUP("core_clk",		gsbi6_qup_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi7_qup_clk.c,	"spi_qsd.0"),
++
++#else /* else non Constitution */
++
+ #ifdef CONFIG_MACH_LGE
+ 	CLK_LOOKUP("core_clk",		gsbi1_uart_clk.c,	""),
+ #elif CONFIG_MACH_APQ8064_SOM
+@@ -5325,6 +5345,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ #else
+ 	CLK_LOOKUP("core_clk",		gsbi7_uart_clk.c, "msm_serial_hsl.0"),
+ #endif
++
+ 	CLK_LOOKUP("core_clk",		gsbi1_qup_clk.c,	"qup_i2c.0"),
+ 	CLK_LOOKUP("core_clk",		gsbi2_qup_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	"qup_i2c.3"),
+@@ -5341,6 +5362,9 @@ static struct clk_lookup msm_clocks_8064[] = {
+ #else
+ 	CLK_LOOKUP("core_clk",		gsbi7_qup_clk.c,	""),
+ #endif
++
++#endif /* end non Constitution */
++
+ 	CLK_LOOKUP("core_clk",		pdm_clk.c,		""),
+ 	CLK_LOOKUP("mem_clk",		pmem_clk.c,		"msm_sps"),
+ 	CLK_LOOKUP("core_clk",          prng_clk.c,		"msm_rng.0"),
+@@ -5374,6 +5398,18 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("ce3_core_src_clk",	ce3_src_clk.c,		"qce.0"),
+ 	CLK_LOOKUP("ce3_core_src_clk",	ce3_src_clk.c,		"qcrypto.0"),
+ 	CLK_LOOKUP("dma_bam_pclk",	dma_bam_p_clk.c,	NULL),
++
++#ifdef CONFIG_MACH_APQ8064_SOM /* Constitution */
++	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,	"qup_i2c.4"),
++	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"qup_i2c.5"),
++	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"msm_serial_hsl.0"),
++	CLK_LOOKUP("iface_clk",		gsbi6_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi7_p_clk.c,	"spi_qsd.0"),
++
++#else /* else non Constitution */
+ #ifdef CONFIG_MACH_LGE
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,		""),
+ #elif CONFIG_MACH_APQ8064_SOM
+@@ -5410,6 +5446,9 @@ static struct clk_lookup msm_clocks_8064[] = {
+ #ifdef CONFIG_MACH_APQ8064_SOM
+ 	CLK_LOOKUP("iface_clk",		gsbi7_p_clk.c,		"spi_qsd.0"),
+ #endif
++
++#endif /* end non Constitution */
++
+ 	CLK_LOOKUP("ref_clk",	tsif_ref_clk.c,	"msm_tspp.0"),
+ 	CLK_LOOKUP("iface_clk",		tsif_p_clk.c,		"msm_tspp.0"),
+ 	CLK_LOOKUP("iface_clk",		usb_fs1_p_clk.c,	""),
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index 58482d9..de87219 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -63,6 +63,7 @@
+ #define MSM_UART1DM_PHYS	(MSM_GSBI1_PHYS + 0x10000)
+ #define MSM_UART3DM_PHYS	(MSM_GSBI3_PHYS + 0x40000)
+ #define MSM_UART4DM_PHYS	(MSM_GSBI4_PHYS + 0x40000)
++#define MSM_UART5DM_PHYS	(MSM_GSBI5_PHYS + 0x40000)
+ #define MSM_UART6DM_PHYS	(MSM_GSBI6_PHYS + 0x40000)
+ #define MSM_UART7DM_PHYS	(MSM_GSBI7_PHYS + 0x40000)
+ 
+@@ -548,6 +549,13 @@ struct platform_device mpq8064_device_qup_i2c_gsbi5 = {
+ 	.resource	= resources_qup_i2c_gsbi5,
+ };
+ 
++struct platform_device apq8064_device_qup_i2c_gsbi5 = {
++	.name		= "qup_i2c",
++	.id		= 5,
++	.num_resources	= ARRAY_SIZE(resources_qup_i2c_gsbi5),
++	.resource	= resources_qup_i2c_gsbi5,
++};
++
+ /* GSBI 6 used into UARTDM Mode */
+ static struct resource msm_uart_dm6_resources[] = {
+ 	{
+@@ -620,6 +628,34 @@ struct platform_device apq8064_device_uart_gsbi6 = {
+ 	.resource	= resources_uart_gsbi6,
+ };
+ 
++/* SOM Constitution 2wire-uart console on gsbi5 */
++static struct resource resources_uart_gsbi5[] = {
++	{
++		.start	= GSBI5_UARTDM_IRQ,
++		.end	= GSBI5_UARTDM_IRQ,
++		.flags	= IORESOURCE_IRQ,
++	},
++	{
++		.start	= MSM_UART5DM_PHYS,
++		.end	= MSM_UART5DM_PHYS + PAGE_SIZE - 1,
++		.name	= "uartdm_resource",
++		.flags	= IORESOURCE_MEM,
++	},
++	{
++		.start	= MSM_GSBI5_PHYS,
++		.end	= MSM_GSBI5_PHYS + PAGE_SIZE - 1,
++		.name	= "gsbi_resource",
++		.flags	= IORESOURCE_MEM,
++	},
++};
++
++struct platform_device apq8064_device_uart_gsbi5 = {
++	.name	= "msm_serial_hsl",
++	.id	= 0,
++	.num_resources	= ARRAY_SIZE(resources_uart_gsbi5),
++	.resource	= resources_uart_gsbi5,
++};
++
+ static struct resource resources_qup_spi_gsbi7[] = {
+ 	{
+ 		.name   = "spi_base",
+diff --git a/arch/arm/mach-msm/devices.h b/arch/arm/mach-msm/devices.h
+index 98b338c..8f873cc 100644
+--- a/arch/arm/mach-msm/devices.h
++++ b/arch/arm/mach-msm/devices.h
+@@ -91,11 +91,13 @@ extern struct platform_device apq8064_device_uartdm_gsbi1;
+ extern struct platform_device apq8064_device_uart_gsbi3;
+ extern struct platform_device apq8064_device_uart_gsbi4;
+ extern struct platform_device apq8064_device_uartdm_gsbi4;
++extern struct platform_device apq8064_device_uart_gsbi5;
+ extern struct platform_device apq8064_device_uart_gsbi6;
+ extern struct platform_device apq8064_device_uart_gsbi7;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi1;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi3;
+ extern struct platform_device apq8064_device_qup_i2c_gsbi4;
++extern struct platform_device apq8064_device_qup_i2c_gsbi5;
+ extern struct platform_device apq8064_device_qup_spi_gsbi5;
+ extern struct platform_device apq8064_device_qup_spi_gsbi7;
+ extern struct platform_device apq8064_slim_ctrl;

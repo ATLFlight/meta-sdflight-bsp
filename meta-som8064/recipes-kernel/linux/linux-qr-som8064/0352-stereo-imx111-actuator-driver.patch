@@ -1,0 +1,233 @@
+diff --git a/drivers/media/video/msm/actuators/qs_imx111_act.c b/drivers/media/video/msm/actuators/qs_imx111_act.c
+new file mode 100644
+index 0000000..537843a
+--- /dev/null
++++ b/drivers/media/video/msm/actuators/qs_imx111_act.c
+@@ -0,0 +1,227 @@
++/* Copyright (c) 2011-2015, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ */
++
++#include "msm_actuator.h"
++#include "msm_camera_i2c.h"
++
++#define QS_IMX111_TOTAL_STEPS_NEAR_TO_FAR_MAX    41
++
++DEFINE_MUTEX(qs_imx111_act_mutex);
++static struct msm_actuator_ctrl_t qs_imx111_act_t;
++
++static int32_t qs_imx111_wrapper_i2c_write(struct msm_actuator_ctrl_t *a_ctrl,
++	int16_t next_lens_position, void *params)
++{
++	msm_camera_i2c_write(&a_ctrl->i2c_client,
++			     (next_lens_position >> 4) & 0x3F,
++			     (next_lens_position << 4) & 0xF0,
++			     MSM_CAMERA_I2C_BYTE_DATA);
++	return 0;
++}
++
++static uint16_t g_near_dir_scenario[] = {
++	/* MOVE_NEAR dir*/
++	4,
++	41,
++};
++
++static uint16_t g_far_dir_scenario[] = {
++	/* MOVE_FAR dir */
++	4,
++	9,
++	41,
++};
++
++static struct region_params_t g_regions[] = {
++	/* step_bound[0] - macro side boundary
++	 * step_bound[1] - infinity side boundary
++	 */
++	/* Region 1 */
++	{
++		.step_bound = {2, 0},
++		.code_per_step = 12,
++	},
++	/* Region 2 */
++	{
++		.step_bound = {41, 2},
++		.code_per_step = 12,
++	}
++};
++
++static struct damping_params_t g_near_dir_damping[] = {
++	/* MOVE_NEAR Dir */
++	/* Scene 1 => Damping params */
++	{
++		.damping_step = 6,
++		.damping_delay = 1500,
++	},
++	/* Scene 2 => Damping params */
++	{
++		.damping_step = 6,
++		.damping_delay = 450,
++	},
++};
++
++static struct damping_params_t g_far_dir_damping[] = {
++	/* MOVE_FAR Dir */
++	/* Scene 1 => Damping params */
++	{
++		.damping_step = 6,
++		.damping_delay = 3000,
++	},
++	/* Scene 2 => Damping params */
++	{
++		.damping_step = 6,
++		.damping_delay = 1500,
++	},
++	/* Scene 3 => Damping params */
++	{
++		.damping_step = 6,
++		.damping_delay = 450,
++	},
++};
++
++static struct damping_t g_near_dir_regions[] = {
++	/* MOVE_NEAR dir */
++	/* Region 1 */
++	{
++		.ringing_params = g_near_dir_damping,
++	},
++	/* Region 2 */
++	{
++		.ringing_params = g_near_dir_damping,
++	},
++};
++
++static struct damping_t g_far_dir_regions[] = {
++	/* MOVE_FAR dir */
++	/* Region 1 */
++	{
++		.ringing_params = g_far_dir_damping,
++	},
++	/* Region 2 */
++	{
++		.ringing_params = g_far_dir_damping,
++	},
++};
++
++
++static int32_t qs_imx111_set_params(struct msm_actuator_ctrl_t *a_ctrl)
++{
++	return 0;
++}
++
++static const struct i2c_device_id qs_imx111_act_i2c_id[] = {
++	{"qs_imx111_act", (kernel_ulong_t)&qs_imx111_act_t},
++	{ }
++};
++
++static int qs_imx111_act_config(
++	void __user *argp)
++{
++	LINFO("%s called\n", __func__);
++	return (int) msm_actuator_config(&qs_imx111_act_t, argp);
++}
++
++static int qs_imx111_i2c_add_driver_table(
++	void)
++{
++	LINFO("%s called\n", __func__);
++	return (int) msm_actuator_init_table(&qs_imx111_act_t);
++}
++
++static struct i2c_driver qs_imx111_act_i2c_driver = {
++	.id_table = qs_imx111_act_i2c_id,
++	.probe  = msm_actuator_i2c_probe,
++	.remove = __exit_p(qs_imx111_act_i2c_remove),
++	.driver = {
++		.name = "qs_imx111_act",
++	},
++};
++
++static int __init qs_imx111_i2c_add_driver(
++	void)
++{
++	LINFO("%s called\n", __func__);
++	return i2c_add_driver(qs_imx111_act_t.i2c_driver);
++}
++
++static struct v4l2_subdev_core_ops qs_imx111_act_subdev_core_ops;
++
++static struct v4l2_subdev_ops qs_imx111_act_subdev_ops = {
++	.core = &qs_imx111_act_subdev_core_ops,
++};
++
++static int32_t qs_imx111_act_probe(
++	void *board_info,
++	void *sdev)
++{
++	LINFO("%s called\n", __func__);
++
++	return (int) msm_actuator_create_subdevice(&qs_imx111_act_t,
++		(struct i2c_board_info const *)board_info,
++		(struct v4l2_subdev *)sdev);
++}
++
++static struct msm_actuator_ctrl_t qs_imx111_act_t = {
++	.i2c_driver = &qs_imx111_act_i2c_driver,
++	.i2c_addr = 0x18,
++	.act_v4l2_subdev_ops = &qs_imx111_act_subdev_ops,
++	.actuator_ext_ctrl = {
++		.a_init_table = qs_imx111_i2c_add_driver_table,
++		.a_create_subdevice = qs_imx111_act_probe,
++		.a_config = qs_imx111_act_config,
++	},
++
++	.i2c_client = {
++		.addr_type = MSM_CAMERA_I2C_BYTE_ADDR,
++	},
++
++	.set_info = {
++		.total_steps = QS_IMX111_TOTAL_STEPS_NEAR_TO_FAR_MAX,
++	},
++
++	.curr_step_pos = 0,
++	.curr_region_index = 0,
++	.initial_code = 350,
++	.actuator_mutex = &qs_imx111_act_mutex,
++
++	/* Initialize scenario */
++	.ringing_scenario[MOVE_NEAR] = g_near_dir_scenario,
++	.scenario_size[MOVE_NEAR] = ARRAY_SIZE(g_near_dir_scenario),
++	.ringing_scenario[MOVE_FAR] = g_far_dir_scenario,
++	.scenario_size[MOVE_FAR] = ARRAY_SIZE(g_far_dir_scenario),
++
++	/* Initialize region params */
++	.region_params = g_regions,
++	.region_size = ARRAY_SIZE(g_regions),
++
++	/* Initialize damping params */
++	.damping[MOVE_NEAR] = g_near_dir_regions,
++	.damping[MOVE_FAR] = g_far_dir_regions,
++
++	.func_tbl = {
++		.actuator_set_params = qs_imx111_set_params,
++		.actuator_init_focus = NULL,
++		.actuator_init_table = msm_actuator_init_table,
++		.actuator_move_focus = msm_actuator_move_focus,
++		.actuator_write_focus = msm_actuator_write_focus,
++		.actuator_i2c_write = qs_imx111_wrapper_i2c_write,
++		.actuator_set_default_focus = msm_actuator_set_default_focus,
++	},
++
++};
++
++subsys_initcall(qs_imx111_i2c_add_driver);
++MODULE_DESCRIPTION("QS_IMX111 actuator");
++MODULE_LICENSE("GPL v2");

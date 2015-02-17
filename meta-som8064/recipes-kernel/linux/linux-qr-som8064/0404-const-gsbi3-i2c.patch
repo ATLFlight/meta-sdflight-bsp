@@ -1,0 +1,71 @@
+diff --git a/arch/arm/mach-msm/board-8064-gpiomux.c b/arch/arm/mach-msm/board-8064-gpiomux.c
+index bb4aec5..ece510e 100644
+--- a/arch/arm/mach-msm/board-8064-gpiomux.c
++++ b/arch/arm/mach-msm/board-8064-gpiomux.c
+@@ -665,6 +665,20 @@ static struct msm_gpiomux_config apq8064_hdmi_configs[] __initdata = {
+ };
+ 
+ static struct msm_gpiomux_config apq8064_constitution_gsbi_configs[] __initdata = {
++	{
++		.gpio      = 8,		/* GSBI3 QUP I2C_CLK */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
++	{
++		.gpio      = 9,		/* GSBI3 QUP I2C_DATA */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_i2c_config_sus,
++			[GPIOMUX_ACTIVE] = &gpio_i2c_config,
++		},
++	},
+ #if 0
+ 	/* NOTE: Since SOM gsbi4 is used for camera its configured 
+ 			 as part of camera data structures. */
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index d219292..4bc464e 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -2405,7 +2405,7 @@ static struct platform_device gpio_ir_recv_pdev = {
+ 
+ static struct platform_device *common_not_mpq_devices[] __initdata = {
+ #ifdef CONFIG_MACH_APQ8064_SOM
+-	/*&apq8064_device_qup_i2c_gsbi3,*/
++	&apq8064_device_qup_i2c_gsbi3,
+ 	&apq8064_device_qup_i2c_gsbi5,
+ #else
+ 	&apq8064_device_qup_i2c_gsbi1,
+@@ -2766,10 +2766,8 @@ static void __init apq8064_i2c_init(void)
+ 	if(machine_is_apq8064_som()) {
+ 		apq8064_device_qup_i2c_gsbi5.dev.platform_data =
+ 					&apq8064_i2c_qup_gsbi5_pdata;
+-		#if 0
+ 		apq8064_device_qup_i2c_gsbi3.dev.platform_data =
+ 					&apq8064_i2c_qup_gsbi3_pdata;
+-		#endif
+ 		apq8064_device_qup_i2c_gsbi4.dev.platform_data =
+ 					&apq8064_i2c_qup_gsbi4_pdata;
+ 	} else {
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index f8ae3060d..5623c9a 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5310,7 +5310,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 
+ 	CLK_LOOKUP("core_clk",		gsbi1_qup_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi2_qup_clk.c,	""),
+-	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	""),
++	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	"qup_i2c.3"),
+ 	CLK_LOOKUP("core_clk",		gsbi4_qup_clk.c,	"qup_i2c.4"),
+ 	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"qup_i2c.5"),
+ 	CLK_LOOKUP("core_clk",		gsbi6_qup_clk.c,	""),
+@@ -5402,7 +5402,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ #ifdef CONFIG_MACH_APQ8064_SOM /* Constitution */
+ 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	""),
+ 	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,	""),
+-	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,	""),
++	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,	"qup_i2c.3"),
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,	"qup_i2c.4"),
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"qup_i2c.5"),
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"msm_serial_hsl.1"),

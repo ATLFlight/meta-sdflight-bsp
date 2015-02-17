@@ -10,7 +10,6 @@ IMAGE_FSTYPES = "ext4"
 IMAGE_LINGUAS = " "
 
 SRC_URI += " \
-   file://adb.conf \
    file://apt.conf \
    file://config.sh \
    file://resize \
@@ -119,7 +118,6 @@ fixup_sysroot() {
     sed -i -e 's/DEFAULT_RUNLEVEL=2/DEFAULT_RUNLEVEL=1/' ${IMAGE_ROOTFS}${sysconfdir}/init/rc-sysinit.conf
     sed -i -e 's/rmdir/rm -rf/' ${IMAGE_ROOTFS}/var/lib/dpkg/info/base-files.postinst
     find ${IMAGE_ROOTFS} -name \*.rules | grep -v -f ${WORKDIR}/udev_files_to_keep.grep | xargs rm -f
-    install ${WORKDIR}/adb.conf ${IMAGE_ROOTFS}${sysconfdir}/init/adb.conf
 
     ln -s ${IMAGE_ROOTFS}/usr/lib/insserv/insserv ${IMAGE_ROOTFS}/sbin 
     # Install qrl-*.sh

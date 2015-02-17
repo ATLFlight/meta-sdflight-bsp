@@ -1,0 +1,35 @@
+diff --git a/arch/arm/mach-msm/clock-8960.c b/arch/arm/mach-msm/clock-8960.c
+index c3dd0e5..f8ae3060d 100755
+--- a/arch/arm/mach-msm/clock-8960.c
++++ b/arch/arm/mach-msm/clock-8960.c
+@@ -5304,7 +5304,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("core_clk",		gsbi2_uart_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi3_uart_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi4_uart_clk.c,	""),
+-	CLK_LOOKUP("core_clk",		gsbi5_uart_clk.c,	"msm_serial_hsl.0"),
++	CLK_LOOKUP("core_clk",		gsbi5_uart_clk.c,	"msm_serial_hsl.1"),
+ 	CLK_LOOKUP("core_clk",		gsbi6_uart_clk.c,	""),
+ 	CLK_LOOKUP("core_clk",		gsbi7_uart_clk.c,	""),
+ 
+@@ -5405,7 +5405,7 @@ static struct clk_lookup msm_clocks_8064[] = {
+ 	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,	""),
+ 	CLK_LOOKUP("iface_clk",		gsbi4_p_clk.c,	"qup_i2c.4"),
+ 	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"qup_i2c.5"),
+-	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"msm_serial_hsl.0"),
++	CLK_LOOKUP("iface_clk",		gsbi5_p_clk.c,	"msm_serial_hsl.1"),
+ 	CLK_LOOKUP("iface_clk",		gsbi6_p_clk.c,	""),
+ 	CLK_LOOKUP("iface_clk",		gsbi7_p_clk.c,	"spi_qsd.0"),
+ 
+diff --git a/arch/arm/mach-msm/devices-8064.c b/arch/arm/mach-msm/devices-8064.c
+index de87219..a39ac15 100644
+--- a/arch/arm/mach-msm/devices-8064.c
++++ b/arch/arm/mach-msm/devices-8064.c
+@@ -651,7 +651,7 @@ static struct resource resources_uart_gsbi5[] = {
+ 
+ struct platform_device apq8064_device_uart_gsbi5 = {
+ 	.name	= "msm_serial_hsl",
+-	.id	= 0,
++	.id	= 1,
+ 	.num_resources	= ARRAY_SIZE(resources_uart_gsbi5),
+ 	.resource	= resources_uart_gsbi5,
+ };

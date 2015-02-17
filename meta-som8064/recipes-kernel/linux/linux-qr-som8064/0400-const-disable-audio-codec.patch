@@ -1,0 +1,18 @@
+diff --git a/arch/arm/mach-msm/board-8064.c b/arch/arm/mach-msm/board-8064.c
+index 8f1f948..5689263 100644
+--- a/arch/arm/mach-msm/board-8064.c
++++ b/arch/arm/mach-msm/board-8064.c
+@@ -3429,10 +3429,12 @@ static void __init apq8064_common_init(void)
+ 			platform_device_register(&mdm_8064_device);
+ 		}
+ 	}
+-	
++
++#ifndef CONFIG_MACH_APQ8064_SOM
+ 	platform_device_register(&apq8064_slim_ctrl);
+ 	slim_register_board_info(apq8064_slim_devices,
+ 		ARRAY_SIZE(apq8064_slim_devices));
++#endif
+ 
+ 	if (!PLATFORM_IS_MPQ8064()) {
+ 		apq8064_init_dsps();

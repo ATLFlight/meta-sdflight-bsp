@@ -1,0 +1,32 @@
+diff --git a/target/msm8960/init.c b/target/msm8960/init.c
+index c33ec26..91132b4 100755
+--- a/target/msm8960/init.c
++++ b/target/msm8960/init.c
+@@ -216,12 +216,17 @@ static unsigned target_check_power_on_reason(void)
+ 
+ void reboot_device(unsigned reboot_reason)
+ {
++	unsigned restart_reason = 0;
+ 	writel(reboot_reason, RESTART_REASON_ADDR);
++	restart_reason = readl(RESTART_REASON_ADDR);
++	dprintf(INFO, "reboot_device Bootloader Restart Reason: Addr 0x%x Val: 0x%x\n", RESTART_REASON_ADDR, restart_reason);
++	mdelay(100);
+ 
+ 	/* Actually reset the chip */
+ 	pm8921_config_reset_pwr_off(1);
+-	writel(0, MSM_PSHOLD_CTL_SU);
+-	mdelay(10000);
++	/* SOM RevB: Dont use PS_HOLD Reset causing cold-boot */
++	/*writel(0, MSM_PSHOLD_CTL_SU);
++	mdelay(10000);*/
+ 
+ 	dprintf(CRITICAL, "PSHOLD failed, trying watchdog reset\n");
+ 	writel(1, MSM_WDT0_RST);
+@@ -242,6 +247,7 @@ unsigned check_reboot_mode(void)
+ 	/* Read reboot reason and scrub it */
+ 	restart_reason = readl(RESTART_REASON_ADDR);
+ 	writel(0x00, RESTART_REASON_ADDR);
++	dprintf(INFO, "Bootloader Restart Reason: Addr 0x%x Val: 0x%x\n", RESTART_REASON_ADDR, restart_reason);
+ 
+ 	return restart_reason;
+ }
