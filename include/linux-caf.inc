@@ -30,7 +30,7 @@ addtask kernel_configme before do_configure after do_patch
 # Pick up shared functions
 inherit kernel
 inherit kernel-caf
-require recipes-kernel/linux/linux-dtb.inc
+#require recipes-kernel/linux/linux-dtb.inc
 
 B = "${WORKDIR}/linux-${MACHINE}-${LINUX_KERNEL_TYPE}-build"
 
