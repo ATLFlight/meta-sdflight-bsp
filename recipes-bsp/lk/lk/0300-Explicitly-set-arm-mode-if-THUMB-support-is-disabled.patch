@@ -1,0 +1,25 @@
+From 87397265cc95c2d21b5ec90c96534177f1d7263e Mon Sep 17 00:00:00 2001
+From: ntewolde <ntewolde@codeaurora.org>
+Date: Thu, 16 Apr 2015 12:39:05 -0700
+Subject: [PATCH] Explicitly set arm mode if THUMB support is disabled
+
+---
+ arch/arm/rules.mk | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/arm/rules.mk b/arch/arm/rules.mk
+index d822430..ead44d9 100644
+--- a/arch/arm/rules.mk
++++ b/arch/arm/rules.mk
+@@ -78,6 +78,8 @@ THUMBINTERWORK :=
+ ifeq ($(ENABLE_THUMB),true)
+ THUMBCFLAGS := -mthumb -D__thumb__
+ THUMBINTERWORK := -mthumb-interwork
++else
++CFLAGS += -marm
+ endif
+ 
+ INCLUDES += \
+-- 
+1.8.2
+

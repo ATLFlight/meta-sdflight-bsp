@@ -48,5 +48,5 @@ include db8074-vendor-patches.scc
 include db8074-user-patches.scc
 
 # These are config fragments for the kernel
-#kconf hardware ltp.cfg
+kconf hardware ltp.cfg
 #kconf hardware panics.cfg

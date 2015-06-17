@@ -1,0 +1,308 @@
+From ad7d038288a9c4fefb12e26e6a579870c5814f14 Mon Sep 17 00:00:00 2001
+From: sswami <sswami@codeaurora.org>
+Date: Wed, 8 Apr 2015 14:45:57 -0700
+Subject: [PATCH] 0001-disable-audio-from-kernel-device-tree
+
+---
+ arch/arm/boot/dts/apq8074-dragonboard.dtsi |    1 +
+ arch/arm/boot/dts/msm8974.dtsi             |   45 ++++++++++++++++++++++++++++
+ 2 files changed, 46 insertions(+)
+
+diff --git a/arch/arm/boot/dts/apq8074-dragonboard.dtsi b/arch/arm/boot/dts/apq8074-dragonboard.dtsi
+index 74043c6..d829b0e 100755
+--- a/arch/arm/boot/dts/apq8074-dragonboard.dtsi
++++ b/arch/arm/boot/dts/apq8074-dragonboard.dtsi
+@@ -241,6 +241,7 @@
+ 		qcom,prim-auxpcm-gpio-set = "prim-gpio-tert";
+ 
+ 		qcom,cdc-micbias2-headset-only;
++        status = "disabled";        
+ 	};
+ 
+ 	qcom,pronto@fb21b000 {
+diff --git a/arch/arm/boot/dts/msm8974.dtsi b/arch/arm/boot/dts/msm8974.dtsi
+index a819550..235881f 100644
+--- a/arch/arm/boot/dts/msm8974.dtsi
++++ b/arch/arm/boot/dts/msm8974.dtsi
+@@ -696,6 +696,7 @@
+ 		qcom,apps-ch-pipes = <0x60000000>;
+ 		qcom,ea-pc = <0x30>;
+ 
++        status = "disabled";       
+ 		taiko_codec {
+ 			compatible = "qcom,taiko-slim-pgd";
+ 			elemental-addr = [00 01 A0 00 17 02];
+@@ -755,6 +756,7 @@
+ 			qcom,cdc-slim-ifd = "taiko-slim-ifd";
+ 			qcom,cdc-slim-ifd-elemental-addr = [00 00 A0 00 17 02];
+ 			qcom,cdc-dmic-sample-rate = <4800000>;
++            status = "disabled";    
+ 		};
+ 	};
+ 
+@@ -806,6 +808,7 @@
+ 		qcom,sec-auxpcm-gpio-sync = <&msmgpio 80 0>;
+ 		qcom,sec-auxpcm-gpio-din  = <&msmgpio 81 0>;
+ 		qcom,sec-auxpcm-gpio-dout = <&msmgpio 82 0>;
++        status = "disabled";    
+ 	};
+ 
+ 	spmi_bus: qcom,spmi@fc4c0000 {
+@@ -1648,11 +1651,13 @@
+ 
+ 	qcom,msm-audio-ion {
+ 		compatible = "qcom,msm-audio-ion";
++        status = "disabled";
+ 	};
+ 
+ 	qti,msm-pcm {
+ 		compatible = "qti,msm-pcm-dsp";
+ 		qti,msm-pcm-dsp-id = <0>;
++        status = "disabled";
+ 	};
+ 
+ 	qti,msm-pcm-low-latency {
+@@ -1660,55 +1665,68 @@
+ 		qti,msm-pcm-dsp-id = <1>;
+ 		qti,msm-pcm-low-latency;
+ 		qti,latency-level = "regular";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-pcm-routing {
+ 		compatible = "qcom,msm-pcm-routing";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-pcm-lpa {
+ 		compatible = "qcom,msm-pcm-lpa";
++        status = "disabled";  
+ 	};
+ 
+ 	qcom,msm-compr-dsp {
+ 		compatible = "qcom,msm-compr-dsp";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-compress-dsp {
+ 		compatible = "qcom,msm-compress-dsp";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-voip-dsp {
+ 		compatible = "qcom,msm-voip-dsp";
++        status = "disabled"; 
+ 	};
+ 
+ 	qcom,msm-pcm-voice {
+ 		compatible = "qcom,msm-pcm-voice";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-stub-codec {
+ 		compatible = "qcom,msm-stub-codec";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-dai-fe {
+ 		compatible = "qcom,msm-dai-fe";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-pcm-afe {
+ 		compatible = "qcom,msm-pcm-afe";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-dai-q6-hdmi {
+ 		compatible = "qcom,msm-dai-q6-hdmi";
+ 		qcom,msm-dai-q6-dev-id = <8>;
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-lsm-client {
+ 		compatible = "qcom,msm-lsm-client";
++        status = "disabled";
+ 	};
+ 
+ 	qti,msm-pcm-loopback {
+ 		compatible = "qti,msm-pcm-loopback";
++        status = "disabled";
+ 	};
+ 
+ 	qcom,msm-dai-q6 {
+@@ -1716,111 +1734,133 @@
+ 		qcom,msm-dai-q6-sb-0-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16384>;
++       status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-0-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16385>;
++            status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-1-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16386>;
++           status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-1-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16387>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-2-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16388>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-2-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16389>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-3-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16390>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-3-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16391>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-4-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16392>;
++        status = "disabled";
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-4-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16393>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-sb-5-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <16395>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-bt-sco-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <12288>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-bt-sco-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <12289>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-int-fm-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <12292>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-int-fm-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <12293>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-be-afe-pcm-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <224>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-be-afe-pcm-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <225>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-afe-proxy-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <241>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-afe-proxy-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <240>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-incall-record-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <32771>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-incall-record-tx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <32772>;
++            status = "disabled";      
+ 		};
+ 
+ 		qcom,msm-dai-q6-incall-music-rx {
+ 			compatible = "qcom,msm-dai-q6-dev";
+ 			qcom,msm-dai-q6-dev-id = <32773>;
++            status = "disabled";      
+ 		};
+ 	};
+ 
+@@ -1834,6 +1874,7 @@
+ 		qcom,msm-cpudai-auxpcm-data = <0>, <0>;
+ 		qcom,msm-cpudai-auxpcm-pcm-clk-rate = <2048000>, <2048000>;
+ 		qcom,msm-auxpcm-interface = "primary";
++       status = "disabled";      
+ 	};
+ 
+ 	qcom,msm-sec-auxpcm {
+@@ -1846,6 +1887,7 @@
+ 		qcom,msm-cpudai-auxpcm-data = <0>, <0>;
+ 		qcom,msm-cpudai-auxpcm-pcm-clk-rate = <2048000>, <2048000>;
+ 		qcom,msm-auxpcm-interface = "secondary";
++       status = "disabled";      
+ 	};
+ 
+ 	qcom,msm-dai-mi2s {
+@@ -1855,11 +1897,13 @@
+ 			qcom,msm-dai-q6-mi2s-dev-id = <3>;
+ 			qcom,msm-mi2s-rx-lines = <1>;
+ 			qcom,msm-mi2s-tx-lines = <2>;
++            status = "disabled";      
+ 		};
+ 	};
+ 
+ 	qcom,msm-pcm-hostless {
+ 		compatible = "qcom,msm-pcm-hostless";
++        status = "disabled";      
+ 	};
+ 
+ 	qcom,msm-ocmem-audio {
+@@ -1870,6 +1914,7 @@
+ 		qcom,msm-bus,vectors-KBps =
+ 			<11 604 0 0>,
+ 			<11 604 32506 32506>;
++       status = "disabled";      
+ 	};
+ 
+ 	qcom,msm-adsp-sensors {
+-- 
+1.7.9.5
+

@@ -1,0 +1,91 @@
+From 4ee779ae120cdcfab30b478196d57dd7bfc9705d Mon Sep 17 00:00:00 2001
+From: Punit Soni <punits@codeaurora.org>
+Date: Wed, 22 Apr 2015 15:53:52 -0700
+Subject: [PATCH] kernel: camera bringup on DB8074
+
+- Fix incorrect regulator name in dragonboard dtsi
+- Add more expressive debug messages in camera driver
+
+Change-Id: Ife3a3c44e2e1be3de8deac00c7bc363c54df4e77
+---
+ arch/arm/boot/dts/msm8974-camera-sensor-dragonboard.dtsi |  7 ++++---
+ drivers/media/platform/msm/camera_v2/msm.c               | 13 ++++++++++---
+ 2 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/arch/arm/boot/dts/msm8974-camera-sensor-dragonboard.dtsi b/arch/arm/boot/dts/msm8974-camera-sensor-dragonboard.dtsi
+index 78cd24c..da1a15b 100644
+--- a/arch/arm/boot/dts/msm8974-camera-sensor-dragonboard.dtsi
++++ b/arch/arm/boot/dts/msm8974-camera-sensor-dragonboard.dtsi
+@@ -185,6 +185,7 @@
+ 		qcom,sensor-mode = <1>;
+ 		qcom,cci-master = <0>;
+ 	};
++
+ 	qcom,camera@0 {
+ 		cell-index = <0>;
+ 		compatible = "qcom,camera";
+@@ -195,6 +196,7 @@
+ 		qcom,actuator-src = <&actuator0>;
+ 		qcom,vdd-cx-supply = <&pm8841_s2>;
+ 		qcom,vdd-cx-name = "qcom,vdd-cx";
++		cam_vdig-supply = <&pm8941_l3>;
+ 		cam_vana-supply = <&pm8941_l17>;
+ 		cam_vio-supply = <&pm8941_lvs3>;
+ 		cam_vaf-supply = <&pm8941_l23>;
+@@ -274,8 +276,8 @@
+ 			<&msmgpio 18 0>;
+ 		qcom,gpio-reset = <1>;
+ 		qcom,gpio-standby = <2>;
+-		qcom,gpio-req-tbl-num = <0 1 2>;
+-		qcom,gpio-req-tbl-flags = <1 0 0>;
++		qcom,gpio-req-tbl-num = <0 1>;
++		qcom,gpio-req-tbl-flags = <1 0>;
+ 		qcom,gpio-req-tbl-label = "CAMIF_MCLK",
+ 					  "CAM_RESET1";
+ 		qcom,cci-master = <0>;
+@@ -320,5 +322,4 @@
+ 		qcom,cci-master = <0>;
+ 		status = "ok";
+ 	};
+-
+ };
+diff --git a/drivers/media/platform/msm/camera_v2/msm.c b/drivers/media/platform/msm/camera_v2/msm.c
+index f8f5110..378b2e6 100644
+--- a/drivers/media/platform/msm/camera_v2/msm.c
++++ b/drivers/media/platform/msm/camera_v2/msm.c
+@@ -349,11 +349,13 @@ int msm_create_session(unsigned int session_id, struct video_device *vdev)
+ 		return -ENODEV;
+ 	}
+ 
++	pr_debug("%s:%d, session_id = %d\n", __func__, __LINE__, session_id);
++
+ 	session = msm_queue_find(msm_session_q, struct msm_session,
+ 		list, __msm_queue_find_session, &session_id);
+ 	if (session) {
+-		pr_err("%s : Session not found Line %d\n",
+-				__func__, __LINE__);
++		pr_err("%s : Session %d already exists. Line %d\n",
++				__func__, session_id, __LINE__);
+ 		return -EINVAL;
+ 	}
+ 
+@@ -508,10 +510,15 @@ int msm_destroy_session(unsigned int session_id)
+ 	struct msm_session *session;
+ 	struct v4l2_subdev *buf_mgr_subdev;
+ 
++	pr_debug("%s:%d, session_id = %d\n", __func__, __LINE__, session_id);
++
+ 	session = msm_queue_find(msm_session_q, struct msm_session,
+ 		list, __msm_queue_find_session, &session_id);
+-	if (!session)
++	if (!session) {
++		pr_err("%s:%d, session not found, session_id=%d\n",
++					  __func__, __LINE__, session_id);
+ 		return -EINVAL;
++	}
+ 
+ 	msm_destroy_session_streams(session);
+ 	msm_remove_session_cmd_ack_q(session);
+-- 
+1.8.2.1
+

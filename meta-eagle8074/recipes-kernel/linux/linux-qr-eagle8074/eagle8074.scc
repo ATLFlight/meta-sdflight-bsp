@@ -31,6 +31,22 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-CONFIG_ANDROID_PARANOID_NETWORK=n    # bind02
-#CONFIG_CGROUP_MEM_RES_CTLR=y
-#CONFIG_SCHED_DEBUG=y
+#
+# The top-level 'feature' for the eagle8074 custom kernel.
+#
+# Essentially this is a convenient top-level container or starting
+# point for adding lower-level config fragements and features.
+#
+
+kconf hardware eagle8074.cfg
+
+# These are used by yocto-kernel to add config fragments and features.
+# Don't remove if you plan on using yocto-kernel with this BSP.
+
+kconf hardware eagle8074-user-config.cfg
+include eagle8074-vendor-patches.scc
+include eagle8074-user-patches.scc
+
+# These are config fragments for the kernel
+kconf hardware ltp.cfg
+#kconf hardware panics.cfg

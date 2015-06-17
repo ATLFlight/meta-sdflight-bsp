@@ -1,38 +1,35 @@
 DESCRIPTION = "OpenMAX video for MSM chipsets"
-LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
-${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10\
-					file://${S}/libstagefrighthw/NOTICE;md5=384ada94f865c1c1442771ab380fb00c \
-					file://${S}/libstagefrighthw/MODULE_LICENSE_APACHE2;md5=d41d8cd98f00b204e9800998ecf8427e"
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://NOTICE;md5=3c567309c019d31c938d51a3317a2693"
 
 SRC_URI = "git://codeaurora.org/platform/hardware/qcom/media;protocol=git;nobranch=1"
+SRC_URI += "file://mm-video-oss_compilation.patch \
+    file://venus_v4l2.rules \
+    file://0002-Add-license-file.patch"
 
 PACKAGES = "${PN}"
 
-SRCREV_som8064       = "AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041"
-SRCREV_som8064-revB  = "AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041"
-SRCREV_som8064-const = "AU_LINUX_ANDROID_KK_2.7_RB1.04.04.02.007.041"
-SRCREV_ifc6410       = "AU_LINUX_ANDROID_JB_2.5_AUTO.04.02.02.115.005"
+SRCREV = "LNX.LA.3.5-01620-8x74.0"
 
-PACKAGES = "${PN}"
+DEPENDS += "glib-2.0 android-tools virtual/kernel"
 
-PV = "1.1"
-PR = "r16"
-
-LV = "1.0.0"
+PV = "1.0"
+PR = "r0"
 
 inherit autotools
 
-BASEMACHINE = "msm8960"
-
 FILES_${PN} = "\
-    /usr/lib/* \
+    /usr/lib/*.so* \
     /usr/bin/* \
     /usr/include/* \
-    /usr/share/*"
+    /usr/share/* \
+    /etc/udev/rules.d/*"
 
-#Skips check for .so symlinks
+# Skips check for .so symlinks
 INSANE_SKIP_${PN} = "dev-so"
+INSANE_SKIP_${PN} += "installed-vs-shipped"
+
+EXTRA_OECONF = "--with-sanitized-headers=${STAGING_INCDIR}/linux-headers/usr/include"
 
 do_unpack_append() {
     import shutil
@@ -44,13 +41,8 @@ do_unpack_append() {
     shutil.move(wd+'/git', s)
 }
 
-do_configure() {
-}
-
-do_make() {
-}
-
-do_install() {
-	install -d ${D}/usr/include/mm-core
-	install -m 0644 ${S}/mm-core/inc/*.h ${D}/usr/include/mm-core
+do_install_append() {
+    dest=/etc/udev/rules.d
+    install -d ${D}${dest}
+    install -m 644 ${WORKDIR}/venus_v4l2.rules -D ${D}${dest}/venus_v4l2.rules
 }

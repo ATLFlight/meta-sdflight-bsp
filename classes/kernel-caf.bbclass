@@ -86,6 +86,7 @@ do_kernel_checkout() {
 	    echo "Checking out master"
 	    git checkout -f master
 	fi
+
 }
 
 LK_ROOT_DEV ?= ""
@@ -149,6 +150,14 @@ do_lk_mkimage() {
   set +x
 }
 
+do_unpack_dtb() {
+  if [ -n "${QRLINUX_DTB}" ] ;
+  then
+    cp ${WORKDIR}/*.dtsi ${S}/arch/arm/boot/dts/
+	cp ${WORKDIR}/*.dts ${S}/arch/arm/boot/dts/
+  fi
+}
+
 do_compile_dtb() {
 	if [ -n "${QRLINUX_DTB}" ] ;
 	then
@@ -161,7 +170,7 @@ do_compile_dtb() {
 
 addtask lk_mkimage after do_deploy and before do_package
 addtask compile_dtb after do_compile_kernelmodules before do_strip
-
+#addtask unpack_dtb after do_kernel_checkout before do_validate_branches 
 
 DEPENDS += "android-tools-native"
 DEPENDS += "dtbtool-native"

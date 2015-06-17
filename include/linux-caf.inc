@@ -46,6 +46,18 @@ do_install_append(){
 
 }
 
+# Save vmlinux file in deploy directory as well.
+do_deploy_append() {
+
+if [ ! -d "${DEPLOYDIR}/out" ]; then
+  mkdir -p ${DEPLOYDIR}/out 
+fi
+
+ install -m 0644 ${D}/boot/vmlinux-${KERNEL_VERSION} ${DEPLOYDIR}/out/vmlinux
+
+}
+
+
 # extra tasks
 addtask kernel_link_vmlinux after do_compile before do_install
 addtask validate_branches before do_patch after do_kernel_checkout

@@ -1,0 +1,2 @@
+SUBSYSTEM=="video4linux", ATTR{link_name}=="venus_enc", SYMLINK+="video/venus_enc"
+SUBSYSTEM=="video4linux", ATTR{link_name}=="venus_dec", SYMLINK+="video/venus_dec"

@@ -8,58 +8,22 @@ PROVIDES = "virtual/bootloader"
 
 SRC_URI  = "git://codeaurora.org/kernel/lk;protocol=git;nobranch=1"
 
-SRCREV_som8064 = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
-SRCREV_som8064-revB = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
-SRCREV_som8064-const = "AU_LINUX_ANDROID_JB_2.5.04.02.02.40.241"
+SRCREV = "LNX.LA.3.5-01620-8x74.0"
 
-SRC_URI_append_som8064 = "\
-         file://NOTICE \
-         file://0001-lk.patch \
-	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
-	 file://0102-SOM-Machine-type-definition.patch \
-	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
-	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch"
-
-SRC_URI_append_som8064-revB = "\
-         file://NOTICE \
-         file://0001-lk.patch \
-	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
-	 file://0102-SOM-Machine-type-definition.patch \
-	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
-	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch"
-
-SRC_URI_append_som8064-const = "\
-         file://NOTICE \
-         file://0001-lk.patch \
-	 file://0101-APQ8064_SOM_CDP-basic-changes-for-som-bringup.patch \
-	 file://0102-SOM-Machine-type-definition.patch \
-	 file://0103-SOM-Carrier-RevB-board-serial-port-rework-fix-with-L.patch \
-	 file://0104-SOM-UART_4wire-on-GSBI1-as-default-serial-port.patch \
-	 file://0200-const-bsp.patch \
-	 file://0201-const-disable-ps-hold-reset.patch"
-
-SRCREV_ifc6410 = "AU_LINUX_ANDROID_JB_2.5_AUTO.04.02.02.115.005"
-
-SRC_URI_append_ifc6410 = "\
-         file://NOTICE \
-         file://0001-lk.patch \
-"
-
+SRC_URI += "file://0300-Explicitly-set-arm-mode-if-THUMB-support-is-disabled.patch"
 
 PV       = "1.0"
 PR       = "r9"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-MY_TARGET          = "msm8960"
+MY_TARGET          = "msm8974"
 
 PARALLEL_MAKE = "-j 1"
 
-BOOTLOADER_NAME         = "appsboot"
-BOOTLOADER_NAME_som8064 = "emmc_appsboot"
+BOOTLOADER_NAME        = "emmc_appsboot"
 
-EXTRA_OEMAKE = "TOOLCHAIN_PREFIX='arm-none-linux-gnueabi-' ${MY_TARGET}"
-EXTRA_OEMAKE_append_som8064  = " EMMC_BOOT=1 SIGNED_KERNEL=0 ENABLE_THUMB=false "
+EXTRA_OEMAKE = "TOOLCHAIN_PREFIX='arm-linux-gnueabihf-' ${MY_TARGET} EMMC_BOOT=1 SIGNED_KERNEL=0 ENABLE_THUMB=false "
 
 do_unpack_append() {
     import shutil
@@ -72,20 +36,13 @@ do_unpack_append() {
 }
 
 do_compile() {
-    PATH=/pkg/asw/compilers/codesourcery/arm-2010q1/bin:$PATH
     make ${PARALLEL_MAKE} ${EXTRA_OEMAKE}
 }
-
-do_install() {
-    install -d ${D}/usr/share/lk
-    install -m 644 ${WORKDIR}/NOTICE ${D}/usr/share/lk/NOTICE
-}
-
-FILES_${PN} = "/usr/share/lk/NOTICE"
 
 do_deploy () {
 	install -d ${DEPLOYDIR}/out
         install ${S}/build-${MY_TARGET}/${BOOTLOADER_NAME}.mbn ${DEPLOYDIR}/out
+        install ${S}/build-${MY_TARGET}/lk ${DEPLOYDIR}/out
 }
 
 do_deploy[dirs] = "${S} ${DEPLOYDIR}"

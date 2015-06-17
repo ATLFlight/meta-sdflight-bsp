@@ -17,7 +17,7 @@ SRC_URI += " \
    file://wpa_supplicant.conf \
    "
 
-PROVIDES += "kernel-module-wlan"
+PROVIDES += "kernel-module-wlan compat-wireless-${MACHINE}"
 
 PACKAGES = "kernel-module-wlan ${PN}"
 

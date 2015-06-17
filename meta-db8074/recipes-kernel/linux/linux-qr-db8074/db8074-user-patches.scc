@@ -34,3 +34,6 @@
 
 ## DB8074 ##
 patch 0001-disable-audio-from-kernel-device-tree.patch
+patch 0002-kernel-camera-bringup-on-DB8074.patch
+patch 0003-diag-Do-not-write-to-USB-when-usb-is-disconnected.patch
+#patch 0004-lvs1_1p8_enable-by-default.patch

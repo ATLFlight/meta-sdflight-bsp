@@ -1,0 +1,28 @@
+From 447f2077aa47d71f5cd59285c02b8e874792fdf1 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Mon, 18 May 2015 09:07:15 -0700
+Subject: [PATCH] lvs1_1p8_enable by default
+
+Change-Id: I7a590989c2a61046080be7cb9085d2ed10a85e93
+---
+ arch/arm/boot/dts/apq8074-dragonboard.dtsi | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/arm/boot/dts/apq8074-dragonboard.dtsi b/arch/arm/boot/dts/apq8074-dragonboard.dtsi
+index ff9f3f2..57a6acc 100755
+--- a/arch/arm/boot/dts/apq8074-dragonboard.dtsi
++++ b/arch/arm/boot/dts/apq8074-dragonboard.dtsi
+@@ -288,6 +288,10 @@
+ 	regulator-always-on;
+ };
+ 
++&pm8941_lvs1 {
++	regulator-always-on;
++};
++
+ &uart7 {
+ 	status = "ok";
+ 	qcom,tx-gpio = <&msmgpio 41 0x00>;
+-- 
+1.8.2.1
+
