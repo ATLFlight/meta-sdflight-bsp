@@ -44,7 +44,6 @@ kconf hardware eagle8074.cfg
 # Don't remove if you plan on using yocto-kernel with this BSP.
 
 kconf hardware eagle8074-user-config.cfg
-include eagle8074-vendor-patches.scc
 include eagle8074-user-patches.scc
 
 # These are config fragments for the kernel

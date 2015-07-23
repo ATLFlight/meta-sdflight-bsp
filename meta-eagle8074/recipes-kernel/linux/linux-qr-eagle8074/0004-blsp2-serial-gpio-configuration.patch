@@ -1,0 +1,36 @@
+From 81c49de4f6eba6bd6e5488f5817946de813921ae Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@qti.qualcomm.com>
+Date: Fri, 5 Jun 2015 10:13:48 -0700
+Subject: [PATCH] blsp2 serial gpio configuration
+
+Change-Id: I14bd834dc13e668d98d78e789aa1e054dd39d62f
+---
+ arch/arm/mach-msm/board-8974-gpiomux.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/arch/arm/mach-msm/board-8974-gpiomux.c b/arch/arm/mach-msm/board-8974-gpiomux.c
+index 48f4e2f..88fbcf1 100755
+--- a/arch/arm/mach-msm/board-8974-gpiomux.c
++++ b/arch/arm/mach-msm/board-8974-gpiomux.c
+@@ -717,6 +717,18 @@ static struct msm_gpiomux_config msm_blsp_configs_eagle[] __initdata = {
+ 			[GPIOMUX_SUSPENDED] = &gpio_uart_config,
+ 		},
+ 	},
++	{
++		.gpio      = 4,			/* BLSP2 UART TX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_uart_config,
++		},
++	},
++	{
++		.gpio      = 5,			/* BLSP2 UART RX */
++		.settings = {
++			[GPIOMUX_SUSPENDED] = &gpio_uart_config,
++		},
++	},
+ };
+ 
+ static struct msm_gpiomux_config msm8974_slimbus_config[] __initdata = {
+-- 
+1.8.2.1
+

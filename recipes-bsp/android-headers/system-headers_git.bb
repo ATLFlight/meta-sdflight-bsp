@@ -27,6 +27,8 @@ do_install_append() {
     dest=/etc/udev/rules.d
     install -d ${D}/usr/include/system
     install -d ${D}/usr/include/sync
+    install -d ${D}/usr/include/utils
     install -m 644 ${S}/include/system/* -D ${D}/usr/include/system
     install -m 644 ${S}/include/sync/* -D ${D}/usr/include/sync
+    install -m 644 ${S}/include/utils/* -D ${D}/usr/include/utils
 }

@@ -3,9 +3,10 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://NOTICE;md5=3c567309c019d31c938d51a3317a2693"
 
 SRC_URI = "git://codeaurora.org/platform/hardware/qcom/media;protocol=git;nobranch=1"
-SRC_URI += "file://mm-video-oss_compilation.patch \
-    file://venus_v4l2.rules \
-    file://0002-Add-license-file.patch"
+
+SRC_URI += "file://venus_v4l2.rules"
+SRC_URI += "file://0001-mm-video-oss_compilation.patch"
+SRC_URI += "file://0002-Add-license-file.patch"
 
 PACKAGES = "${PN}"
 

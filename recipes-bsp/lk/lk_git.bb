@@ -8,9 +8,12 @@ PROVIDES = "virtual/bootloader"
 
 SRC_URI  = "git://codeaurora.org/kernel/lk;protocol=git;nobranch=1"
 
-SRCREV = "LNX.LA.3.5-01620-8x74.0"
+SRCREV = "LNX.LA.3.5.2-09410-8x74.0"
 
-SRC_URI += "file://0300-Explicitly-set-arm-mode-if-THUMB-support-is-disabled.patch"
+SRC_URI += "\
+         file://0300-Explicitly-set-arm-mode-if-THUMB-support-is-disabled.patch \
+         file://0001-Eagle-hardware-support.patch \
+		 file://0004-Override-platform-ID-for-Eagle.patch"
 
 PV       = "1.0"
 PR       = "r9"
@@ -37,6 +40,10 @@ do_unpack_append() {
 
 do_compile() {
     make ${PARALLEL_MAKE} ${EXTRA_OEMAKE}
+}
+
+do_install() {
+    install -d ${D}/usr/share/lk
 }
 
 do_deploy () {

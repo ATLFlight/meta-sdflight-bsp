@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2013-2015, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -10,14 +10,28 @@
  * GNU General Public License for more details.
  */
 
-/include/ "msm8974-camera-sensor-dragonboard.dtsi"
+/include/ "apq8074-camera-sensor-eagle.dtsi"
 /include/ "msm8974-leds.dtsi"
 /include/ "msm-rdbg.dtsi"
+/include/ "apq8074-leds-eagle.dtsi"
 
 / {
 	aliases {
 		serial0 = &blsp2_uart5;
+        serial1 = &blsp1_uart4;
 	};
+};
+
+&mdss_dsi0 {
+    status = "disabled";
+};
+
+&mdss_dsi1 {
+    status = "disabled";
+};
+
+&mdss_edp {
+    status = "disabled";
 };
 
 &vph_pwr_vreg {
@@ -25,6 +39,10 @@
 };
 
 &soc {
+
+    qcom,mdss_wb_panel {
+		status = "disabled";
+	};
 
 	qcom,mdss_dsi@fd922800 {
 		status = "disabled";
@@ -90,6 +108,15 @@
 		status = "disabled";
 	};
 
+	qcom,msm-voip-dsp {
+		status = "disabled";
+	};
+
+	qcom,msm-pcm-voice {
+		status = "disabled";
+	};
+
+
     /* blsp1 - qup i2c - na */
 	i2c@f9923000 {
 		status = "disabled";
@@ -105,98 +132,26 @@
 		status = "disabled";
 	};
 
-	/* Not defined */
-    /* blsp2 - qup spi - na */
-	spi@f9924000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp3 - qup i2c - na */
-	i2c@f9925000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp3 - qup spi - na */
-	spi@f9925000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp4 - qup i2c - na */
-	i2c@f9926000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp4 - qup spi - na */
-	spi@f9926000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp5 - qup i2c - na */
-	i2c@f9927000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp5 - qup spi - na */
-	spi@f9927000 {
+	/* blsp2 - qup i2c - barometer (keep disabled) */
+	i2c_3: i2c@f9925000 {
+		cell-index = <3>;
+		compatible = "qcom,i2c-qup";
+		reg = <0xf9925000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		interrupts = <0 97 0>;
+		interrupt-names = "qup_err_intr";
+		qcom,i2c-bus-freq = <384000>;
+		qcom,i2c-src-freq = <19200000>;
+		qcom,master-id = <86>;
+		qcom,scl-gpio = <&msmgpio 11 0>;
+		qcom,sda-gpio = <&msmgpio 10 0>;
 		status = "disabled";
 	};
 
     /* blsp6 - qup i2c - na */
 	i2c@f9928000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp6 - qup spi - na */
-	spi@f9928000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp7 - qup i2c - na */
-	i2c@f9963000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp7 - qup spi - na */
-	spi@f9963000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp8 - qup i2c - na */
-	i2c@f9964000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp8 - qup spi - na */
-	spi@f9964000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp9 - qup i2c - na */
-	i2c@f9965000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp9 - qup spi - na */
-	spi@f9965000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp10 - qup i2c - na */
-	i2c@f9966000 {
 		status = "disabled";
 	};
 
@@ -209,30 +164,6 @@
 	/* msm8974.dtsi */
     /* blsp11 - qup i2c - na */
 	i2c@f9967000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp11 - qup spi - na */
-	spi@f9967000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp12 - qup i2c - na */
-	i2c@f9968000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp12 - qup spi - na */
-	spi@f9968000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp1 - uart - na */
-	serial@f991d000 {
 		status = "disabled";
 	};
 
@@ -249,50 +180,19 @@
 	};
 
 	/* Not defined */
-    /* blsp4 - uart - na */
-	serial@f9920000 {
-		status = "disabled";
-	};
+    /* blsp5 - uart - GPS */
+	blsp1_uart4: serial@f9921000 {
+		compatible = "qcom,msm-lsuart-v14";
+		reg = <0xf9921000 0x1000>;
+		interrupts = <0 111 0>;
+		status = "okay";
 
-	/* Not defined */
-    /* blsp5 - uart - na */
-	serial@f9921000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp6 - uart - na */
-	serial@f9922000 {
-		status = "disabled";
-	};
-
-    /* blsp7 - uart - BT */
-	/*uart@f995d000 {
-		status = "disabled";
-	};*/
-
-	/* msm8974.dtsi */
-    /* blsp8 - uart - na */
-	serial@f995e000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp9 - uart - na */
-	serial@f995f000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp10 - uart - na */
-	serial@f9960000 {
-		status = "disabled";
-	};
-
-	/* Not defined */
-    /* blsp11 - uart - na */
-	serial@f9961000 {
-		status = "disabled";
+		qcom,msm-bus,name = "serial_uart5";
+		qcom,msm-bus,num-cases = <2>;
+		qcom,msm-bus,num-paths = <1>;
+		qcom,msm-bus,vectors-KBps =
+				<86 512 0 0>,
+				<86 512 500 800>;
 	};
 
     /* blsp12 - serial console */
@@ -306,8 +206,8 @@
 		qcom,msm-bus,num-cases = <2>;
 		qcom,msm-bus,num-paths = <1>;
 		qcom,msm-bus,vectors-KBps =
-				<86 512 0 0>,
-				<86 512 500 800>;
+				<84 512 0 0>,
+				<84 512 500 800>;
 	};
 };
 
@@ -319,6 +219,18 @@
 	qcom,sup-voltages = <2000 2000>;
 	status = "ok";
 };
+
+&pm8941_lvs1 {
+	regulator-always-on;
+};
+
+&pm8941_l18 {
+    regulator-min-microvolt = <2850000>;
+    regulator-max-microvolt = <2850000>;
+    qcom,init-voltage = <2850000>;
+	regulator-always-on;
+};
+
 
 &pm8941_l19 {
 	regulator-min-microvolt = <3300000>;
@@ -341,34 +253,6 @@
 	qcom,rx-gpio = <&msmgpio 42 0x00>;
 	qcom,cts-gpio = <&msmgpio 43 0x00>;
 	qcom,rfr-gpio = <&msmgpio 44 0x00>;
-};
-
-&usb_otg {
-	status = "ok";
-	qcom,hsusb-otg-otg-control = <2>;
-	qcom,hsusb-otg-mode = <3>;
-	vbus_otg-supply = <&pm8941_mvs1>;
-	qcom,usb2-enable-hsphy2;
-	qcom,dp-manual-pullup;
-
-	#address-cells = <0>;
-	interrupt-parent = <&usb_otg>;
-	interrupts = <0 1 2>;
-	#interrupt-cells = <1>;
-	interrupt-map-mask = <0xffffffff>;
-	interrupt-map = <0 &intc 0 134 0
-		1 &intc 0 140 0
-		2 &spmi_bus 0x0 0x0 0x9 0x0>;
-	interrupt-names = "core_irq", "async_irq", "pmic_id_irq";
-};
-
-&usb3 {
-	interrupts = <0>;	/* remove pmic_id_irq; used by &usb_otg */
-	qcom,charging-disabled;
-	vbus_dwc3-supply = <0>;
-	dwc3@f9200000 {
-		host-only-mode;
-	};
 };
 
 &slim_msm {
@@ -571,102 +455,23 @@
 };
 
 &pm8941_lsid1 {
-	qcom,leds@d000 {
-		qcom,rgb_2 {
-			status = "ok";
-			qcom,default-state = "on";
-			qcom,turn-off-delay-ms = <1000>;
-		};
-	};
 
-	qcom,leds@d100 {
-		status = "disabled";
-	};
-
-	qcom,leds@d200 {
-		status = "disabled";
-	};
-
-	qcom,leds@d300 {
-		status = "disabled";
-	};
-
-	qcom,leds@d400 {
-		status = "disabled";
-	};
-
-	qcom,leds@d500 {
-		status = "disabled";
-	};
-
-	qcom,leds@d600 {
-		status = "disabled";
-	};
-
-	qcom,leds@d700 {
-		status = "disabled";
-	};
-
-	qcom,leds@d800 {
-		status = "okay";
-		qcom,wled_0 {
-			label = "wled";
-			linux,name = "wled:backlight";
-			linux,default-trigger = "bkl-trigger";
-			qcom,cs-out-en;
-			qcom,op-fdbck = <1>;
-			qcom,default-state = "on";
-			qcom,max-current = <20>;
-			qcom,ctrl-delay-us = <0>;
-			qcom,boost-curr-lim = <3>;
-			qcom,cp-sel = <0>;
-			qcom,switch-freq = <11>;
-			qcom,ovp-val = <1>;
-			qcom,num-strings = <1>;
-			qcom,id = <0>;
-		};
-	};
-
-	qcom,leds@d900 {
-		status = "disabled";
-	};
-
-	qcom,leds@da00 {
-		status = "disabled";
-	};
-
-	qcom,leds@db00 {
-		status = "disabled";
-	};
-
-	qcom,leds@dc00 {
-		status = "disabled";
-	};
-
-	qcom,leds@dd00 {
-		status = "disabled";
-	};
-
-	qcom,leds@de00 {
-		status = "disabled";
-	};
-
-	qcom,leds@df00 {
-		status = "disabled";
-	};
-
-	qcom,leds@e000 {
-		status = "disabled";
-	};
-
-	qcom,leds@e100 {
-		status = "disabled";
-	};
-
-	qcom,leds@e200 {
-		status = "disabled";
-	};
-
+    qcom,leds@d000 {
+        qcom,rgb_2 {
+            status = "ok";
+            qcom,default-state = "on";
+			#qcom,turn-off-delay-ms = <1000>;
+            qcom,idx-len = <1>;
+            qcom,duty-pcts = [40];
+        };
+		/*
+        qcom,rgb_1 {
+            status = "ok";
+            qcom,default-state = "on";
+            qcom,idx-len = <1>;
+            qcom,duty-pcts = [40];
+        };*/
+    };
 
 	/* channel 1 */
 	pwm@b200 {
@@ -771,7 +576,7 @@
 	status = "ok";
 };
 
-&dsi_hx8379c_wvga_vid {
-    status = "disabled";
-	qcom,cont-splash-enabled;
+&usb3 {
+	qcom,charging-disabled;
+	qcom,otg-capability;
 };

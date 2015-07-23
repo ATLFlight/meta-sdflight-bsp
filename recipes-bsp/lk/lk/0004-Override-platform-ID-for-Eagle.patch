@@ -1,0 +1,39 @@
+From 7daf83ed59a31ebc842ad97b2647417c83f19ac8 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Fri, 24 Jul 2015 19:23:35 -0700
+Subject: [PATCH] Override platform ID for Eagle
+
+---
+ platform/msm_shared/board.c | 3 +++
+ platform/msm_shared/smem.h  | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/platform/msm_shared/board.c b/platform/msm_shared/board.c
+index 5591ecd..916f8bc 100644
+--- a/platform/msm_shared/board.c
++++ b/platform/msm_shared/board.c
+@@ -127,6 +127,9 @@ static void platform_detect()
+ 		dprintf(CRITICAL, "Unsupported board info format\n");
+ 		ASSERT(0);
+ 	}
++
++	board.platform_hw = HW_PLATFORM_EAGLE;
++	board.target = HW_PLATFORM_EAGLE;
+ }
+ 
+ void board_init()
+diff --git a/platform/msm_shared/smem.h b/platform/msm_shared/smem.h
+index e287c8e..e143264 100755
+--- a/platform/msm_shared/smem.h
++++ b/platform/msm_shared/smem.h
+@@ -349,6 +349,7 @@ enum platform {
+ 	HW_PLATFORM_VIRTIO = 16,
+ 	HW_PLATFORM_BTS = 19,
+ 	HW_PLATFORM_DMA = 22,
++	HW_PLATFORM_EAGLE = 28,
+ 	HW_PLATFORM_32BITS = 0x7FFFFFFF,
+ };
+ 
+-- 
+2.4.2
+

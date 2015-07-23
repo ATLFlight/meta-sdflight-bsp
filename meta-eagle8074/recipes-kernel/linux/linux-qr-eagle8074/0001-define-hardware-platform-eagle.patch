@@ -1,0 +1,55 @@
+From 44deae0fd4010d1edd78c252df8ab98c5ffb110e Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Mon, 1 Jun 2015 16:00:41 -0700
+Subject: [PATCH] define hardware platform eagle
+
+Change-Id: I9aa1682c927d06d761cb0ce18b03a3151ca68622
+---
+ arch/arm/mach-msm/include/mach/socinfo.h | 2 ++
+ arch/arm/mach-msm/socinfo.c              | 3 ++-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm/mach-msm/include/mach/socinfo.h b/arch/arm/mach-msm/include/mach/socinfo.h
+index aeb32f8..eb2ca8b 100644
+--- a/arch/arm/mach-msm/include/mach/socinfo.h
++++ b/arch/arm/mach-msm/include/mach/socinfo.h
+@@ -45,6 +45,7 @@
+ #define of_board_is_xpm()	of_machine_is_compatible("qcom,xpm")
+ #define of_board_is_skuf()	of_machine_is_compatible("qcom,skuf")
+ #define of_board_is_sbc()	of_machine_is_compatible("qcom,sbc")
++#define of_board_is_eagle()	of_machine_is_compatible("qcom,eagle")
+ 
+ #define machine_is_msm8974()	of_machine_is_compatible("qcom,msm8974")
+ #define machine_is_msm9625()	of_machine_is_compatible("qcom,msm9625")
+@@ -77,6 +78,7 @@
+ #define of_board_is_xpm()		0
+ #define of_board_is_skuf()		0
+ #define of_board_is_sbc()		0
++#define of_board_is_eagle()		0
+ 
+ #define machine_is_msm8974()		0
+ #define machine_is_msm9625()		0
+diff --git a/arch/arm/mach-msm/socinfo.c b/arch/arm/mach-msm/socinfo.c
+index e7cec58..1d5836b 100644
+--- a/arch/arm/mach-msm/socinfo.c
++++ b/arch/arm/mach-msm/socinfo.c
+@@ -52,6 +52,7 @@ enum {
+ 	HW_PLATFORM_MTP  = 8,
+ 	HW_PLATFORM_LIQUID  = 9,
+ 	/* Dragonboard platform id is assigned as 10 in CDT */
++    /* Using Same ID for Eagle for now. TBD */
+ 	HW_PLATFORM_DRAGON	= 10,
+ 	HW_PLATFORM_QRD	= 11,
+ 	HW_PLATFORM_HRD	= 13,
+@@ -68,7 +69,7 @@ const char *hw_platform[] = {
+ 	[HW_PLATFORM_SVLTE_SURF] = "SLVTE_SURF",
+ 	[HW_PLATFORM_MTP] = "MTP",
+ 	[HW_PLATFORM_LIQUID] = "Liquid",
+-	[HW_PLATFORM_DRAGON] = "Dragon",
++	[HW_PLATFORM_DRAGON] = "Eagle",
+ 	[HW_PLATFORM_QRD] = "QRD",
+ 	[HW_PLATFORM_HRD] = "HRD",
+ 	[HW_PLATFORM_DTV] = "DTV",
+-- 
+1.8.2.1
+

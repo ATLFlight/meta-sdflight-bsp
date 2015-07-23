@@ -4,7 +4,7 @@ DESCRIPTION = "libsparse library"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
 
-DEPENDS += "zlib"
+DEPENDS += "zlib-native"
 
 PR = "r0"
 PV = "1.0"

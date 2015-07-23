@@ -1,0 +1,55 @@
+From 757c97c035abd196ff2aff89628c862fa43a716d Mon Sep 17 00:00:00 2001
+From: Suraj Swami <sswami@codeaurora.org>
+Date: Tue, 30 Jun 2015 18:45:30 -0700
+Subject: [PATCH] camera-hal: compilation changes for eagle8074
+
+---
+ QCamera2/stack/mm-camera-interface/inc/android_adapter.h    | 13 +++++++++++++
+ .../stack/mm-camera-interface/src/mm_camera_interface.c     |  9 +++++++--
+ 2 files changed, 20 insertions(+), 2 deletions(-)
+ create mode 100644 QCamera2/stack/mm-camera-interface/inc/android_adapter.h
+
+diff --git a/QCamera2/stack/mm-camera-interface/inc/android_adapter.h b/QCamera2/stack/mm-camera-interface/inc/android_adapter.h
+new file mode 100644
+index 0000000..dd73fcb
+--- /dev/null
++++ b/QCamera2/stack/mm-camera-interface/inc/android_adapter.h
+@@ -0,0 +1,13 @@
++#ifndef ANDROID_ADAPTER_H
++#define ANDROID_ADAPTER_H
++
++#include<string.h>
++
++#define PROPERTY_VALUE_MAX 32
++
++#define property_get(name, value_str, default_value) \
++  do { \
++    strncpy(value_str, default_value, PROPERTY_VALUE_MAX); \
++  } while (0)
++
++#endif
+diff --git a/QCamera2/stack/mm-camera-interface/src/mm_camera_interface.c b/QCamera2/stack/mm-camera-interface/src/mm_camera_interface.c
+index 97fd107..290d1e1 100755
+--- a/QCamera2/stack/mm-camera-interface/src/mm_camera_interface.c
++++ b/QCamera2/stack/mm-camera-interface/src/mm_camera_interface.c
+@@ -36,10 +36,15 @@
+ #include <poll.h>
+ #include <linux/media.h>
+ #include <signal.h>
++#include <stdint.h>
+ #include <media/msm_cam_sensor.h>
+-#include <cutils/properties.h>
+ #include <stdlib.h>
+-#include <stdint.h>
++
++#ifdef _ANDROID_
++#include <cutils/properties.h>
++#else
++#include "android_adapter.h"
++#endif
+ 
+ #include "mm_camera_dbg.h"
+ #include "mm_camera_interface.h"
+-- 
+1.9.1
+

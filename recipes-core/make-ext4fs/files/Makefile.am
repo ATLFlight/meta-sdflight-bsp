@@ -12,4 +12,4 @@ make_ext4fs_SOURCES = make_ext4fs_main.c \
 	wipe.c \
 	crc16.c
 make_ext4fs_CFLAGS = -Iinclude -DHOST
-make_ext4fs_LDFLAGS = -lsparse -lz
+make_ext4fs_LDADD = -lsparse -lz

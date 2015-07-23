@@ -1,0 +1,33 @@
+diff --git a/arch/arm/mach-msm/include/mach/socinfo.h b/arch/arm/mach-msm/include/mach/socinfo.h
+index 471599a..bbf806d 100644
+--- a/arch/arm/mach-msm/include/mach/socinfo.h
++++ b/arch/arm/mach-msm/include/mach/socinfo.h
+@@ -45,7 +45,7 @@
+ #define of_board_is_xpm()	of_machine_is_compatible("qcom,xpm")
+ #define of_board_is_skuf()	of_machine_is_compatible("qcom,skuf")
+ #define of_board_is_sbc()	of_machine_is_compatible("qcom,sbc")
+-#define of_board_is_eagle()	of_machine_is_compatible("qcom,eagle")
++#define of_board_is_eagle() of_machine_is_compatible("qcom,eagle")
+ 
+ #define machine_is_msm8974()	of_machine_is_compatible("qcom,msm8974")
+ #define machine_is_msm9625()	of_machine_is_compatible("qcom,msm9625")
+diff --git a/arch/arm/mach-msm/socinfo.c b/arch/arm/mach-msm/socinfo.c
+index bc2f5c6..13b2d08 100644
+--- a/arch/arm/mach-msm/socinfo.c
++++ b/arch/arm/mach-msm/socinfo.c
+@@ -59,6 +59,7 @@ enum {
+ 	HW_PLATFORM_QRD	= 11,
+ 	HW_PLATFORM_HRD	= 13,
+ 	HW_PLATFORM_DTV	= 14,
++	HW_PLATFORM_NPC_EAGLE	= 23,
+ 	HW_PLATFORM_INVALID
+ };
+ 
+@@ -75,6 +76,7 @@ const char *hw_platform[] = {
+ 	[HW_PLATFORM_QRD] = "QRD",
+ 	[HW_PLATFORM_HRD] = "HRD",
+ 	[HW_PLATFORM_DTV] = "DTV",
++	[HW_PLATFORM_NPC_EAGLE] = "NPC Eagle",
+ };
+ 
+ enum {

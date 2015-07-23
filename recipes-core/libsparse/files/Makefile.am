@@ -8,4 +8,10 @@ libsparse_a_SOURCES = backed_block.c \
 	sparse_err.c \
 	sparse_read.c
 libsparse_a_CFLAGS = -Iinclude
-libsparse_a_LDFLAGS = -lz
+
+bin_PROGRAMS = simg2img
+
+simg2img_SOURCES = simg2img.c \
+	sparse_crc32.c
+simg2img_CFLAGS = -Iinclude
+simg2img_LDADD = libsparse.a -lz

@@ -32,5 +32,10 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-patch 0001-disable-audio-from-kernel-device-tree.patch
-patch 0002-kernel-camera-bringup-on-DB8074.patch
+#patch 0000-disable-audio-from-kernel-device-tree.patch
+patch 0001-define-hardware-platform-eagle.patch
+patch 0002-eagle-blsp-configuration.patch
+patch 0003-new-platform-id.patch
+patch 0004-blsp2-serial-gpio-configuration.patch
+patch 0005-blsp5-blsp12-serial-fixes.patch
+patch 0012-Change-Eagle-to-correct-PID-28.patch

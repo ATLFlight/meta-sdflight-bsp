@@ -12,11 +12,17 @@
 
 /dts-v1/;
 
-/include/ "apq8074-v2.2.dtsi"
+/include/ "msm8974pro-ab-pm8941.dtsi"
 /include/ "apq8074-eagle.dtsi"
 
 / {
-	model = "Qualcomm APQ 8074v2.2 EAGLE";
+	model = "Qualcomm APQ 8074Pro-AB EAGLE";
 	compatible = "qcom,apq8074-eagle", "qcom,apq8074", "qcom,eagle";
-	qcom,msm-id = <184 10 0x20002>;
+	qcom,board-id = <28 0>;
 };
+
+&sdhc_1 {
+    qcom,pad-pull-on = <0x0 0x3 0x3 0x1>; /* no-pull, pull-up, pull-up, pull-down */
+    qcom,pad-pull-off = <0x0 0x3 0x3 0x1>; /* no-pull, pull-up, pull-up, pull-down */
+};
+

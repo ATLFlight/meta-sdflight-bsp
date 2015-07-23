@@ -12,7 +12,9 @@ SRCREV = "LNX.LA.3.5-01620-8x74.0"
 SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=${SRCREV};protocol=git;nobranch=1"
 
 SRC_URI += " \
-   file://Kbuild.patch \
+   file://0001-Move-Kbuild-from-SDIO-driver.patch \
+   file://0002-Fix-compilation-on-OE.patch \
+   file://0003-Disable-power-save-mode-by-default.patch \
    file://qca6234.cfg \
    file://wpa_supplicant.conf \
    "
@@ -39,7 +41,6 @@ do_unpack_append() {
     if os.path.exists(s):
         shutil.rmtree(s)
     os.rename(wd+'/git', s)
-    shutil.copyfile(s+'/drivers/net/wireless/ath/ath6kl-3.5/android_sdio/Kbuild', s+'/Kbuild')
 }
 
 do_compile_prepend() {

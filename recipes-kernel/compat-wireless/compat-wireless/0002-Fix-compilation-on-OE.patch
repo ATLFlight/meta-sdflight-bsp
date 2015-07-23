@@ -1,10 +1,10 @@
-From dbf01c523a9c1a89381011f995e83e41365c895e Mon Sep 17 00:00:00 2001
+From dc5892f1c6cddae2f820cb89468b1d6daa632606 Mon Sep 17 00:00:00 2001
 From: Gustavo Solaira <gustavos@codeaurora.org>
 Date: Wed, 8 Apr 2015 21:02:55 -0700
-Subject: [PATCH] Fix compilation on OE
+Subject: [PATCH 2/3] Fix compilation on OE
 
 ---
- .../wireless/ath/ath6kl-3.5/android_sdio/Kbuild    |   46 ++++++++++----------
+ Kbuild | 46 +++++++++++++++++++++++-----------------------
  1 file changed, 23 insertions(+), 23 deletions(-)
 
 diff --git a/Kbuild b/Kbuild
@@ -66,5 +66,5 @@ index 9906d76..b7b5042 100644
  
  ifeq ($(HAVE_CFG80211), 1)
 -- 
-1.7.9.5
+2.4.2
 
