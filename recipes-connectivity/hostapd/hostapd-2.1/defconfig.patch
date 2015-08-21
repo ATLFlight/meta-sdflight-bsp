@@ -1,0 +1,40 @@
+diff --git a/hostapd/defconfig b/hostapd/defconfig
+index e329a11..04d0f17 100644
+--- a/hostapd/defconfig
++++ b/hostapd/defconfig
+@@ -29,10 +29,10 @@ CONFIG_DRIVER_NL80211=y
+ #LIBS += -L$<path to libnl library files>
+ 
+ # Use libnl v2.0 (or 3.0) libraries.
+-#CONFIG_LIBNL20=y
++CONFIG_LIBNL20=n
+ 
+ # Use libnl 3.2 libraries (if this is selected, CONFIG_LIBNL20 is ignored)
+-#CONFIG_LIBNL32=y
++CONFIG_LIBNL32=y
+ 
+ 
+ # Driver interface for FreeBSD net80211 layer (e.g., Atheros driver)
+@@ -151,14 +151,14 @@ CONFIG_IPV6=y
+ #CONFIG_DRIVER_RADIUS_ACL=y
+ 
+ # IEEE 802.11n (High Throughput) support
+-#CONFIG_IEEE80211N=y
++CONFIG_IEEE80211N=y
+ 
+ # Wireless Network Management (IEEE Std 802.11v-2011)
+ # Note: This is experimental and not complete implementation.
+ #CONFIG_WNM=y
+ 
+ # IEEE 802.11ac (Very High Throughput) support
+-#CONFIG_IEEE80211AC=y
++CONFIG_IEEE80211AC=y
+ 
+ # Remove debugging code that is printing out debug messages to stdout.
+ # This can be used to reduce the size of the hostapd considerably if debugging
+@@ -319,4 +319,4 @@ CONFIG_IPV6=y
+ # For more details refer to:
+ # http://wireless.kernel.org/en/users/Documentation/acs
+ #
+-#CONFIG_ACS=y
++CONFIG_ACS=y

@@ -14,6 +14,7 @@ PN = "android-tools"
 
 PROVIDES = "android-tools"
 DEPENDS += "zlib"
+DEPENDS += "pseudo-native"
 
 PACKAGES = "${PN}"
 

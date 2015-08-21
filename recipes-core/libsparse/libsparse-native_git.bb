@@ -10,7 +10,7 @@ PR = "r0"
 PV = "1.0"
 PN = "libsparse-native"
 
-SRC_URI = "git://codeaurora.org/quic/la/platform/system/core;nobranch=1;tag=LNX.LA.3.5-01620-8x74.0"
+SRC_URI = "git://codeaurora.org/quic/la/platform/system/core;nobranch=1;tag=LNX.LA.3.5.2-09410-8x74.0"
 SRC_URI += "file://Makefile.am \
 	file://configure.ac"
 

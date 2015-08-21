@@ -11,7 +11,7 @@ PN = "dtbtool"
 
 PROVIDES = "dtbtool-native"
 
-SRC_URI = "git://codeaurora.org/quic/la/device/qcom/common;nobranch=1;tag=LNX.LA.3.5-01620-8x74.0"
+SRC_URI = "git://codeaurora.org/quic/la/device/qcom/common;nobranch=1;tag=LNX.LA.3.5.2-09410-8x74.0"
 SRC_URI += "file://0001-dtbtool-for-linux.patch"
 
 EXTRA_OEMAKE = "INCLUDES='-I${S}/include'"

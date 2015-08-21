@@ -8,7 +8,7 @@ LICENSE = "GPLv2"
 
 LIC_FILES_CHKSUM = "file://COPYRIGHT;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
-SRCREV = "LNX.LA.3.5-01620-8x74.0"
+SRCREV = "LNX.LA.3.5.2-09410-8x74.0"
 SRC_URI = "git://codeaurora.org/platform/external/compat-wireless.git;revision=${SRCREV};protocol=git;nobranch=1"
 
 SRC_URI += " \

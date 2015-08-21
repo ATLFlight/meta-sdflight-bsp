@@ -10,7 +10,7 @@ SRC_URI += "file://0002-Add-license-file.patch"
 
 PACKAGES = "${PN}"
 
-SRCREV = "LNX.LA.3.5-01620-8x74.0"
+SRCREV = "LNX.LA.3.5.2-09410-8x74.0"
 
 DEPENDS += "glib-2.0 android-tools virtual/kernel"
 

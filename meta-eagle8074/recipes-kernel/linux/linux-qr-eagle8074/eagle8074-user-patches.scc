@@ -33,9 +33,13 @@
 #
 
 #patch 0000-disable-audio-from-kernel-device-tree.patch
-patch 0001-define-hardware-platform-eagle.patch
-patch 0002-eagle-blsp-configuration.patch
-patch 0003-new-platform-id.patch
-patch 0004-blsp2-serial-gpio-configuration.patch
-patch 0005-blsp5-blsp12-serial-fixes.patch
-patch 0012-Change-Eagle-to-correct-PID-28.patch
+#patch 0001-define-hardware-platform-eagle.patch
+#patch 0002-eagle-blsp-configuration.patch
+#patch 0003-new-platform-id.patch
+#patch 0004-blsp2-serial-gpio-configuration.patch
+#patch 0005-blsp5-blsp12-serial-fixes.patch
+#patch 0006-Disable-single-character-mode-on-console-startup.patch
+#patch 0007-Change-base-UART-to-UART12-0xF9962000.patch
+#patch 0008-ov7251-driver-baseline.patch
+#patch 0009-ov7251-regulator-update.patch
+#patch 0010-msm-camera-IMX214-sensor-driver-in-kernel.patch

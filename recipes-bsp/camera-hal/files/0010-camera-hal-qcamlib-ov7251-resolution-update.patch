@@ -1,0 +1,179 @@
+From 04a2ef13d3b880927a7612d42fc223d01f1ff9c5 Mon Sep 17 00:00:00 2001
+From: Kaustubh Gondkar <kgondkar@codeaurora.org>
+Date: Thu, 16 Jul 2015 16:30:59 -0700
+Subject: [PATCH] qcamlib ov7251 resolution update
+
+Change-Id: I1b2a94dc7082de50fe1a3b335344256eb90bc577
+---
+ qcamlib/inc/qcamlib.h       |  1 +
+ qcamlib/src/qcamlib.c       | 17 +++++++++++------
+ qcamlib/test/qcamlib_test.c | 43 ++++++++++++++++++++++++++++++++++++-------
+ 3 files changed, 48 insertions(+), 13 deletions(-)
+
+diff --git a/qcamlib/inc/qcamlib.h b/qcamlib/inc/qcamlib.h
+index 7e32a59..47e44ca 100644
+--- a/qcamlib/inc/qcamlib.h
++++ b/qcamlib/inc/qcamlib.h
+@@ -101,6 +101,7 @@ typedef struct _qcamlib_stream_dim_t {
+ typedef struct _qcamlib_config_t {
+     qcamlib_stream_dim_t preview_dim;
+     qcamlib_stream_dim_t video_dim;
++    qcamlib_stream_dim_t snapshot_dim;
+ } qcamlib_config_t;
+ 
+ /**
+diff --git a/qcamlib/src/qcamlib.c b/qcamlib/src/qcamlib.c
+index d4642df..9cb2751 100644
+--- a/qcamlib/src/qcamlib.c
++++ b/qcamlib/src/qcamlib.c
+@@ -77,7 +77,10 @@ qcamlib_t qcamlib_create()
+     h->test_obj.video_height = DEFAULT_VIDEO_HEIGHT;
+     h->test_obj.preview_width = DEFAULT_PREVIEW_WIDTH;
+     h->test_obj.preview_height = DEFAULT_PREVIEW_HEIGHT;
+-
++#if 0
++    h->test_obj.snapshot_width = DEFAULT_SNAPSHOT_WIDTH;
++    h->test_obj.snapshot_height = DEFAULT_SNAPSHOT_HEIGHT;
++#endif
+     return h;
+ cleanup:
+     free(h);
+@@ -316,14 +319,12 @@ void qcamlib_deregister_preview_cb(qcamlib_t h)
+ {
+     h->pcb = NULL;
+     h->test_obj.user_preview_cb = NULL;
+-    return 0;
+ }
+ 
+ void qcamlib_deregister_video_cb(qcamlib_t h)
+ {
+     h->vcb = NULL;
+     h->test_obj.user_video_cb = NULL;
+-    return 0;
+ }
+ 
+ void qcamlib_set_cb_userdata(qcamlib_t h, void *userdata)
+@@ -338,9 +339,13 @@ int qcamlib_configure(qcamlib_t h, qcamlib_config_t config)
+     h->test_obj.preview_height = config.preview_dim.height;
+     h->test_obj.video_width = config.video_dim.width;
+     h->test_obj.video_height = config.video_dim.height;
+-    QCAM_DBG("preview %dx%d, video %dx%d", h->test_obj.preview_width,
+-             h->test_obj.preview_height, h->test_obj.video_width,
+-             h->test_obj.video_height);
++#if 0
++    h->test_obj.snapshot_width = config.snapshot_dim.width;
++    h->test_obj.snapshot_height = config.snapshot_dim.height;
++#endif
++    QCAM_DBG("preview %dx%d, video %dx%d", 
++			h->test_obj.preview_width, h->test_obj.preview_height, 
++			h->test_obj.video_width, h->test_obj.video_height);
+     return 0;
+ }
+ 
+diff --git a/qcamlib/test/qcamlib_test.c b/qcamlib/test/qcamlib_test.c
+index 67289bf..6c67970 100644
+--- a/qcamlib/test/qcamlib_test.c
++++ b/qcamlib/test/qcamlib_test.c
+@@ -43,12 +43,19 @@
+ 
+ #define PRINT_FPS             0
+ 
++typedef enum {
++	SENSOR_IMX_4K = 0,
++	SENSOR_OV_OPTIC_FLOW = 1,
++	SENSOR_TYPE_MAX
++} sensor_type_t;
++
+ uint32_t p_frame_count = 0;
+ uint32_t v_frame_count = 0;
+ uint32_t dump_count = 0;
+ uint32_t v_dump_count = 0;
+ uint32_t dump_count_max = DEF_DUMP_COUNT_MAX;
+ uint32_t dump_interval = DEF_DUMP_INTERVAL;
++uint32_t sensor_type = SENSOR_IMX_4K;
+ uint8_t *p_buf = NULL;
+ uint32_t p_bufsize = 0;
+ uint8_t *v_buf = NULL;
+@@ -82,6 +89,9 @@ char usage_str[] =
+   "        maximum number of frames to be saved (default=100)\n"
+   "    -i dump-interval\n"
+   "        save every i'th frame (default=30)\n"
++  "    -s sensor-type \n"
++  "        0 : IMX 4K sensor (default) \n"
++  "        1 : OV OpticFlow sensor \n"
+   "    -h\n"
+   "        print this message\n"
+ ;
+@@ -190,10 +200,10 @@ void print_usage()
+   printf("%s", usage_str);
+ }
+ 
+-int parse_commadline(int argc, char* argv[])
++int parse_commandline(int argc, char* argv[])
+ {
+   int c;
+-  while ((c = getopt (argc, argv, "hi:n:o:v")) != -1) {
++  while ((c = getopt (argc, argv, "hi:n:o:vs:")) != -1) {
+     switch (c) {
+       case 'o':
+         outdir = optarg;
+@@ -207,6 +217,9 @@ int parse_commadline(int argc, char* argv[])
+       case 'v':
+         enable_video = true;
+         break;
++      case 's':
++        sensor_type = atoi(optarg);
++        break;
+       case 'h':
+         print_usage();
+         exit(0);
+@@ -255,10 +268,15 @@ void stop_streaming()
+ 
+ int main(int argc, char *argv[])
+ {
+-  parse_commadline(argc, argv);
++  parse_commandline(argc, argv);
+ 
+   printf("---- qcamlib test application ----\n");
+ 
++  if(sensor_type >= SENSOR_TYPE_MAX) {
++	printf("ERROR: Invalid sensor type (%d) (IMX_4K / OV_OPTIC_FLOW) parameter\n",sensor_type);
++	return -1;
++  }
++ 
+   struct stat st = {0};
+   if (stat(outdir, &st) == -1) {
+     mkdir(outdir, 0777);
+@@ -273,14 +291,25 @@ int main(int argc, char *argv[])
+   qcamlib_config_t config;
+   memset(&config, 0x00, sizeof(qcamlib_config_t));
+ 
++  config.snapshot_dim.width = 1024;
++  config.snapshot_dim.height = 768;
+   config.video_dim.width = 1920;
+   config.video_dim.height = 1080;
+   if (enable_video == true) {
+-      config.preview_dim.width = 1280;
+-      config.preview_dim.height = 720;
++     config.preview_dim.width = 1280;
++     config.preview_dim.height = 720;
+   } else {
+-      config.preview_dim.width = 3840;
+-      config.preview_dim.height = 2160;
++     config.preview_dim.width = 3840;
++     config.preview_dim.height = 2160;
++  }
++
++  if (sensor_type == SENSOR_OV_OPTIC_FLOW) {
++      config.snapshot_dim.width = 640;
++      config.snapshot_dim.height = 480;
++      config.preview_dim.width = 640;
++      config.preview_dim.height = 480;
++      config.video_dim.width = 640;
++      config.video_dim.height = 480;
+   }
+ 
+   qcamlib_configure(h_cam, config);
+-- 
+1.8.2.1
+

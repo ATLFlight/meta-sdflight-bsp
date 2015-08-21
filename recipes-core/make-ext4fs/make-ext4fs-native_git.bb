@@ -10,7 +10,7 @@ PR = "r0"
 PV="1.0"
 PN = "make-ext4fs-native"
 
-SRC_URI = "git://codeaurora.org/quic/la/platform/system/extras;nobranch=1;tag=LNX.LA.3.5-01620-8x74.0"
+SRC_URI = "git://codeaurora.org/quic/la/platform/system/extras;nobranch=1;tag=LNX.LA.3.5.2-09410-8x74.0"
 SRC_URI += "file://0001-Compile-without-libselinux.patch \
 	file://Makefile.am \
 	file://configure.ac"

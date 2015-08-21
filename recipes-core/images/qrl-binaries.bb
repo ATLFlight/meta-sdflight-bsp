@@ -17,16 +17,28 @@ DEPENDS += " \
     camera-hal \
     lk \
     mm-video-oss \
+    hostapd  \
+    dnsmasq \
+    setup-softap \
 "
 
 PKGLIST_OS = " \
     libglib-2.0-0_2.38.2-r0 \
     libz1 \
     libgcc-s1 \
+    libnl-3-200 \
+    libnl-route-3-200 \
+    libnl-nf-3-200 \
+    libnl-genl-3-200 \
+    libnl-3-cli \
     android-tools \
     qrl-networking \
     camera-hal \
     mm-video-oss \
+    hostapd \
+    libcrypto1.0.0 \
+    dnsmasq \
+    setup-softap \
 "
 
 inherit base

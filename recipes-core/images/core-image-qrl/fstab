@@ -1,10 +1,4 @@
-# Begin /etc/fstab
-
-# file system  mount-point  type   options         dump  fsck
-#                                                        order
-
-proc           /proc        proc   defaults        0     0
-sysfs          /sys         sysfs  defaults        0     0
-#devpts         /dev/pts    devpts gid=4,mode=620  0     0
-tmpfs          /run         tmpfs  defaults        0     0
-# End /etc/fstab
+# UNCONFIGURED FSTAB FOR BASE SYSTEM
+#LABEL=qcom-firmware /lib/firmware ext4 defaults 0 0
+/dev/mmcblk0p15 /lib/firmware ext4 defaults 0 0
+/dev/mmcblk0p14 /mnt/persist ext4 defaults 0 0

@@ -1,0 +1,150 @@
+From 5b2b1458a621759d8f1b1d8cbabca2991355cb04 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Mon, 13 Jul 2015 19:02:42 -0700
+Subject: [PATCH 3/3] Change serial to UART12
+
+---
+ platform/msm8974/acpuclock.c              |  8 ++++----
+ platform/msm8974/gpio.c                   |  4 ++--
+ platform/msm8974/include/platform/iomap.h |  7 +++++++
+ platform/msm8974/msm8974-clock.c          | 34 +++++++++++++++++++++++++++++--
+ target/msm8974/init.c                     |  2 +-
+ 5 files changed, 46 insertions(+), 9 deletions(-)
+
+diff --git a/platform/msm8974/acpuclock.c b/platform/msm8974/acpuclock.c
+index da1b024..35d8aff 100644
+--- a/platform/msm8974/acpuclock.c
++++ b/platform/msm8974/acpuclock.c
+@@ -200,17 +200,17 @@ void clock_config_uart_dm(uint8_t id)
+ 	int ret;
+ 
+ 
+-    ret = clk_get_set_enable("uart2_iface_clk", 0, 1);
++    ret = clk_get_set_enable("uart12_iface_clk", 0, 1);
+     if(ret)
+ 	{
+-		dprintf(CRITICAL, "failed to set uart2_iface_clk ret = %d\n", ret);
++		dprintf(CRITICAL, "failed to set uart12_iface_clk ret = %d\n", ret);
+ 		ASSERT(0);
+ 	}
+ 
+-    ret = clk_get_set_enable("uart2_core_clk", 7372800, 1);
++    ret = clk_get_set_enable("uart12_core_clk", 7372800, 1);
+ 	if(ret)
+ 	{
+-		dprintf(CRITICAL, "failed to set uart1_core_clk ret = %d\n", ret);
++		dprintf(CRITICAL, "failed to set uart12_core_clk ret = %d\n", ret);
+ 		ASSERT(0);
+ 	}
+ }
+diff --git a/platform/msm8974/gpio.c b/platform/msm8974/gpio.c
+index 13097da..8dd0e24 100644
+--- a/platform/msm8974/gpio.c
++++ b/platform/msm8974/gpio.c
+@@ -56,11 +56,11 @@ void gpio_set(uint32_t gpio, uint32_t dir)
+ void gpio_config_uart_dm(uint8_t id)
+ {
+     /* configure rx gpio */
+-	gpio_tlmm_config(5, 2, GPIO_INPUT, GPIO_NO_PULL,
++	gpio_tlmm_config(86, 2, GPIO_INPUT, GPIO_NO_PULL,
+ 				GPIO_8MA, GPIO_DISABLE);
+ 
+     /* configure tx gpio */
+-	gpio_tlmm_config(4, 2, GPIO_OUTPUT, GPIO_NO_PULL,
++	gpio_tlmm_config(85, 2, GPIO_OUTPUT, GPIO_NO_PULL,
+ 				GPIO_8MA, GPIO_DISABLE);
+ }
+ 
+diff --git a/platform/msm8974/include/platform/iomap.h b/platform/msm8974/include/platform/iomap.h
+index 182f454..05fb17e 100644
+--- a/platform/msm8974/include/platform/iomap.h
++++ b/platform/msm8974/include/platform/iomap.h
+@@ -83,6 +83,7 @@
+ #define BLSP1_UART3_BASE            (PERIPH_SS_BASE + 0x00120000)
+ #define BLSP1_UART4_BASE            (PERIPH_SS_BASE + 0x00121000)
+ #define BLSP1_UART5_BASE            (PERIPH_SS_BASE + 0x00122000)
++#define BLSP2_UART5_BASE            (PERIPH_SS_BASE + 0x00162000)
+ #define MSM_USB_BASE                (PERIPH_SS_BASE + 0x00255000)
+ 
+ #define MSM_USB30_BASE               0xF9200000
+@@ -199,6 +200,12 @@
+ #define BLSP1_UART2_APPS_M          (CLK_CTL_BASE + 0x714)
+ #define BLSP1_UART2_APPS_N          (CLK_CTL_BASE + 0x718)
+ #define BLSP1_UART2_APPS_D          (CLK_CTL_BASE + 0x71C)
++#define BLSP2_UART6_APPS_CBCR       (CLK_CTL_BASE + 0xC44)
++#define BLSP2_UART6_APPS_CMD_RCGR   (CLK_CTL_BASE + 0xC4C)
++#define BLSP2_UART6_APPS_CFG_RCGR   (CLK_CTL_BASE + 0xC50)
++#define BLSP2_UART6_APPS_M          (CLK_CTL_BASE + 0xC54)
++#define BLSP2_UART6_APPS_N          (CLK_CTL_BASE + 0xC58)
++#define BLSP2_UART6_APPS_D          (CLK_CTL_BASE + 0xC5C)
+ 
+ /* USB */
+ #define USB_HS_SYSTEM_CBCR          (CLK_CTL_BASE + 0x484)
+diff --git a/platform/msm8974/msm8974-clock.c b/platform/msm8974/msm8974-clock.c
+index e2209c2..ab9b62e 100644
+--- a/platform/msm8974/msm8974-clock.c
++++ b/platform/msm8974/msm8974-clock.c
+@@ -324,6 +324,36 @@ static struct vote_clk gcc_blsp1_ahb_clk = {
+ 	},
+ };
+ 
++/* BLSP 2 */
++static struct rcg_clk blsp2_uart6_apps_clk_src =
++{
++      .cmd_reg      = (uint32_t *) BLSP2_UART6_APPS_CMD_RCGR,
++      .cfg_reg      = (uint32_t *) BLSP2_UART6_APPS_CFG_RCGR,
++      .m_reg        = (uint32_t *) BLSP2_UART6_APPS_M,
++      .n_reg        = (uint32_t *) BLSP2_UART6_APPS_N,
++      .d_reg        = (uint32_t *) BLSP2_UART6_APPS_D,
++
++      .set_rate     = clock_lib2_rcg_set_rate_mnd,
++      .freq_tbl     = ftbl_gcc_blsp1_2_uart1_6_apps_clk,
++      .current_freq = &rcg_dummy_freq,
++
++      .c = {
++              .dbg_name = "blsp2_uart6_apps_clk",
++              .ops      = &clk_ops_rcg_mnd,
++      },
++};
++
++static struct branch_clk gcc_blsp2_uart6_apps_clk =
++{
++      .cbcr_reg     = (uint32_t *) BLSP2_UART6_APPS_CBCR,
++      .parent       = &blsp2_uart6_apps_clk_src.c,
++
++      .c = {
++              .dbg_name = "gcc_blsp2_uart6_apps_clk",
++              .ops      = &clk_ops_branch,
++      },
++};
++
+ static struct vote_clk gcc_blsp2_ahb_clk = {
+ 	.cbcr_reg     = (uint32_t *) BLSP2_AHB_CBCR,
+ 	.vote_reg     = (uint32_t *) APCS_CLOCK_BRANCH_ENA_VOTE,
+@@ -823,8 +853,8 @@ static struct clk_lookup msm_clocks_8974[] =
+ 	CLK_LOOKUP("sdc2_iface_clk", gcc_sdcc2_ahb_clk.c),
+ 	CLK_LOOKUP("sdc2_core_clk",  gcc_sdcc2_apps_clk.c),
+ 
+-	CLK_LOOKUP("uart2_iface_clk", gcc_blsp1_ahb_clk.c),
+-	CLK_LOOKUP("uart2_core_clk",  gcc_blsp1_uart2_apps_clk.c),
++	CLK_LOOKUP("uart12_iface_clk", gcc_blsp2_ahb_clk.c),
++	CLK_LOOKUP("uart12_core_clk",  gcc_blsp2_uart6_apps_clk.c),
+ 
+ 	CLK_LOOKUP("usb_iface_clk",  gcc_usb_hs_ahb_clk.c),
+ 	CLK_LOOKUP("usb_core_clk",   gcc_usb_hs_system_clk.c),
+diff --git a/target/msm8974/init.c b/target/msm8974/init.c
+index ff2f7bb..8330d49 100644
+--- a/target/msm8974/init.c
++++ b/target/msm8974/init.c
+@@ -103,7 +103,7 @@ static uint32_t mmc_sdc_pwrctl_irq[] =
+ void target_early_init(void)
+ {
+ #if WITH_DEBUG_UART
+-	uart_dm_init(1, 0, BLSP1_UART1_BASE);
++	uart_dm_init(12, 0, BLSP2_UART5_BASE);
+ #endif
+ }
+ 
+-- 
+2.4.2
+

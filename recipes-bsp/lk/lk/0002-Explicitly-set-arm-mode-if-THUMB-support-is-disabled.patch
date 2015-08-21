@@ -1,14 +1,14 @@
-From 87397265cc95c2d21b5ec90c96534177f1d7263e Mon Sep 17 00:00:00 2001
-From: ntewolde <ntewolde@codeaurora.org>
-Date: Thu, 16 Apr 2015 12:39:05 -0700
-Subject: [PATCH] Explicitly set arm mode if THUMB support is disabled
+From da4ee19a32251d3f48f3c09e60a759fb92acddd2 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Mon, 13 Jul 2015 19:01:53 -0700
+Subject: [PATCH 2/3] Explicitly set arm mode if THUMB support is disabled
 
 ---
  arch/arm/rules.mk | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/arch/arm/rules.mk b/arch/arm/rules.mk
-index d822430..ead44d9 100644
+index d822430..783d24f 100644
 --- a/arch/arm/rules.mk
 +++ b/arch/arm/rules.mk
 @@ -78,6 +78,8 @@ THUMBINTERWORK :=
@@ -21,5 +21,5 @@ index d822430..ead44d9 100644
  
  INCLUDES += \
 -- 
-1.8.2
+2.4.2
 

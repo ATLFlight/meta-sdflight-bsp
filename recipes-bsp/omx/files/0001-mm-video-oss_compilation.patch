@@ -1,6 +1,6 @@
-From d20c77c561ee299910d3cd192e8f95715e4c3c53 Mon Sep 17 00:00:00 2001
+From 72ef3a7d44c8e76a6179cb8af0f809edd264f9a9 Mon Sep 17 00:00:00 2001
 From: Gustavo Solaira <gustavos@codeaurora.org>
-Date: Wed, 20 May 2015 15:56:46 -0700
+Date: Mon, 6 Jul 2015 17:27:06 -0700
 Subject: [PATCH] Fix compilation in Linux
 
 ---
@@ -13,8 +13,8 @@ Subject: [PATCH] Fix compilation in Linux
  mm-video-v4l2/vidc/venc/inc/omx_video_base.h       | 11 +++--
  mm-video-v4l2/vidc/venc/src/omx_video_base.cpp     | 21 ++++++++-
  mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp  |  6 +--
- .../vidc/venc/src/video_encoder_device_v4l2.cpp    | 17 +++++--
- 10 files changed, 197 insertions(+), 20 deletions(-)
+ .../vidc/venc/src/video_encoder_device_v4l2.cpp    | 19 ++++++--
+ 10 files changed, 199 insertions(+), 20 deletions(-)
  create mode 100644 Makefile.am
  create mode 100644 configure.ac
  create mode 100644 mm-core/Makefile.am
@@ -236,7 +236,7 @@ index 0000000..66d2346
 +libOmxVenc_la_CFLAGS = $(AM_CFLAGS) -fPIC
 +libOmxVenc_la_LDFLAGS = -shared -version-info $(OMXVIDEO_LIBRARY_VERSION) @GLIB_LIBS@ -lcutils
 diff --git a/mm-video-v4l2/vidc/venc/inc/omx_video_base.h b/mm-video-v4l2/vidc/venc/inc/omx_video_base.h
-index 3552f7c..b498ac9 100644
+index 408e13f..010ef97 100644
 --- a/mm-video-v4l2/vidc/venc/inc/omx_video_base.h
 +++ b/mm-video-v4l2/vidc/venc/inc/omx_video_base.h
 @@ -64,7 +64,9 @@ IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -278,7 +278,7 @@ index 3552f7c..b498ac9 100644
  
          class omx_c2d_conv
          {
-@@ -482,7 +482,10 @@ class omx_video: public qc_omx_component
+@@ -485,7 +485,10 @@ class omx_video: public qc_omx_component
                  OMX_BUFFERHEADERTYPE *buffer);
          OMX_ERRORTYPE empty_this_buffer_opaque(OMX_HANDLETYPE hComp,
                  OMX_BUFFERHEADERTYPE *buffer);
@@ -290,7 +290,7 @@ index 3552f7c..b498ac9 100644
                  struct pmem &Input_pmem_info,unsigned &index);
          OMX_ERRORTYPE queue_meta_buffer(OMX_HANDLETYPE hComp,
 diff --git a/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp b/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
-index cb78aeb..cefaad4 100644
+index 627015e..528b3ab 100644
 --- a/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
 +++ b/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
 @@ -52,6 +52,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -302,7 +302,7 @@ index cb78aeb..cefaad4 100644
  #endif
  #define H264_SUPPORTED_WIDTH (480)
  #define H264_SUPPORTED_HEIGHT (368)
-@@ -401,11 +403,16 @@ void omx_video::process_event_cb(void *ctxt, unsigned char id)
+@@ -399,11 +401,16 @@ void omx_video::process_event_cb(void *ctxt, unsigned char id)
                      break;
                  case OMX_COMPONENT_GENERATE_ETB_OPQ:
                      DEBUG_PRINT_LOW("OMX_COMPONENT_GENERATE_ETB_OPQ");
@@ -318,9 +318,9 @@ index cb78aeb..cefaad4 100644
 +                    pThis->omx_report_error ();
 +#endif
                      break;
-                 case OMX_COMPONENT_GENERATE_ETB:
-                     DEBUG_PRINT_LOW("OMX_COMPONENT_GENERATE_ETB");
-@@ -3247,7 +3254,9 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
+                 case OMX_COMPONENT_GENERATE_ETB: {
+                         OMX_ERRORTYPE iret;
+@@ -3250,7 +3257,9 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
      int push_cnt = 0;
      unsigned nBufIndex = 0;
      OMX_ERRORTYPE ret = OMX_ErrorNone;
@@ -330,7 +330,7 @@ index cb78aeb..cefaad4 100644
  
  #ifdef _MSM8974_
      int fd = 0;
-@@ -3259,6 +3268,8 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
+@@ -3262,6 +3271,8 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
      }
  
      // Buffer sanity checks
@@ -339,7 +339,7 @@ index cb78aeb..cefaad4 100644
      if (meta_mode_enable && !mUsesColorConversion) {
          //For color-conversion case, we have an internal buffer and not a meta buffer
          bool met_error = false;
-@@ -3289,6 +3300,9 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
+@@ -3292,6 +3303,9 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
              return OMX_ErrorBadParameter;
          }
      } else {
@@ -349,7 +349,7 @@ index cb78aeb..cefaad4 100644
          nBufIndex = buffer - ((OMX_BUFFERHEADERTYPE *)m_inp_mem_ptr);
          if (nBufIndex >= m_sInPortDef.nBufferCountActual) {
              DEBUG_PRINT_ERROR("ERROR: ETBProxy: Invalid bufIndex = %u", nBufIndex);
-@@ -3917,11 +3931,13 @@ OMX_ERRORTYPE omx_video::empty_buffer_done(OMX_HANDLETYPE         hComp,
+@@ -3928,11 +3942,13 @@ OMX_ERRORTYPE omx_video::empty_buffer_done(OMX_HANDLETYPE         hComp,
      pending_input_buffers--;
  
      if (mUseProxyColorFormat && (buffer_index < (int)m_sInPortDef.nBufferCountActual)) {
@@ -363,7 +363,7 @@ index cb78aeb..cefaad4 100644
          if (mUsesColorConversion) {
              // return color-conversion buffer back to the pool
              DEBUG_PRINT_LOW("empty_buffer_done insert address is %p",buffer);
-@@ -4276,7 +4292,6 @@ void omx_video::omx_release_meta_buffer(OMX_BUFFERHEADERTYPE *buffer)
+@@ -4287,7 +4303,6 @@ void omx_video::omx_release_meta_buffer(OMX_BUFFERHEADERTYPE *buffer)
          }
      }
  }
@@ -371,7 +371,7 @@ index cb78aeb..cefaad4 100644
  omx_video::omx_c2d_conv::omx_c2d_conv()
  {
      c2dcc = NULL;
-@@ -4598,6 +4613,7 @@ OMX_ERRORTYPE omx_video::convert_queue_buffer(OMX_HANDLETYPE hComp,
+@@ -4615,6 +4630,7 @@ OMX_ERRORTYPE omx_video::convert_queue_buffer(OMX_HANDLETYPE hComp,
      return ret;
  }
  
@@ -379,13 +379,13 @@ index cb78aeb..cefaad4 100644
  OMX_ERRORTYPE omx_video::push_input_buffer(OMX_HANDLETYPE hComp)
  {
      unsigned address = 0,p2,id, index = 0;
-@@ -4650,3 +4666,4 @@ OMX_ERRORTYPE omx_video::push_input_buffer(OMX_HANDLETYPE hComp)
+@@ -4667,3 +4683,4 @@ OMX_ERRORTYPE omx_video::push_input_buffer(OMX_HANDLETYPE hComp)
      }
      return ret;
  }
 +#endif
 diff --git a/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp b/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
-index b73d9b7..f747aed 100644
+index ee19679..29671bf 100644
 --- a/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
 +++ b/mm-video-v4l2/vidc/venc/src/omx_video_encoder.cpp
 @@ -50,7 +50,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -412,7 +412,7 @@ index b73d9b7..f747aed 100644
  
  omx_venc::~omx_venc()
 diff --git a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
-index c1164dd..b6567eb 100644
+index 4d02559..5806ec9 100644
 --- a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
 +++ b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
 @@ -31,6 +31,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
@@ -435,7 +435,23 @@ index c1164dd..b6567eb 100644
  #include <media/hardware/HardwareAPI.h>
  #include <gralloc_priv.h>
  #endif
-@@ -605,12 +605,14 @@ bool venc_dev::venc_open(OMX_U32 codec)
+@@ -212,6 +212,7 @@ venc_dev::venc_dev(class omx_venc *venc_class)
+     memset(&ltrinfo, 0, sizeof(ltrinfo));
+     memset(&m_debug,0,sizeof(m_debug));
+ 
++#ifdef _ANDROID_
+     char property_value[PROPERTY_VALUE_MAX] = {0};
+     property_get("vidc.enc.log.in", property_value, "0");
+     m_debug.in_buffer_log = atoi(property_value);
+@@ -224,6 +225,7 @@ venc_dev::venc_dev(class omx_venc *venc_class)
+ 
+     snprintf(m_debug.log_loc, PROPERTY_VALUE_MAX,
+              "%s", BUFFER_LOG_LOC);
++#endif
+ }
+ 
+ venc_dev::~venc_dev()
+@@ -765,12 +767,14 @@ bool venc_dev::venc_open(OMX_U32 codec)
      struct v4l2_control control;
      OMX_STRING device_name = (OMX_STRING)"/dev/video/venus_enc";
  
@@ -450,7 +466,7 @@ index c1164dd..b6567eb 100644
  
      m_nDriver_fd = open (device_name, O_RDWR);
  
-@@ -1461,6 +1463,8 @@ bool venc_dev::venc_set_param(void *paramData, OMX_INDEXTYPE index)
+@@ -1619,6 +1623,8 @@ bool venc_dev::venc_set_param(void *paramData, OMX_INDEXTYPE index)
              }
          case OMX_QcomIndexParamSequenceHeaderWithIDR:
              {
@@ -459,7 +475,7 @@ index c1164dd..b6567eb 100644
                  PrependSPSPPSToIDRFramesParams * pParam =
                      (PrependSPSPPSToIDRFramesParams *)paramData;
  
-@@ -1469,7 +1473,9 @@ bool venc_dev::venc_set_param(void *paramData, OMX_INDEXTYPE index)
+@@ -1627,7 +1633,9 @@ bool venc_dev::venc_set_param(void *paramData, OMX_INDEXTYPE index)
                      DEBUG_PRINT_ERROR("ERROR: set inband sps/pps failed");
                      return OMX_ErrorUnsupportedSetting;
                  }
@@ -470,7 +486,7 @@ index c1164dd..b6567eb 100644
                  break;
              }
          case OMX_QcomIndexParamH264AUDelimiter:
-@@ -2110,7 +2116,9 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
+@@ -2278,7 +2286,9 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
      struct v4l2_plane plane;
      int rc=0;
      struct OMX_BUFFERHEADERTYPE *bufhdr;
@@ -480,7 +496,7 @@ index c1164dd..b6567eb 100644
      temp_buffer = (struct pmem *)buffer;
  
      memset (&buf, 0, sizeof(buf));
-@@ -2141,6 +2149,8 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
+@@ -2309,6 +2319,8 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
          // CPU (Eg: MediaCodec)  0            --             0              bufhdr
          // ---------------------------------------------------------------------------------------
          if (metadatamode) {
@@ -489,7 +505,7 @@ index c1164dd..b6567eb 100644
              meta_buf = (encoder_media_buffer_type *)bufhdr->pBuffer;
  
              if (!meta_buf)
-@@ -2171,6 +2181,7 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
+@@ -2339,6 +2351,7 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
                  DEBUG_PRINT_LOW("venc_empty_buf: Opaque non-camera buf: fd = %d filled %d of %d",
                          fd, plane.bytesused, plane.length);
              }
@@ -498,5 +514,5 @@ index c1164dd..b6567eb 100644
              plane.m.userptr = (unsigned long) bufhdr->pBuffer;
              plane.data_offset = bufhdr->nOffset;
 -- 
-1.8.2.1
+2.4.2
 

@@ -6,7 +6,7 @@ SRC_URI = "git://codeaurora.org/quic/la/platform/system/core;protocol=git;nobran
 
 PACKAGES = "${PN}"
 
-SRCREV = "LNX.LA.3.5-01620-8x74.0"
+SRCREV = "LNX.LA.3.5.2-09410-8x74.0"
 
 PV = "1.0"
 PR = "r0"

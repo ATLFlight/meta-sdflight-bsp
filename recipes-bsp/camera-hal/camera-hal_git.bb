@@ -15,6 +15,8 @@ SRC_URI += "file://0006-camera-hal-qcamlib-API-update-for-video-stream.patch"
 SRC_URI += "file://0007-camera-hal-add-copy-buffer-API-in-qcamlib.patch"
 SRC_URI += "file://0008-camera-hal-disable-CAF-in-video.patch"
 SRC_URI += "file://0009-camera-hal-compilation-changes-for-eagle8074.patch"
+SRC_URI += "file://0010-camera-hal-qcamlib-ov7251-resolution-update.patch"
+SRC_URI += "file://0011-eagle-ov7521-set-default-snapshot-resolution-to-640x480.patch"
 
 #SRC_URI += "file://work.patch"
 
@@ -28,6 +30,7 @@ inherit autotools
 
 # Need the kernel headers
 DEPENDS += "virtual/kernel"
+DEPENDS += "mm-camera-headers"
 DEPENDS += "android-tools"
 DEPENDS += "mm-video-oss"
 DEPENDS += "libhardware-headers"
