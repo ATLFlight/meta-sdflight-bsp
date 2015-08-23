@@ -1,11 +1,11 @@
-From 2f7dde9a66e817cfda18ffffd0726b6626442d9e Mon Sep 17 00:00:00 2001
+From b473f4c1e90d3b98b9d3d45ca4d8c5f59317f190 Mon Sep 17 00:00:00 2001
 From: Suraj Swami <sswami@codeaurora.org>
 Date: Fri, 17 Jul 2015 10:16:30 -0700
-Subject: [PATCH] eagle - ov7521 - set default snapshot resolution to 640 x
- 480
+Subject: [PATCH 11/16] eagle - ov7521 - set default snapshot resolution to 640
+ x 480
 
 ---
- QCamera2/stack/mm-camera-test/inc/mm_qcamera_app.h |    4 ++--
+ QCamera2/stack/mm-camera-test/inc/mm_qcamera_app.h | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/QCamera2/stack/mm-camera-test/inc/mm_qcamera_app.h b/QCamera2/stack/mm-camera-test/inc/mm_qcamera_app.h
@@ -24,5 +24,5 @@ index e4b4109..2e6636a 100644
  
  #define DEFAULT_OV_FORMAT         MDP_Y_CRCB_H2V2
 -- 
-1.7.9.5
+1.9.1
 

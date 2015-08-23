@@ -1,0 +1,126 @@
+From b86f97feda2c4c56c273bd8f940717bb38025f70 Mon Sep 17 00:00:00 2001
+From: Punit Soni <punits@codeaurora.org>
+Date: Fri, 17 Jul 2015 18:55:51 -0700
+Subject: [PATCH] mm-video-oss: add support for  shared mem encoding
+
+Change-Id: Iea1df4aab0d6dffb5acce99df972fd41d3164b67
+---
+ Makefile.am                                               |  3 +++
+ mm-video-v4l2/vidc/common/inc/vidc_debug.h                | 12 ++++++++++++
+ mm-video-v4l2/vidc/venc/src/omx_video_base.cpp            |  8 ++++++--
+ mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp |  5 +++--
+ 4 files changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 5f33f7c..9bb2b1e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -2,4 +2,7 @@
+ #
+ ACLOCAL_AMFLAGS = -I m4
+ 
++# additional headers to be installed in sysroot
++include_HEADERS = libstagefrighthw/QComOMXMetadata.h
++
+ SUBDIRS = mm-core mm-video-v4l2/vidc/venc
+diff --git a/mm-video-v4l2/vidc/common/inc/vidc_debug.h b/mm-video-v4l2/vidc/common/inc/vidc_debug.h
+index 20aebba..f52f07f 100644
+--- a/mm-video-v4l2/vidc/common/inc/vidc_debug.h
++++ b/mm-video-v4l2/vidc/common/inc/vidc_debug.h
+@@ -58,4 +58,16 @@ extern int debug_level;
+ #define ALOGD(fmt, args...) syslog(LOG_DEBUG, fmt, ##args)
+ #endif
+ 
++
++#undef DEBUG_PRINT_ERROR
++#define DEBUG_PRINT_ERROR(fmt, args...) \
++          syslog(LOG_ERR,"%d: " fmt, __LINE__, ##args)
++
++#undef DEBUG_PRINT_HIGH
++#define DEBUG_PRINT_HIGH(fmt, args...) \
++          syslog(LOG_ERR,"%d: " fmt, __LINE__, ##args)
++
++#undef DEBUG_PRINT_LOW
++#define DEBUG_PRINT_LOW(fmt, args...) do {} while (0)
++
+ #endif
+diff --git a/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp b/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
+index 528b3ab..a75f10c 100644
+--- a/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
++++ b/mm-video-v4l2/vidc/venc/src/omx_video_base.cpp
+@@ -218,6 +218,7 @@ omx_video::omx_video():
+     pdest_frame(NULL),
+     m_pInput_pmem(NULL),
+     m_pOutput_pmem(NULL),
++    meta_mode_enable(false),
+ #ifdef USE_ION
+     m_pInput_ion(NULL),
+     m_pOutput_ion(NULL),
+@@ -2045,6 +2046,8 @@ OMX_ERRORTYPE  omx_video::use_input_buffer(
+     unsigned   i = 0;
+     unsigned char *buf_addr = NULL;
+ 
++    m_use_input_pmem = OMX_TRUE;
++
+     DEBUG_PRINT_HIGH("use_input_buffer: port = %lu appData = %p bytes = %lu buffer = %p",port,appData,bytes,buffer);
+     if (bytes != m_sInPortDef.nBufferSize) {
+         DEBUG_PRINT_ERROR("ERROR: use_input_buffer: Size Mismatch!! "
+@@ -2152,7 +2155,7 @@ OMX_ERRORTYPE  omx_video::use_input_buffer(
+ 
+         } else {
+             OMX_QCOM_PLATFORM_PRIVATE_PMEM_INFO *pParam = reinterpret_cast<OMX_QCOM_PLATFORM_PRIVATE_PMEM_INFO *>((*bufferHdr)->pAppPrivate);
+-            DEBUG_PRINT_LOW("Inside qcom_ext with luma:(fd:%lu,offset:0x%x)", pParam->pmem_fd, (unsigned)pParam->offset);
++            DEBUG_PRINT_ERROR("Inside qcom_ext with luma:(fd:%lu,offset:0x%x)", pParam->pmem_fd, (unsigned)pParam->offset);
+ 
+             if (pParam) {
+                 m_pInput_pmem[i].fd = pParam->pmem_fd;
+@@ -3264,7 +3267,7 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
+ #ifdef _MSM8974_
+     int fd = 0;
+ #endif
+-    DEBUG_PRINT_LOW("ETBProxy: buffer->pBuffer[%p]", buffer->pBuffer);
++    DEBUG_PRINT_LOW("ETBProxy: buffer->pBuffer[%p] metamode=%d", buffer->pBuffer, meta_mode_enable);
+     if (buffer == NULL) {
+         DEBUG_PRINT_ERROR("ERROR: ETBProxy: Invalid buffer[%p]", buffer);
+         return OMX_ErrorBadParameter;
+@@ -3323,6 +3326,7 @@ OMX_ERRORTYPE  omx_video::empty_this_buffer_proxy(OMX_IN OMX_HANDLETYPE
+ #ifdef _MSM8974_
+     if (!meta_mode_enable) {
+         fd = m_pInput_pmem[nBufIndex].fd;
++        DEBUG_PRINT_ERROR("%s:%d, fd=%d", __func__, __LINE__, fd);
+     }
+ #endif
+ #ifdef _ANDROID_ICS_
+diff --git a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
+index 5806ec9..66ad752 100644
+--- a/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
++++ b/mm-video-v4l2/vidc/venc/src/video_encoder_device_v4l2.cpp
+@@ -2154,7 +2154,7 @@ bool venc_dev::venc_use_buf(void *buf_addr, unsigned port,unsigned index)
+         rc = ioctl(m_nDriver_fd, VIDIOC_PREPARE_BUF, &buf);
+ 
+         if (rc)
+-            DEBUG_PRINT_LOW("VIDIOC_PREPARE_BUF Failed");
++            DEBUG_PRINT_ERROR("VIDIOC_PREPARE_BUF Failed");
+     } else if (port == PORT_INDEX_OUT) {
+         extra_idx = EXTRADATA_IDX(num_planes);
+ 
+@@ -2192,7 +2192,7 @@ bool venc_dev::venc_use_buf(void *buf_addr, unsigned port,unsigned index)
+         rc = ioctl(m_nDriver_fd, VIDIOC_PREPARE_BUF, &buf);
+ 
+         if (rc)
+-            DEBUG_PRINT_LOW("VIDIOC_PREPARE_BUF Failed");
++            DEBUG_PRINT_ERROR("VIDIOC_PREPARE_BUF Failed");
+     } else {
+         DEBUG_PRINT_ERROR("ERROR: venc_use_buf:Invalid Port Index ");
+         return false;
+@@ -2375,6 +2375,7 @@ bool venc_dev::venc_empty_buf(void *buffer, void *pmem_data_buf, unsigned index,
+ 
+     buf.timestamp.tv_sec = bufhdr->nTimeStamp / 1000000;
+     buf.timestamp.tv_usec = (bufhdr->nTimeStamp % 1000000);
++
+     rc = ioctl(m_nDriver_fd, VIDIOC_QBUF, &buf);
+ 
+     if (rc) {
+-- 
+1.9.1
+

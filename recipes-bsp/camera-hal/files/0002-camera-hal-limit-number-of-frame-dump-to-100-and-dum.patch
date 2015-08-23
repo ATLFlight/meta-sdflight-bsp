@@ -1,7 +1,7 @@
-From 3dada6a84bd1a6501e84e799fe87a49b3c04c08c Mon Sep 17 00:00:00 2001
+From a1e303371dcd74b28a988c3c357cf41645d77927 Mon Sep 17 00:00:00 2001
 From: Suraj Swami <sswami@codeaurora.org>
 Date: Wed, 29 Apr 2015 11:13:06 -0700
-Subject: [PATCH 2/9] camera hal limit number of frame dump to 100 and dump
+Subject: [PATCH 02/16] camera hal limit number of frame dump to 100 and dump
  frame at mod30
 
 ---

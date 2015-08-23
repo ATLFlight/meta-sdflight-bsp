@@ -17,6 +17,7 @@ PN = "android-tools-native"
 PROVIDES = "android-tools-native"
 DEPENDS += "zlib"
 DEPENDS += "pseudo-native"
+PARALLEL_MAKE = ""
 
 SRC_URI = "git://codeaurora.org/platform/system/core;branch=redcloud;tag=AU_LINUX_BASE_TARGET_ALL.01.01.036"
 SRC_URI += "file://0002-QR-Linux-Native-Patches.patch"

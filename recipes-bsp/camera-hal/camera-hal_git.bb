@@ -17,8 +17,11 @@ SRC_URI += "file://0008-camera-hal-disable-CAF-in-video.patch"
 SRC_URI += "file://0009-camera-hal-compilation-changes-for-eagle8074.patch"
 SRC_URI += "file://0010-camera-hal-qcamlib-ov7251-resolution-update.patch"
 SRC_URI += "file://0011-eagle-ov7521-set-default-snapshot-resolution-to-640x480.patch"
-
-#SRC_URI += "file://work.patch"
+SRC_URI += "file://0012-camera-hal-changes-for-shared-memory-encoding.patch"
+SRC_URI += "file://0013-camera-hal-enable-focus-mode-in-qcamlib.patch"
+SRC_URI += "file://0014-camera-hal-porting-and-and-new-api-changes.patch"
+SRC_URI += "file://0015-ov7251-RAW-data-interface-changes.patch"
+SRC_URI += "file://0016-camera-hall-enable-meta-mode-for-buffer-sharing.patch"
 
 PV = "1.0"
 PR = "r0"
@@ -30,17 +33,21 @@ inherit autotools
 
 # Need the kernel headers
 DEPENDS += "virtual/kernel"
-DEPENDS += "mm-camera-headers"
 DEPENDS += "android-tools"
 DEPENDS += "mm-video-oss"
 DEPENDS += "libhardware-headers"
 DEPENDS += "system-headers"
+DEPENDS += "frameworks-headers"
 
 CFLAGS += "-I./mm-camera-interface"
 CFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include"
 CFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include/media"
 CFLAGS += "-I${STAGING_INCDIR}/mm-core"
 CFLAGS += "-I${STAGING_INCDIR}/omx/inc"
+
+CXXFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include"
+CXXFLAGS += "-I${STAGING_INCDIR}/glib-2.0"
+CXXFLAGS += "-I${STAGING_LIBDIR}/glib-2.0/include"
 
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_INCDIR}/linux-headers/include"
 EXTRA_OECONF_append = " --enable-target=msm8974"

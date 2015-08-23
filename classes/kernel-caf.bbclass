@@ -136,6 +136,7 @@ do_lk_mkimage() {
        --cmdline "${cmd_line}" \
        --pagesize 2048 \
        --output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
+     cp ${master_dt_image} ${DEPLOY_DIR_IMAGE}/
   else
      ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${kernel_image} \
        --base 0x80200000 \

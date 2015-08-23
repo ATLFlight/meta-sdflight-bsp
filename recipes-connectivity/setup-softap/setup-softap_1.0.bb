@@ -9,12 +9,14 @@ PROVIDES = "setup-softap"
 SRC_URI = "file://hostapd.conf \
            file://qca6234.cfg.softap \
            file://wificonfig.sh \
+           file://wlan.conf \
           "
 
 PACKAGES = "${PN}"
 
 FILES_${PN} = "/etc/hostapd.conf \
                /etc/network/interfaces.d/qca6234.cfg.softap \
+               /etc/modprobe.d/wlan.conf \
                /usr/local/qr-linux/wificonfig.sh \
               "
               
@@ -25,6 +27,7 @@ do_install() {
 
     install -d ${dest}/network/interfaces.d
     install -d ${D}/usr/local/qr-linux
+    install -d ${dest}/modprobe.d
 
     # Install the pruned down version for our actual use
     install -m 644 ${WORKDIR}/hostapd.conf ${dest}
@@ -32,6 +35,8 @@ do_install() {
     install -m 644 ${WORKDIR}/qca6234.cfg.softap ${dest}/network/interfaces.d
 
     install -m 755 ${WORKDIR}/wificonfig.sh ${D}/usr/local/qr-linux
+
+    install -m 644 ${WORKDIR}/wlan.conf ${dest}/modprobe.d
 }
 
 pkg_postinst_${PN}() {
@@ -50,7 +55,6 @@ pkg_postinst_${PN}() {
             -e "s|#DAEMON_OPTS=\"\"|DAEMON_OPTS=\"-dd\"|g" /etc/default/hostapd > /tmp/hostapd.tmp
         install -m 644 /tmp/hostapd.tmp /etc/default/hostapd
     fi
-
 
     # Append the dhcp address range to the dnsmasq.conf file. Since the /etc/dnsmasq.conf file is
     # added by the dnsmasq-base package, we want to ensure that it's hasn't already been 

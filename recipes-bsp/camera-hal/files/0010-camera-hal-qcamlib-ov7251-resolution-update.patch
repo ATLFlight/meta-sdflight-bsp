@@ -1,7 +1,7 @@
-From 04a2ef13d3b880927a7612d42fc223d01f1ff9c5 Mon Sep 17 00:00:00 2001
+From e37926710b33664a207f9363fb600edb4a00dd75 Mon Sep 17 00:00:00 2001
 From: Kaustubh Gondkar <kgondkar@codeaurora.org>
 Date: Thu, 16 Jul 2015 16:30:59 -0700
-Subject: [PATCH] qcamlib ov7251 resolution update
+Subject: [PATCH 10/16] qcamlib ov7251 resolution update
 
 Change-Id: I1b2a94dc7082de50fe1a3b335344256eb90bc577
 ---
@@ -175,5 +175,5 @@ index 67289bf..6c67970 100644
  
    qcamlib_configure(h_cam, config);
 -- 
-1.8.2.1
+1.9.1
 

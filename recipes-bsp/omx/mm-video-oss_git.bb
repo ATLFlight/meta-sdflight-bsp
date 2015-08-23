@@ -7,6 +7,8 @@ SRC_URI = "git://codeaurora.org/platform/hardware/qcom/media;protocol=git;nobran
 SRC_URI += "file://venus_v4l2.rules"
 SRC_URI += "file://0001-mm-video-oss_compilation.patch"
 SRC_URI += "file://0002-Add-license-file.patch"
+SRC_URI += "file://0003-mm-video-oss-add-support-for-shared-mem-encoding.patch"
+SRC_URI += "file://0004-Enable-meta-buffer-mode-to-allow-camera-to-share-buf.patch"
 
 PACKAGES = "${PN}"
 

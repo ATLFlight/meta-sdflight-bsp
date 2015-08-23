@@ -1,7 +1,7 @@
-From 593118d60a29fa32d00f7cc24a24cfd5dcd64e32 Mon Sep 17 00:00:00 2001
+From 921816c345695d5ff891f405f5d90de77aeecc35 Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Tue, 28 Apr 2015 13:44:39 -0700
-Subject: [PATCH 3/9] camera-hal: create qcamlib wrapper library
+Subject: [PATCH 03/16] camera-hal: create qcamlib wrapper library
 
 Add a camera api interface to expose basic camera functionality
 This is a wrapper on mm-camera-interface library, which takes

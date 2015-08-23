@@ -1,7 +1,7 @@
-From 757c97c035abd196ff2aff89628c862fa43a716d Mon Sep 17 00:00:00 2001
+From e3c5723c5d5daf1baa8bf5f8ca36cdce3c73d71e Mon Sep 17 00:00:00 2001
 From: Suraj Swami <sswami@codeaurora.org>
 Date: Tue, 30 Jun 2015 18:45:30 -0700
-Subject: [PATCH] camera-hal: compilation changes for eagle8074
+Subject: [PATCH 09/16] camera-hal: compilation changes for eagle8074
 
 ---
  QCamera2/stack/mm-camera-interface/inc/android_adapter.h    | 13 +++++++++++++

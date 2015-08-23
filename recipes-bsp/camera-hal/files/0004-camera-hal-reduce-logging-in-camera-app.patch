@@ -1,7 +1,7 @@
-From 3cc155296f63956ddb11ded006289a18311b1ae8 Mon Sep 17 00:00:00 2001
+From b360a337ef76a157c767c2cf1183ab9161864bfa Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Wed, 6 May 2015 18:13:40 -0700
-Subject: [PATCH 4/9] camera-hal: reduce logging in camera app
+Subject: [PATCH 04/16] camera-hal: reduce logging in camera app
 
 - remove stderr logs
 - use syslog for app logging

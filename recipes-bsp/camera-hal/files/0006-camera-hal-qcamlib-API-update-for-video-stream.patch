@@ -1,7 +1,7 @@
-From 966537b8f5b808ecd3c81692b0dd9f14d2e008ed Mon Sep 17 00:00:00 2001
+From d506f3a59a949d04a3004f6a63366f07de746c2e Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Tue, 26 May 2015 12:24:34 -0700
-Subject: [PATCH 6/9] camera-hal: qcamlib API update for video stream
+Subject: [PATCH 06/16] camera-hal: qcamlib API update for video stream
 
 Change-Id: Ic95c8ac6cf03a6931a1ebbb4db8b3ed120a6bf49
 ---

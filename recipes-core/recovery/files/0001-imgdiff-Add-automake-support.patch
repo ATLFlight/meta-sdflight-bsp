@@ -1,0 +1,64 @@
+From a8c8db42fe2d18001e773a1e175101a6451842e4 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Thu, 13 Aug 2015 20:03:14 -0700
+Subject: [PATCH] imgdiff: Add automake support
+
+---
+ Makefile.am  |  9 +++++++++
+ configure.ac | 28 ++++++++++++++++++++++++++++
+ 2 files changed, 37 insertions(+)
+ create mode 100644 Makefile.am
+ create mode 100644 configure.ac
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..d5a5576
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,9 @@
++c_sources := imgdiff.c utils.c bsdiff.c
++
++bin_PROGRAMS := imgdiff
++
++imgdiff_SOURCES := $(c_sources)
++
++imgdiff_CFLAGS := $(AM_CFLAGS)
++imgdiff_LDFLAGS := -lz -lbz2
++
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..b647a8a
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,28 @@
++AC_PREREQ(2.61)
++AC_INIT([imgdiff],1.0.0)
++AM_INIT_AUTOMAKE([-Wall gnu foreign])
++AM_MAINTAINER_MODE
++
++AC_CONFIG_HEADER([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Checks for programs.
++AM_PROG_AS
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_CXX
++AC_PROG_LIBTOOL
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++
++AS_CASE([$host],
++        [arm*], [ARM=yes],
++        [ARM=no]
++)
++
++AC_OUTPUT([ \
++        Makefile
++])
+-- 
+2.4.2
+

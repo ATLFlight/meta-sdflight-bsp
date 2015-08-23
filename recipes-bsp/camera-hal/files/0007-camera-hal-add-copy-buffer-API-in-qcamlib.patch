@@ -1,7 +1,7 @@
-From bb4cb0c111028008674fd8a4f1591f864566ea95 Mon Sep 17 00:00:00 2001
+From 7a5a7589c541b71b423a363761f3e0f686d51dbf Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Thu, 18 Jun 2015 14:22:31 -0700
-Subject: [PATCH 7/9] camera-hal: add copy buffer API in qcamlib
+Subject: [PATCH 07/16] camera-hal: add copy buffer API in qcamlib
 
 Change-Id: I97cf84409e9e05d304db3dbb33602f388fc18efe
 ---

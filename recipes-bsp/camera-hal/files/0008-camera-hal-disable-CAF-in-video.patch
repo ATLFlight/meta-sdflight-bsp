@@ -1,7 +1,7 @@
-From c76033649e63843dec9eed28b5d3cd6528928ccc Mon Sep 17 00:00:00 2001
+From ca9de6732aa7441eb9bde03ddf74808da0114962 Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Thu, 18 Jun 2015 16:38:04 -0700
-Subject: [PATCH 8/9] camera-hal: disable CAF in video
+Subject: [PATCH 08/16] camera-hal: disable CAF in video
 
 Change-Id: I3524e2a52a98c826b902fec1870052eff72cb545
 ---

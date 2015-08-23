@@ -1,6 +1,6 @@
 lib_LIBRARIES = libsparse.a
 sparseincdir = $(includedir)/sparse
-sparseinc_HEADERS = include/sparse/sparse.h
+sparseinc_HEADERS = include/sparse/sparse.h sparse_crc32.h
 libsparse_a_SOURCES = backed_block.c \
 	output_file.c \
 	sparse.c \
@@ -8,6 +8,7 @@ libsparse_a_SOURCES = backed_block.c \
 	sparse_err.c \
 	sparse_read.c
 libsparse_a_CFLAGS = -Iinclude
+libsparse_a_LDFLAGS = -all-static -lz
 
 bin_PROGRAMS = simg2img
 

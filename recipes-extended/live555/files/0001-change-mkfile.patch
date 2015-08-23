@@ -1,0 +1,110 @@
+From 406eb26e028453da3dc05e9a9948eadb83d43976 Mon Sep 17 00:00:00 2001
+From: "U-AP\\xiaoyiz" <xiaoyiz@codeaurora.org>
+Date: Fri, 24 Jul 2015 18:32:09 +0800
+Subject: [PATCH] first try
+
+---
+ BasicUsageEnvironment/Makefile.tail |    4 ++--
+ UsageEnvironment/Makefile.tail      |    4 ++--
+ config.linux-with-shared-libraries  |   12 ++++++------
+ groupsock/Makefile.tail             |    4 ++--
+ liveMedia/Makefile.tail             |    4 ++--
+ 5 files changed, 14 insertions(+), 14 deletions(-)
+
+diff --git a/BasicUsageEnvironment/Makefile.tail b/BasicUsageEnvironment/Makefile.tail
+index 9b2f6dc..3ae1ce1 100755
+--- a/BasicUsageEnvironment/Makefile.tail
++++ b/BasicUsageEnvironment/Makefile.tail
+@@ -13,10 +13,10 @@ libBasicUsageEnvironment.$(LIB_SUFFIX): $(OBJS)
+ 	$(LIBRARY_LINK)$@ $(LIBRARY_LINK_OPTS) \
+ 		$(OBJS)
+ 
+-.$(C).$(OBJ):
++.$(CFILE).$(OBJ):
+ 	$(C_COMPILER) -c $(C_FLAGS) $<       
+ 
+-.$(CPP).$(OBJ):
++.$(CPPFILE).$(OBJ):
+ 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
+ 
+ BasicUsageEnvironment0.$(CPP):	include/BasicUsageEnvironment0.hh
+diff --git a/UsageEnvironment/Makefile.tail b/UsageEnvironment/Makefile.tail
+index a7c23df..78fcb02 100755
+--- a/UsageEnvironment/Makefile.tail
++++ b/UsageEnvironment/Makefile.tail
+@@ -10,10 +10,10 @@ OBJS = UsageEnvironment.$(OBJ) HashTable.$(OBJ) strDup.$(OBJ)
+ $(USAGE_ENVIRONMENT_LIB): $(OBJS)
+ 	$(LIBRARY_LINK)$@ $(LIBRARY_LINK_OPTS) $(OBJS)
+ 
+-.$(C).$(OBJ):
++.$(CFILE).$(OBJ):
+ 	$(C_COMPILER) -c $(C_FLAGS) $<       
+ 
+-.$(CPP).$(OBJ):
++.$(CPPFILE).$(OBJ):
+ 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
+ 
+ UsageEnvironment.$(CPP):	include/UsageEnvironment.hh
+diff --git a/config.linux-with-shared-libraries b/config.linux-with-shared-libraries
+index 34c76e9..c97ed95 100755
+--- a/config.linux-with-shared-libraries
++++ b/config.linux-with-shared-libraries
+@@ -25,17 +25,17 @@ libgroupsock_LIB_SUFFIX=so.$(shell expr $(libgroupsock_VERSION_CURRENT) - $(libg
+ #####
+ 
+ COMPILE_OPTS =		$(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -fPIC
+-C =			c
+-C_COMPILER =		cc
++CFILE =			c
++C_COMPILER =		$(CC)
+ C_FLAGS =		$(COMPILE_OPTS) $(CPPFLAGS) $(CFLAGS)
+-CPP =			cpp
+-CPLUSPLUS_COMPILER =	c++
++CPPFILE =			cpp
++CPLUSPLUS_COMPILER =	$(CXX)
+ CPLUSPLUS_FLAGS =	$(COMPILE_OPTS) -Wall -DBSD=1 $(CPPFLAGS) $(CXXFLAGS)
+ OBJ =			o
+-LINK =			c++ -o
++LINK =			$(CXX) -o
+ LINK_OPTS =		-L. $(LDFLAGS)
+ CONSOLE_LINK_OPTS =	$(LINK_OPTS)
+-LIBRARY_LINK =		gcc -o 
++LIBRARY_LINK =		$(CCLD) -o 
+ SHORT_LIB_SUFFIX =	so.$(shell expr $($(NAME)_VERSION_CURRENT) - $($(NAME)_VERSION_AGE))
+ LIB_SUFFIX =	 	$(SHORT_LIB_SUFFIX).$($(NAME)_VERSION_AGE).$($(NAME)_VERSION_REVISION)
+ LIBRARY_LINK_OPTS =	-shared -Wl,-soname,$(NAME).$(SHORT_LIB_SUFFIX) $(LDFLAGS)
+diff --git a/groupsock/Makefile.tail b/groupsock/Makefile.tail
+index 89a8593..4c71a9a 100755
+--- a/groupsock/Makefile.tail
++++ b/groupsock/Makefile.tail
+@@ -4,9 +4,9 @@ NAME = libgroupsock
+ ALL = $(NAME).$(LIB_SUFFIX)
+ all:	$(ALL)
+ 
+-.$(C).$(OBJ):
++.$(CFILE).$(OBJ):
+ 	$(C_COMPILER) -c $(C_FLAGS) $<
+-.$(CPP).$(OBJ):
++.$(CPPFILE).$(OBJ):
+ 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
+ 
+ GROUPSOCK_LIB_OBJS = GroupsockHelper.$(OBJ) GroupEId.$(OBJ) inet.$(OBJ) Groupsock.$(OBJ) NetInterface.$(OBJ) NetAddress.$(OBJ) IOHandlers.$(OBJ)
+diff --git a/liveMedia/Makefile.tail b/liveMedia/Makefile.tail
+index bdd3632..283848f 100755
+--- a/liveMedia/Makefile.tail
++++ b/liveMedia/Makefile.tail
+@@ -5,9 +5,9 @@ LIVEMEDIA_LIB = $(NAME).$(LIB_SUFFIX)
+ ALL = $(LIVEMEDIA_LIB)
+ all:	$(ALL)
+ 
+-.$(C).$(OBJ):
++.$(CFILE).$(OBJ):
+ 	$(C_COMPILER) -c $(C_FLAGS) $<
+-.$(CPP).$(OBJ):
++.$(CPPFILE).$(OBJ):
+ 	$(CPLUSPLUS_COMPILER) -c $(CPLUSPLUS_FLAGS) $<
+ 
+ MP3_SOURCE_OBJS = MP3FileSource.$(OBJ) MP3Transcoder.$(OBJ) MP3ADU.$(OBJ) MP3ADUdescriptor.$(OBJ) MP3ADUinterleaving.$(OBJ) MP3ADUTranscoder.$(OBJ) MP3StreamState.$(OBJ) MP3Internals.$(OBJ) MP3InternalsHuffman.$(OBJ) MP3InternalsHuffmanTable.$(OBJ) MP3ADURTPSource.$(OBJ)
+-- 
+1.7.9
+

@@ -1,0 +1,49 @@
+From aa718a8364c72d5df7b8aaf2dacf47f376276d82 Mon Sep 17 00:00:00 2001
+From: "U-AP\\xiaoyiz" <xiaoyiz@codeaurora.org>
+Date: Sat, 25 Jul 2015 11:29:42 +0800
+Subject: [PATCH 2/2] remove test build
+
+---
+ Makefile.tail |   14 ++------------
+ 1 files changed, 2 insertions(+), 12 deletions(-)
+
+diff --git a/Makefile.tail b/Makefile.tail
+index c891bf2..5caaad0 100755
+--- a/Makefile.tail
++++ b/Makefile.tail
+@@ -16,30 +16,20 @@ all:
+ 	cd $(GROUPSOCK_DIR) ; $(MAKE)
+ 	cd $(USAGE_ENVIRONMENT_DIR) ; $(MAKE)
+ 	cd $(BASIC_USAGE_ENVIRONMENT_DIR) ; $(MAKE)
+-	cd $(TESTPROGS_DIR) ; $(MAKE)
+-	cd $(MEDIA_SERVER_DIR) ; $(MAKE)
+-	cd $(PROXY_SERVER_DIR) ; $(MAKE)
++
+ 
+ install:
+ 	cd $(LIVEMEDIA_DIR) ; $(MAKE) install
+ 	cd $(GROUPSOCK_DIR) ; $(MAKE) install
+ 	cd $(USAGE_ENVIRONMENT_DIR) ; $(MAKE) install
+ 	cd $(BASIC_USAGE_ENVIRONMENT_DIR) ; $(MAKE) install
+-	cd $(TESTPROGS_DIR) ; $(MAKE) install
+-	cd $(MEDIA_SERVER_DIR) ; $(MAKE) install
+-	cd $(PROXY_SERVER_DIR) ; $(MAKE) install
+ 
+ clean:
+ 	cd $(LIVEMEDIA_DIR) ; $(MAKE) clean
+ 	cd $(GROUPSOCK_DIR) ; $(MAKE) clean
+ 	cd $(USAGE_ENVIRONMENT_DIR) ; $(MAKE) clean
+ 	cd $(BASIC_USAGE_ENVIRONMENT_DIR) ; $(MAKE) clean
+-	cd $(TESTPROGS_DIR) ; $(MAKE) clean
+-	cd $(MEDIA_SERVER_DIR) ; $(MAKE) clean
+-	cd $(PROXY_SERVER_DIR) ; $(MAKE) clean
+ 
+ distclean: clean
+ 	-rm -f $(LIVEMEDIA_DIR)/Makefile $(GROUPSOCK_DIR)/Makefile \
+-	  $(USAGE_ENVIRONMENT_DIR)/Makefile $(BASIC_USAGE_ENVIRONMENT_DIR)/Makefile \
+-	  $(TESTPROGS_DIR)/Makefile $(MEDIA_SERVER_DIR)/Makefile \
+-	  $(PROXY_SERVER_DIR)/Makefile Makefile
++	  $(USAGE_ENVIRONMENT_DIR)/Makefile $(BASIC_USAGE_ENVIRONMENT_DIR)/Makefile 
+-- 
+1.7.9
+

@@ -1,7 +1,7 @@
-From a782782a740ecd5a55aaa9b36832dbb6a6edcf20 Mon Sep 17 00:00:00 2001
+From 1f20159c9ce00744467ca06bf0a7f059abcc5054 Mon Sep 17 00:00:00 2001
 From: Punit Soni <punits@codeaurora.org>
 Date: Tue, 16 Jun 2015 13:44:17 -0700
-Subject: [PATCH 5/9] camera-hal: remove android-includes references from
+Subject: [PATCH 05/16] camera-hal: remove android-includes references from
  Makefiles
 
 Change-Id: I1c41e94c1a8ad784056ca7f5fc328e9b7cc34a72
