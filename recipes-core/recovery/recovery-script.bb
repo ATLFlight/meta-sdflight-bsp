@@ -7,11 +7,16 @@ PV = "1.0"
 
 inherit autotools
 
-SRC_URI = "file://install-update.sh"
+SRC_URI = "file://install-update.sh \
+    file://qrlUpdate.conf"
 
 FILES_${PN} = "/usr/bin/*"
+FILES_${PN} += "/etc/init/*"
 
 do_install() {
     install -m 755 ${WORKDIR}/install-update.sh -D ${D}${bindir}/install-update
+    dest=/etc/init
+    install -d ${D}${dest}
+    install -m 755 ${WORKDIR}/qrlUpdate.conf ${D}${dest}
 }
 

@@ -1,21 +1,23 @@
 DESCRIPTION = "Android bootable recovery image"
-LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
+LICENSE = "BSD-3-Clause"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5=550794465ba0ec5312d6919e203a55f9"
 HOMEPAGE = "https://android.googlesource.com/platform/bootable/recovery"
 
-PR = "r0"
-PV = "1.0"
+PR = "r1"
+
+FILESPATH =+ "${WORKSPACE}:"
+
+SRC_URI += "file://build/ \
+    file://init \
+    file://recovery.fstab"
 
 SRC_URI += "http://releases.linaro.org/14.09/ubuntu/ifc6410/initrd.img-3.4.0-linaro-ifc6410;downloadfilename=initrd.img;name=initrd"
 SRC_URI[initrd.md5sum] = "d92fb01531698e30615f26efa2999c6c"
 SRC_URI[initrd.sha256sum] = "d177ba515258df5fda6d34043261d694026c9e27f1ef8ec16674fa479c5b47fb"
-SRC_URI += "git://codeaurora.org/quic/la/platform/build;nobranch=1;tag=LNX.LA.3.5.2-09410-8x74.0 \
-    file://init \
-    file://recovery.fstab"
 
-DEPENDS += "virtual/kernel recovery"
+DEPENDS += "virtual/kernel recovery dumpkey-java"
 
-inherit autotools
+inherit base
 
 LK_ROOT_DEV ?= ""
 LK_CMDLINE_OPTIONS ?= ""
@@ -39,13 +41,11 @@ do_compile() {
     # Create build.prop only with machine name
     echo "ro.product.device=${MACHINE}" > ${WORKDIR}/initrd/build.prop
 
-    # Dump public keys (optional)
-    if [ -f ${WORKDIR}/dumpkey.jar ]; then
-        java -jar ${WORKDIR}/dumpkey.jar \
-            `ls ${WORKDIR}/git/target/product/security/*.pem` \
-            > ${WORKDIR}/keys
-        install -m 644 ${WORKDIR}/keys -D ${WORKDIR}/initrd/res/keys
-    fi
+    # Dump public keys
+    java -jar ${STAGING_BINDIR_NATIVE}/dumpkey.jar \
+        `ls ${WORKDIR}/build/target/product/security/*.pem` \
+        > ${WORKDIR}/keys
+    install -m 644 ${WORKDIR}/keys -D ${WORKDIR}/initrd/res/keys
 
     # Create the image
     find ./ | cpio -H newc -o > ${WORKDIR}/initrd-recovery.cpio

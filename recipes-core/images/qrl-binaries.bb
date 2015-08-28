@@ -30,8 +30,10 @@ DEPENDS += " \
     recovery \
     recovery-image \
     recovery-script \
+    signapk-java \
     live555 \
     libjpeg-turbo \
+    frameworks-av \
 "
 
 PKGLIST_OS = " \
@@ -55,6 +57,15 @@ PKGLIST_OS = " \
     recovery-script \
     live555 \
     libjpeg-turbo \
+    frameworks-av \
+"
+
+PKGLIST_KERNEL = " \
+    kernel-image-3.4.0-${MACHINE} \
+    kernel-3.4.0-${MACHINE} \
+    kernel-module-wlan \
+    depmodwrapper-cross \
+    compat-wireless \
 "
 
 inherit base
@@ -74,6 +85,12 @@ copy_package() {
     if [ -f ${DEPLOY_DIR}/deb/${TUNE_PKGARCH}/${pkg}_*${DPKG_ARCH}.deb ]; then
         foundPkg=true
         install -m 644 ${DEPLOY_DIR}/deb/${TUNE_PKGARCH}/${pkg}_*${DPKG_ARCH}.deb ${IMAGE_ROOTFS}/${dest}
+    fi
+
+    # Kernel package check
+    if [ -f ${DEPLOY_DIR}/deb/${TUNE_ARCH}/${pkg}_*${DPKG_ARCH}.deb ]; then
+        foundPkg=true
+        install -m 644 ${DEPLOY_DIR}/deb/${TUNE_ARCH}/${pkg}_*${DPKG_ARCH}.deb ${IMAGE_ROOTFS}/${dest}
     fi
 
     # Nothing found at all
@@ -123,7 +140,7 @@ create_system_image() {
         build_date=`sed -n '2p' ${version_file}`
         build_version=$(head -n 1 ${version_file})
     else
-        build_date=`date +%Y-%m-%d %H:%M:%S`
+        build_date=`date +"%Y-%m-%d %H:%M:%S"`
         build_version=${MACHINE}-`date +%F-%H%M%S`
     fi
     build_utc=`date -d "${build_date}" +%s`
@@ -175,10 +192,7 @@ copy_packages() {
 
     copy_packages_aux os ${PKGLIST_OS}
 
-    # Now create a tgz of the kernel modules
-    cd ${DEPLOY_DIR}/deb/${TUNE_ARCH}
-    tar zcf qrlPackages_kernel.tgz *.deb
-    mv qrlPackages_kernel.tgz ${DEPLOY_DIR_IMAGE}/out
+    copy_packages_aux kernel ${PKGLIST_KERNEL}
 }
 
 do_copy_packages() {
@@ -238,11 +252,18 @@ do_target_files() {
     if [ -f ${file_config} ]; then
         rm ${file_config}
     fi
-    system_folder="$target_folder/SYSTEM"
+    system_folder=$target_folder/SYSTEM
     echo "system 0 0 755" >> $file_config
-    for f in `find $system_folder/*`; do
-        echo system/${f/$system_folder\//} 0 0 `stat --format=%a $f` >> $file_config
+    cd $system_folder
+    for f in `find *`; do
+        echo system/$f 0 0 `stat --format=%a $f` >> $file_config
     done
+    cd -
+
+    # Create stub firmware folders
+    echo "qcom-firmware 0 0 755" >> $file_config
+    firmware_folder=$target_folder/QCOM-FIRMWARE
+    install -d ${firmware_folder}
 
     # Enable extension of this function
     target_files_extension ${target_folder} ${file_config}
@@ -269,13 +290,10 @@ do_update_package() {
     if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip ]; then
         rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip
     fi
-    if [ -f ${WORKDIR}/signapk.jar ]; then
-        install -m 644 ${WORKDIR}/signapk.jar -D ${STAGING_BINDIR_NATIVE}/signapk.jar
-        SIGNATURE_OPTIONS="--signapk_path signapk.jar -k ${PRODUCT_KEY}"
-    fi
     ${WORKDIR}/build/tools/releasetools/ota_from_target_files \
-        -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py \
-        -p ${STAGING_BINDIR_NATIVE} ${SIGNATURE_OPTIONS} -v \
+        -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py -v \
+        -p ${STAGING_BINDIR_NATIVE} \
+        --signapk_path signapk.jar -k ${PRODUCT_KEY} \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota.zip
     set +x

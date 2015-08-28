@@ -39,6 +39,13 @@ ln -sf /proc/mounts /etc/mtab
 
 echo "Loading, please wait..."
 
+# Turn on the green LED
+BLUE_LED_BLINK=/sys/class/leds/blue/blink
+GREEN_LED_BLINK=/sys/class/leds/green/blink
+RED_LED_BLINK=/sys/class/leds/red/blink
+echo 0 > ${BLUE_LED_BLINK}
+echo 1 > ${GREEN_LED_BLINK}
+
 # Note that this only becomes /dev on the real filesystem if udev's scripts
 # are used; which they will be, but it's worth pointing out
 if ! mount -t devtmpfs -o mode=0755 udev /dev; then
@@ -92,5 +99,8 @@ echo ""
 if [ $ret -eq 0 ]; then
     reboot
 else
+    # Turn on the red LED
+    echo 0 > ${GREEN_LED_BLINK}
+    echo 1 > ${RED_LED_BLINK}
     /bin/sh
 fi

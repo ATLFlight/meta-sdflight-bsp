@@ -21,6 +21,7 @@ DEPENDS += "mm-video-oss"
 DEPENDS += "libhardware-headers"
 DEPENDS += "system-headers"
 DEPENDS += "frameworks-headers"
+DEPENDS += "frameworks-av"
 
 CFLAGS += "-I./mm-camera-interface"
 CFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include"
