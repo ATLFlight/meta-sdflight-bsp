@@ -3,10 +3,12 @@ LICENSE = "Apache-2.0 & BSD"
 LIC_FILES_CHKSUM = "file://NOTICE;md5=9645f39e9db895a4aa6e02cb57294595"
 HOMEPAGE = "https://android.googlesource.com/platform/bootable/recovery"
 
-PR = "r0"
-PV = "1.0"
+PR = "r1"
 
-SRC_URI = "git://codeaurora.org/quic/la/platform/bootable/recovery;nobranch=1;tag=LNX.LA.3.5.2-09410-8x74.0"
+FILESPATH =+ "${WORKSPACE}:"
+S = "${WORKDIR}/bootable/recovery/"
+
+SRC_URI = "file://bootable/recovery/"
 
 DEPENDS += "virtual/kernel android-tools ext4-utils safe-iop libselinux libsparse"
 
@@ -22,12 +24,10 @@ EXTRA_OECONF = "--with-sanitized-headers=${STAGING_INCDIR}/linux-headers/usr/inc
 
 do_unpack_append() {
     import shutil
-    import os
-    s = d.getVar('S', True)
-    wd = d.getVar('WORKDIR',True)
-    if os.path.exists(s):
-        shutil.rmtree(s)
-    shutil.move(wd+'/git', s)
+    ws = d.getVar('WORKSPACE',True)
+    s = d.getVar('S',True)
+    old = ws+'/device/qcom/common/recovery/oem-recovery'
+    shutil.copytree(old, s+'/oem-recovery')
 }
 
 do_install_append() {

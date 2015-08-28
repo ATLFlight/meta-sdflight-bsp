@@ -11,7 +11,7 @@ PARTITION_SYSTEM_SIZE = "1G"
 PARTITION_UPDATE_SIZE = "1G"
 
 # Using default platform key during development
-PRODUCT_KEY ?= "${WORKDIR}/git/target/product/security/testkey"
+PRODUCT_KEY ?= "${WORKSPACE}/build/target/product/security/testkey"
 
 DEPENDS += " \
     glib-2.0 \
@@ -23,9 +23,12 @@ DEPENDS += " \
     lk \
     mm-video-oss \
     hostapd  \
+    libnl \
     dnsmasq \
     setup-softap \
     sdcard-automount \
+    recovery \
+    recovery-image \
     recovery-script \
     live555 \
     libjpeg-turbo \
@@ -189,6 +192,13 @@ do_image() {
     create_update_image
 }
 
+FILESPATH =+ "${WORKSPACE}:"
+S = "${WORKDIR}/build/"
+
+SRC_URI += "file://build/ \
+    file://device/qcom/common/releasetools.py \
+    file://device/qcom/msm8974/radio/filesmap"
+
 do_target_files() {
     target_files=${MACHINE}-target_files
     target_folder=${WORKDIR}/${target_files}
@@ -211,7 +221,7 @@ do_target_files() {
     install -m 644 ${STAGING_DIR}/${MACHINE}/etc/recovery.fstab \
         -D ${target_folder}/RECOVERY/RAMDISK/etc/recovery.fstab
     # Radio folder
-    install -m 644 ${WORKDIR}/filesmap -D ${target_folder}/RADIO/filesmap
+    install -m 644 ${WORKDIR}/device/qcom/msm8974/radio/filesmap -D ${target_folder}/RADIO/filesmap
     if [ -f ${DEPLOY_DIR_IMAGE}/out/emmc_appsboot.mbn ]; then
         install -m 644 ${DEPLOY_DIR_IMAGE}/out/emmc_appsboot.mbn ${target_folder}/RADIO/emmc_appsboot.mbn
     fi
@@ -263,8 +273,8 @@ do_update_package() {
         install -m 644 ${WORKDIR}/signapk.jar -D ${STAGING_BINDIR_NATIVE}/signapk.jar
         SIGNATURE_OPTIONS="--signapk_path signapk.jar -k ${PRODUCT_KEY}"
     fi
-    ${WORKDIR}/git/tools/releasetools/ota_from_target_files \
-        -n -d MMC -s ${WORKDIR}/releasetools.py \
+    ${WORKDIR}/build/tools/releasetools/ota_from_target_files \
+        -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py \
         -p ${STAGING_BINDIR_NATIVE} ${SIGNATURE_OPTIONS} -v \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota.zip
@@ -285,5 +295,5 @@ do_image[depends] = "ext4-utils-native:do_populate_sysroot"
 do_update_package[depends] = "imgdiff-native:do_populate_sysroot"
 
 addtask image after do_build
-#addtask target_files after do_image
-#addtask update_package after do_target_files
+addtask target_files after do_image
+addtask update_package after do_target_files
