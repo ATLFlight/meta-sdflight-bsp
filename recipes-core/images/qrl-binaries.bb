@@ -281,7 +281,7 @@ do_packagedata[noexec] = "1"
 do_package_write_ipk[noexec] = "1"
 do_package_write_deb[noexec] = "1"
 do_package_write_rpm[noexec] = "1"
-do_image[depends] = "make-ext4fs-native:do_populate_sysroot"
+do_image[depends] = "ext4-utils-native:do_populate_sysroot"
 do_update_package[depends] = "imgdiff-native:do_populate_sysroot"
 
 addtask image after do_build

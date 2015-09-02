@@ -37,6 +37,11 @@ EXTRA_OECONF_arm = "--disable-shared \
 INSANE_SKIP_${PN} = "installed-vs-shipped"
 FILES_${PN}-dev += "${includedir}/cutils"
 
+do_install_append() {
+	install -m 0644 ${S}/include/private/android_filesystem_capability.h -D ${D}${includedir}/private/android_filesystem_capability.h
+	install -m 0644 ${S}/include/private/android_filesystem_config.h -D ${D}${includedir}/private/android_filesystem_config.h
+}
+
 do_install_append_arm() {
 	install -m 0644 ${WORKDIR}/adb.conf -D ${D}${sysconfdir}/init/adb.conf
 	for h in ${S}/include/cutils/*
