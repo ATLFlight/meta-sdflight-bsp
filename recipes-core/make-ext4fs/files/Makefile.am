@@ -11,5 +11,5 @@ make_ext4fs_SOURCES = make_ext4fs_main.c \
 	sha1.c \
 	wipe.c \
 	crc16.c
-make_ext4fs_CFLAGS = -Iinclude -DHOST
-make_ext4fs_LDADD = -lsparse -lz
+make_ext4fs_CFLAGS = -Iinclude -DHOST $(LIBSPARSE_CFLAGS)
+make_ext4fs_LDADD = -lz $(LIBSPARSE_LIBS)

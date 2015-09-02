@@ -1,4 +1,4 @@
-inherit native autotools gettext
+inherit native autotools gettext pkgconfig
 
 DESCRIPTION = "make_ext4fs tool"
 LICENSE = "Apache-2.0"
@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb
 
 DEPENDS += "libsparse-native zlib-native"
 
-PR = "r0"
+PR = "r1"
 PV="1.0"
 PN = "make-ext4fs-native"
 
