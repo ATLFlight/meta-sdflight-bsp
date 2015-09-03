@@ -60,6 +60,9 @@ mount -t tmpfs -o "noexec,nosuid,size=10%,mode=0755" tmpfs /run
 
 . /scripts/functions
 
+# Need some time to create the sysfs nodes
+sleep 5
+
 # Create partitions by-name links
 log_begin_msg "Mounting partitions\n"
 for f in `ls /sys/class/block/mmcblk0p*/uevent`; do

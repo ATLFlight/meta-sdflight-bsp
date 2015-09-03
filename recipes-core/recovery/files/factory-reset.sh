@@ -1,4 +1,5 @@
-# Copyright (c) 2011, 2015, The Linux Foundation. All rights reserved.
+#!/bin/sh
+# Copyright (c) 2015, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -25,12 +26,23 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/dev/block/platform/msm_sdcc.1/by-name/system       /system         ext4    ro,barrier=1                                                    wait
-/dev/block/platform/msm_sdcc.1/by-name/cache        /qcom-firmware  ext4    ro,barrier=1                                                    wait
-/dev/block/platform/msm_sdcc.1/by-name/userdata     /linaro-rootfs  ext4    noatime,nosuid,nodev,barrier=1,data=ordered,noauto_da_alloc     wait,check
-/dev/block/platform/msm_sdcc.1/by-name/update       /cache          ext4    noatime,nosuid,nodev,barrier=1,data=ordered,noauto_da_alloc     wait,check
-/dev/block/platform/msm_sdcc.1/by-name/factory      /factory        ext4    ro,barrier=1                                                    wait
-/dev/block/mmcblk1p1                                /sdcard         ext4    nosuid,nodev,barrier=1,data=ordered,nodelalloc                  wait
-/dev/block/platform/msm_sdcc.1/by-name/boot         /boot           emmc    defaults                                                        defaults
-/dev/block/platform/msm_sdcc.1/by-name/recovery     /recovery       emmc    defaults                                                        defaults
-/dev/block/platform/msm_sdcc.1/by-name/misc         /misc           emmc    defaults                                                        defaults
+update_block="/dev/mmcblk0p17"
+update_mount="/mnt/update"
+recovery_folder="${update_mount}/recovery"
+
+# Mount the update partition
+mkdir -p ${update_mount}
+mount -t ext4 ${update_block} ${update_mount}
+
+[ -d ${recovery_folder} ] || mkdir -p ${recovery_folder}
+
+# Create command file for recovery
+echo "--update_package=/factory/eagle8074-factory.zip" > ${recovery_folder}/command
+echo "Performing factory reset..."
+sync
+
+# Unmount the update partition
+umount ${update_mount}
+
+# Reboot to recovery
+reboot2fastboot recovery

@@ -9,6 +9,7 @@ QRL_BINARIES_TOOLS_LOCATION = "${STAGING_BINDIR_NATIVE}"
 PARTITION_PERSIST_SIZE = "32M"
 PARTITION_SYSTEM_SIZE = "1G"
 PARTITION_UPDATE_SIZE = "1G"
+PARTITION_FACTORY_SIZE = "1G"
 
 # Using default platform key during development
 PRODUCT_KEY ?= "${WORKSPACE}/build/target/product/security/testkey"
@@ -255,15 +256,8 @@ do_target_files() {
     system_folder=$target_folder/SYSTEM
     echo "system 0 0 755" >> $file_config
     cd $system_folder
-    for f in `find *`; do
-        echo system/$f 0 0 `stat --format=%a $f` >> $file_config
-    done
+    find * -exec stat --format="system/%n 0 0 %a" "{}" \; >> $file_config
     cd -
-
-    # Create stub firmware folders
-    echo "qcom-firmware 0 0 755" >> $file_config
-    firmware_folder=$target_folder/QCOM-FIRMWARE
-    install -d ${firmware_folder}
 
     # Enable extension of this function
     target_files_extension ${target_folder} ${file_config}
@@ -273,7 +267,7 @@ do_target_files() {
         rm -f ${WORKDIR}/${target_files}.zip
     fi
     cd ${target_folder}
-    zip -r ${WORKDIR}/${target_files}.zip ./
+    zip -ry ${WORKDIR}/${target_files}.zip ./
     cd -
 
     cp ${WORKDIR}/${target_files}.zip ${DEPLOY_DIR_IMAGE}/out/
@@ -299,6 +293,24 @@ do_update_package() {
     set +x
 }
 
+do_factory_image() {
+    set -x
+    if [ -d ${IMAGE_ROOTFS}/factory_rootfs ]; then
+        rm -rf ${IMAGE_ROOTFS}/factory_rootfs
+    fi
+    mkdir -p ${IMAGE_ROOTFS}/factory_rootfs
+    ${WORKDIR}/build/tools/releasetools/ota_from_target_files \
+        -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py -v \
+        -p ${STAGING_BINDIR_NATIVE} \
+        --signapk_path signapk.jar -k ${PRODUCT_KEY} \
+        --factory --no_prereq \
+        ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
+        ${IMAGE_ROOTFS}/factory_rootfs/${MACHINE}-factory.zip
+    ${QRL_BINARIES_TOOLS_LOCATION}/make_ext4fs -s -l ${PARTITION_FACTORY_SIZE} \
+        ${DEPLOY_DIR_IMAGE}/out/factory.img ${IMAGE_ROOTFS}/factory_rootfs
+    set +x
+}
+
 do_patch[noexec] = "0"
 do_configure[noexec] = "1"
 do_build[noexec] = "0"
@@ -315,3 +327,4 @@ do_update_package[depends] = "imgdiff-native:do_populate_sysroot"
 addtask image after do_build
 addtask target_files after do_image
 addtask update_package after do_target_files
+addtask factory_image after do_update_package
