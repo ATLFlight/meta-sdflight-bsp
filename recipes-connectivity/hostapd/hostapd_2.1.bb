@@ -4,12 +4,14 @@ SUMMARY = "User space daemon for extended IEEE 802.11 management"
 
 DEPENDS = "libnl (= 3.2.21) openssl"
 
-PROVIDES = "${PN}"
+PR = "r1"
 
-SRC_URI = "git://codeaurora.org/platform/external/hostap;nobranch=1;tag=hostap_2_1 \
-           file://defconfig.patch;patch=1 \
-"
-# http://ports.ubuntu.com/ubuntu-ports/pool/universe/w/wpa/hostapd_2.1-0ubuntu1_armhf.deb
+FILESPATH =+ "${WORKSPACE}:"
+S = "${WORKDIR}/external/hostap/"
+
+SRC_URI = "file://external/hostap/"
+
+PACKAGES = "${PN}"
 
 SRC_URI += "\
 http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/wpa/trusty/download/head:/hostapd.sh-20120512164208-bwtj2zmf8oi7hmeh-824/hostapd.sh\
@@ -26,6 +28,8 @@ http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/wpa/trusty/download/h
 "
 
 inherit update-rc.d
+
+INSANE_SKIP_${PN} = "installed-vs-shipped"
 
 INITSCRIPT_NAME = "hostapd"
 
@@ -61,33 +65,23 @@ DEFAULT_PREFERENCE = "-1"
 PKGV="1:${PV}"
 
 do_configure_prepend() {
-    install -m 0644 ${WORKDIR}/hostapd-${PV}/hostapd/defconfig ${WORKDIR}/hostapd-${PV}/hostapd/.config
-}
-
-do_unpack_append() {
-    import shutil
-    import os
-    s = d.getVar('S', True)
-    wd = d.getVar('WORKDIR',True)
-    if os.path.exists(s):
-        shutil.rmtree(s)
-    shutil.move(wd+'/git', s)
+    install -m 0644 ${S}/hostapd/defconfig ${S}/hostapd/.config
 }
 
 do_compile() {
     export CFLAGS="-MMD -O2 -Wall -g -I${STAGING_INCDIR}/libnl3"
-    make -C ${WORKDIR}/hostapd-${PV}/hostapd
+    make -C ${S}/hostapd
 }
 
 do_install() {
     install -d ${D}${sbindir} ${D}${sysconfdir}/init.d ${D}/${sysconfdir}/default ${D}/${sysconfdir}/hostapd
     install -d ${D}/${sysconfdir}/network/if-pre-up.d ${D}/${sysconfdir}/network/if-post-down.d
-    install -m 755 ${WORKDIR}/hostapd-${PV}/hostapd/hostapd                      ${D}${sbindir}
-    install -m 755 ${WORKDIR}/hostapd-${PV}/hostapd/hostapd_cli                  ${D}${sbindir}
-    install -m 644 ${WORKDIR}/hostapd-${PV}/hostapd/hostapd.conf                 ${D}${sysconfdir}/hostapd.conf.template
-    install -m 644 ${DL_DIR}/hostapd.default                                     ${D}${sysconfdir}/default/hostapd
-    install -m 755 ${DL_DIR}/hostapd.ifupdown                                    ${D}${sysconfdir}/hostapd/ifupdown.sh
-    install -m 755 ${DL_DIR}/hostapd.init                                        ${D}${sysconfdir}/init.d/hostapd
+    install -m 755 ${S}/hostapd/hostapd                      ${D}${sbindir}
+    install -m 755 ${S}/hostapd/hostapd_cli                  ${D}${sbindir}
+    install -m 644 ${S}/hostapd/hostapd.conf                 ${D}${sysconfdir}/hostapd.conf.template
+    install -m 644 ${DL_DIR}/hostapd.default                 ${D}${sysconfdir}/default/hostapd
+    install -m 755 ${DL_DIR}/hostapd.ifupdown                ${D}${sysconfdir}/hostapd/ifupdown.sh
+    install -m 755 ${DL_DIR}/hostapd.init                    ${D}${sysconfdir}/init.d/hostapd
 }
 
 pkg_postinst_${PN}() {
