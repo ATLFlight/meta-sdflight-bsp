@@ -67,6 +67,7 @@ PKGLIST_KERNEL = " \
     kernel-module-wlan \
     depmodwrapper-cross \
     compat-wireless \
+    kernel-module-rdbg \
 "
 
 inherit base
