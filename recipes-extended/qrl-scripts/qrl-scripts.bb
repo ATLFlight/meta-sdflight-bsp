@@ -15,3 +15,24 @@ do_install() {
     install -d ${D}${dest}
     install -m 755 ${WORKDIR}/board-name.sh ${D}${dest}
 }
+
+pkg_postinst_${PN}() {
+    # Disable v4l2 udev rules, causing issues with venus,
+    # q6 and cameras
+    rm /lib/udev/rules.d/60-persistent-v4l.rules
+    ln -s /dev/null /lib/udev/rules.d/60-persistent-v4l.rules
+    # Set upstart jobs related to graphics and audio to manual
+    echo manual > /etc/init/plymouth.override
+    echo manual > /etc/init/plymouth-log.override
+    echo manual > /etc/init/plymouth-ready.override
+    echo manual > /etc/init/plymouth-shutdown.override
+    echo manual > /etc/init/plymouth-splash.override
+    echo manual > /etc/init/plymouth-stop.override
+    echo manual > /etc/init/plymouth-upstart-bridge.override
+    echo manual > /etc/init/udev-fallback-graphics.override
+    echo manual > /etc/init/alsa-restore.override
+    echo manual > /etc/init/alsa-state.override
+    echo manual > /etc/init/alsa-store.override
+    echo manual > /etc/init/failsafe.override
+    echo manual > /etc/init/openvt.override
+}

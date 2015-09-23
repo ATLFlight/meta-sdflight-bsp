@@ -10,8 +10,6 @@ FILESPATH =+ "${WORKSPACE}:"
 SRC_URI = "file://linux"
 SRC_URI += "file://defconfig \
             file://${MACHINE}.scc \
-            file://${MACHINE}.cfg \
-	    file://eagle8074-user-patches.scc \
             file://${MACHINE}-user-config.cfg \
            "
 
