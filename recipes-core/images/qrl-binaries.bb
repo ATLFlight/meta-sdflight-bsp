@@ -35,6 +35,7 @@ DEPENDS += " \
     live555 \
     libjpeg-turbo \
     frameworks-av \
+    post-boot \
 "
 
 PKGLIST_OS = " \
@@ -59,6 +60,7 @@ PKGLIST_OS = " \
     live555 \
     libjpeg-turbo \
     frameworks-av \
+    post-boot \
 "
 
 PKGLIST_KERNEL = " \
