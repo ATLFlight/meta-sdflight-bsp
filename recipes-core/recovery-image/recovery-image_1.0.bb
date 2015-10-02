@@ -25,6 +25,38 @@ LK_CMDLINE_OPTIONS ?= ""
 do_configure() {
 }
 
+copy_libraries() {
+    initrd_libdir=${WORKDIR}/initrd/lib/arm-linux-gnueabihf
+
+    # Install libraries
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libstdc++.so.6.0.18 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libm-2.17-2013.07-2.so ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libgcc_s.so.1 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/libsparse.so.0.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/libselinux.so.0.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/libpcre.so.1.2.2 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/libbz2.so.0.0.0 ${initrd_libdir}
+
+    # Strip libraries
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libstdc++.so.6.0.18
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libm-2.17-2013.07-2.so
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libgcc_s.so.1
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libsparse.so.0.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libselinux.so.0.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libpcre.so.1.2.2
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libbz2.so.0.0.0
+
+    # Create symlinks
+    cd ${initrd_libdir}
+    ln -sf libstdc++.so.6.0.18 libstdc++.so.6
+    ln -sf libm-2.17-2013.07-2.so libm.so.6
+    ln -sf libsparse.so.0.0.0 libsparse.so.0
+    ln -sf libselinux.so.0.0.0 libselinux.so.0
+    ln -sf libpcre.so.1.2.2 libpcre.so.1
+    ln -sf libbz2.so.0.0.0 libbz2.so.0
+    cd -
+}
+
 do_compile() {
     set -x
     # Unpack Linaro's initrd
@@ -37,6 +69,9 @@ do_compile() {
     install -m 755 ${WORKDIR}/init -D ${WORKDIR}/initrd/init
     install -m 644 ${WORKDIR}/recovery.fstab -D ${WORKDIR}/initrd/etc/recovery.fstab
     install -m 644 ${WORKDIR}/recovery.fstab -D ${STAGING_DIR}/${MACHINE}/etc/recovery.fstab
+
+    # Copy libraries for recovery
+    copy_libraries
 
     # Create build.prop only with machine name
     echo "ro.product.device=${MACHINE}" > ${WORKDIR}/initrd/build.prop
