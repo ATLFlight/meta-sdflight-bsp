@@ -1,6 +1,6 @@
 DESCRIPTION = "open source lib live555"
 LICENSE = "LGPL-2.1"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5=1a6d268fd218675ffea8be556788b780"
+LIC_FILES_CHKSUM = "file://COPYING;md5=68ad62c64cc6c620126241fd429e68fe"
 
 SRC_URI = "git://github.com/hackeron/live555"
 SRCREV = "35c375c6b15403869a27047f67a0d2d4fd0a16e2"
