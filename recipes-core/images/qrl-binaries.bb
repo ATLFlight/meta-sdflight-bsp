@@ -28,15 +28,17 @@ DEPENDS += " \
     dnsmasq \
     setup-softap \
     sdcard-automount \
-    recovery \
-    recovery-image \
-    recovery-script \
-    signapk-java \
     live555 \
     libjpeg-turbo \
     frameworks-av \
     post-boot \
 "
+
+# TODO: Re-enable when recovery is complete
+#recovery \
+#recovery-image \
+#recovery-script \
+#signapk-java
 
 PKGLIST_OS = " \
     libglib-2.0-0_2.38.2-r0 \
@@ -56,12 +58,14 @@ PKGLIST_OS = " \
     dnsmasq \
     setup-softap \
     sdcard-automount \
-    recovery-script \
     live555 \
     libjpeg-turbo \
     frameworks-av \
     post-boot \
 "
+
+# TODO: Re-enable when recovery is complete
+#recovery-script
 
 PKGLIST_KERNEL = " \
     kernel-image-3.4.0-${MACHINE} \
@@ -328,6 +332,6 @@ do_image[depends] = "ext4-utils-native:do_populate_sysroot"
 do_update_package[depends] = "imgdiff-native:do_populate_sysroot"
 
 addtask image after do_build
-addtask target_files after do_image
-addtask update_package after do_target_files
-addtask factory_image after do_update_package
+#addtask target_files after do_image
+#addtask update_package after do_target_files
+#addtask factory_image after do_update_package
