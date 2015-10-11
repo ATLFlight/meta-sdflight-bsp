@@ -37,6 +37,8 @@ DEPENDS += " \
     frameworks-av \
     post-boot \
     qrl-scripts \
+    linux-firmware \
+    ath3k-bluez \
 "
 
 PKGLIST_OS = " \
@@ -63,6 +65,7 @@ PKGLIST_OS = " \
     frameworks-av \
     post-boot \
     qrl-scripts \
+    ath3k-bluez \
 "
 
 PKGLIST_KERNEL = " \
