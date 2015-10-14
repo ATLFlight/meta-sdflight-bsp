@@ -1,6 +1,7 @@
-DESCRIPTION = "open source lib turob jpeg"
-LICENSE = "BSD-3-Clause"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5=550794465ba0ec5312d6919e203a55f9"
+DESCRIPTION = "libjpeg-turbo"
+LICENSE = "IJG & BSD-3-Clause & Zlib"
+LIC_FILES_CHKSUM = "file://README;md5=aebe10abe0cac14c7e5c16a6d2ea494e \
+                    file://README-turbo.txt;md5=91d786de7bc53a1ad837c8a42619ef4b"
 
 JPEGTAG = "1.4.0"
 
