@@ -20,7 +20,7 @@ FILES_${PN} = "/etc/hostapd.conf \
                /usr/local/qr-linux/wificonfig.sh \
               "
               
-inherit allarch
+inherit base
 
 do_install() {
     dest="${D}${sysconfdir}"
@@ -39,12 +39,43 @@ do_install() {
     install -m 644 ${WORKDIR}/wlan.conf ${dest}/modprobe.d
 }
 
+# Save the user modified conf file
+pkg_prerm_${PN}() {
+    file_md5sum() {
+        pn=$1
+        fn=$2
+        md5=`cat /var/lib/dpkg/info/${pn}.md5sums | grep ${fn} | cut -d' ' -f1`
+        echo $md5
+    }
+
+    if [ -f /etc/hostapd.conf ]; then
+        cp /etc/hostapd.conf /tmp/hostapd.conf.tmp
+        echo $(file_md5sum setup-softap hostapd.conf) > /tmp/hostapd.conf.md5
+    fi
+}
+
 pkg_postinst_${PN}() {
-        
-    # Set SSID and install the "live" hostapd.conf
-    rand=`od -An -N2 -tu2 /dev/urandom | sed -e 's/ //g'`
-    sed -e "s/^ssid=/ssid=Atlanticus_$rand/g" /etc/hostapd.conf > /tmp/hostapd.conf.tmp
-    install -m 644 /tmp/hostapd.conf.tmp /etc/hostapd.conf
+    install_conf() {
+        # Set SSID and install the "live" hostapd.conf
+        rand=`od -An -N2 -tu2 /dev/urandom | sed -e 's/ //g'`
+        sed -e "s/^ssid=/ssid=Atlanticus_$rand/g" /etc/hostapd.conf > /tmp/hostapd.conf.tmp
+        install -m 644 /tmp/hostapd.conf.tmp /etc/hostapd.conf
+    }
+
+    # Try to restore the user version if possible
+    if [ -f /tmp/hostapd.conf.tmp ]; then
+        # Restore the user file if the new file has same
+        # contents of file in the previous package version
+        new_md5=`md5sum /etc/hostapd.conf | cut -d' ' -f1`
+        old_md5=`cat /tmp/hostapd.conf.md5`
+        if [ "$old_md5" = "$new_md5" ]; then
+            install -m 644 /tmp/hostapd.conf.tmp /etc/hostapd.conf
+        else
+            install_conf
+        fi
+    else
+        install_conf
+    fi
 
     # Update the default hostapd file to point to the hostapd.conf in the
     # sysconfdir (e.g /etc) and the set the launch options to be "-dd"
