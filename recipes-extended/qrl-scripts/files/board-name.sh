@@ -1,5 +1,6 @@
-#
-# Copyright (c) 2014,2015 The Linux Foundation.
+#!/bin/sh
+###############################################################################
+# Copyright (c) 2015, The Linux Foundation.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,39 +32,12 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+###############################################################################
 
-#@TYPE: Machine
-#@NAME: eagle8074
+board_model=`cat /sys/devices/soc0/board_model`
+image_version=`cat /sys/devices/soc0/image_version | cut -d':' -f2`
+hw_platform=`cat /sys/devices/soc0/hw_platform`
 
-#@DESCRIPTION: Machine configuration for eagle8074 systems
-
-# Uncomment the following line to enable the hard floating point abi. Note that
-# this breaks some binary libraries and 3D (neither of which ship with
-# meta-yocto). For maximum compatibility, leave this disabled.
-DEFAULTTUNE ?= "cortexa8hf-neon"
-include conf/machine/include/tune-cortexa8.inc
-
-MACHINE_ARCH = "arm"
-HOST_OS = "linux-gnueabihf"
-DPKG_ARCH = "armhf"
-
-SERIAL_CONSOLE = "115200 ttyHSL0"
-LK_ROOT_DEV = "/dev/mmcblk0p13"
-LK_CMDLINE_OPTIONS += "prim_display=hdmi_msm"
-
-PREFERRED_PROVIDER_virtual/kernel ?= "linux-qr-eagle8074"
-PREFERRED_PROVIDER_kernel-module-wlan ?= "kernel-module-wlan"
-PREFERRED_PROVIDER_kernel-module-cfg80211 ?= "linux-qr-eagle8074"
-
-QRLINUX_DTB = "apq8074pro-ab-eagle.dtb \
-    apq8074pro-ab-eagle-p2.dtb"
-
-PACKAGE_GROUP_eagle8074-kernelmods = "kernel-module-wlan kernel-module-cfg80211"
-MULTISTRAP_SECTION_eagle8074-kernelmods = "Modules"
-
-PACKAGE_GROUP_ethernet-eagle8074 = "ethernet-eagle8074"
-
-IMAGE_FEATURES += "eagle8074-kernelmods ethernet-eagle8074"
-
-# Change the compiler
-GCCVERSION = "4.8%"
+echo "platform=$hw_platform"
+echo "board=$board_model"
+echo "sbl1_ver=$image_version"

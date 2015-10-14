@@ -117,12 +117,7 @@ do_lk_mkimage() {
   set -x
   if [ -n "${QRLINUX_DTB}" ] ;
   then
-     dt_image=${kernel_imgdir}/${QRLINUX_DTB}
      master_dt_image=${kernel_imgdir}/masterDTB
-     kernel_dt_image=${kernel_imgdir}/zImage-dtb
-
-     # Append dtb to kernel image
-     cat ${kernel_image} ${dt_image} > ${kernel_dt_image}
 
      # Create new dtb header ot be appended to kernel image
      # This is rquired for LK bootloader compatibility, otherwise its not required. 
@@ -151,14 +146,6 @@ do_lk_mkimage() {
   set +x
 }
 
-do_unpack_dtb() {
-  if [ -n "${QRLINUX_DTB}" ] ;
-  then
-    cp ${WORKDIR}/*.dtsi ${S}/arch/arm/boot/dts/
-	cp ${WORKDIR}/*.dts ${S}/arch/arm/boot/dts/
-  fi
-}
-
 do_compile_dtb() {
 	if [ -n "${QRLINUX_DTB}" ] ;
 	then
@@ -171,8 +158,6 @@ do_compile_dtb() {
 
 addtask lk_mkimage after do_deploy and before do_package
 addtask compile_dtb after do_compile_kernelmodules before do_strip
-#addtask unpack_dtb after do_kernel_checkout before do_validate_branches 
 
 DEPENDS += "android-tools-native"
 DEPENDS += "dtbtool-native"
-

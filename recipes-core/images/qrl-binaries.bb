@@ -32,6 +32,7 @@ DEPENDS += " \
     libjpeg-turbo \
     frameworks-av \
     post-boot \
+    qrl-scripts \
 "
 
 # TODO: Re-enable when recovery is complete
@@ -62,6 +63,7 @@ PKGLIST_OS = " \
     libjpeg-turbo \
     frameworks-av \
     post-boot \
+    qrl-scripts \
 "
 
 # TODO: Re-enable when recovery is complete
