@@ -47,3 +47,31 @@ do_install () {
 	install -d ${D}${dest}
 	install -m 644 ${WORKDIR}/wpa_supplicant.conf ${D}${dest}
 }
+
+# Save the user modified conf file
+pkg_prerm_${PN}() {
+    file_md5sum() {
+        pn=$1
+        fn=$2
+        md5=`cat /var/lib/dpkg/info/${pn}.md5sums | grep ${fn} | cut -d' ' -f1`
+        echo $md5
+    }
+
+    if [ -f /etc/wpa_supplicant/wpa_supplicant.conf ]; then
+        cp /etc/wpa_supplicant/wpa_supplicant.conf /tmp/wpa_supplicant.conf.tmp
+        echo $(file_md5sum compat-wireless wpa_supplicant.conf) > /tmp/wpa_supplicant.conf.md5
+    fi
+}
+
+pkg_postinst_${PN}() {
+    # Try to restore the user version if possible
+    if [ -f /tmp/wpa_supplicant.conf.tmp ]; then
+        # Restore the user file if the new file has same
+        # contents of file in the previous package version
+        new_md5=`md5sum /etc/wpa_supplicant/wpa_supplicant.conf | cut -d' ' -f1`
+        old_md5=`cat /tmp/wpa_supplicant.conf.md5`
+        if [ "$old_md5" = "$new_md5" ]; then
+            install -m 644 /tmp/wpa_supplicant.conf.tmp /etc/wpa_supplicant/wpa_supplicant.conf
+        fi
+    fi
+}
