@@ -15,4 +15,7 @@ INSANE_SKIP_${PN} += "installed-vs-shipped"
 do_install() {
    install -d ${D}${includedir}/camera-hal
    cp -a ${S}/QCamera2/stack/common/*.h ${D}${includedir}/camera-hal
+   cp -a ${S}/mm-image-codec/qexif/*.h  ${D}${includedir}/camera-hal
+   cp -a ${S}/mm-image-codec/qomx_core/*.h  ${D}${includedir}/camera-hal
+   cp -a ${S}/QCamera_Intf.h  ${D}${includedir}/camera-hal
 }
