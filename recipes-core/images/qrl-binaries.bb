@@ -39,6 +39,8 @@ DEPENDS += " \
     qrl-scripts \
     linux-firmware \
     ath3k-bluez \
+    libhardware \
+    power-hal \
 "
 
 PKGLIST_OS = " \
@@ -66,6 +68,8 @@ PKGLIST_OS = " \
     post-boot \
     qrl-scripts \
     ath3k-bluez \
+    libhardware \
+    power-hal \
 "
 
 PKGLIST_KERNEL = " \

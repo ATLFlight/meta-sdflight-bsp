@@ -1,0 +1,185 @@
+From 701d9ee9b85410184dc9372beb0ead5042b45886 Mon Sep 17 00:00:00 2001
+From: Gustavo Solaira <gustavos@codeaurora.org>
+Date: Fri, 23 Oct 2015 11:34:45 -0700
+Subject: [PATCH] Port libhardware to Linux
+
+Change-Id: I9c0a571efbc78289fa356e989eaf126235aad1e1
+---
+ Makefile.am                 | 20 +++++++++++++
+ configure.ac                | 68 +++++++++++++++++++++++++++++++++++++++++++++
+ hardware.c                  | 21 ++++++++++++++
+ include/hardware/hardware.h |  2 ++
+ 4 files changed, 111 insertions(+)
+ create mode 100644 Makefile.am
+ create mode 100644 configure.ac
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..cd82a4b
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,20 @@
++AM_CFLAGS = -Wundef \
++	-Wstrict-prototypes \
++	-Wno-trigraphs \
++	-g -O0 \
++	-fno-inline \
++	-fno-short-enums \
++	-Wall \
++	-Wextra \
++	-Iinclude
++
++requiredlibs = -llog
++library_includedir = $(pkgincludedir)
++library_include_HEADERS = $(h_sources)
++
++c_sources = hardware.c
++
++lib_LTLIBRARIES = libhardware.la
++libhardware_la_SOURCES = $(c_sources) $(h_sources)
++libhardware_la_CFLAGS = $(AM_CFLAGS)
++libhardware_la_LIBADD = $(requiredlibs)
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..3f307e3
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,68 @@
++#                                               -*- Autoconf -*-
++
++# configure.ac -- Autoconf script
++#
++
++# Process this file with autoconf to produce a configure script
++
++# Requires autoconf tool later than 2.61
++AC_PREREQ(2.61)
++AC_INIT([libhardware],1.0.0)
++# Does not strictly follow GNU Coding standards
++AM_INIT_AUTOMAKE([foreign subdir-objects])
++# Disables auto rebuilding of configure, Makefile.ins
++AM_MAINTAINER_MODE
++# defines some macros variable to be included by source
++AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Checks for programs.
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_CXX
++AC_PROG_LIBTOOL
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++
++AC_ARG_WITH([glib],
++    AC_HELP_STRING([--with-glib],
++       [enable glib, building HLOS systems which use glib]))
++
++if (test "x${with_glib}" = "xyes"); then
++    AC_DEFINE(ENABLE_USEGLIB, 1, [Define if HLOS systems uses glib])
++    PKG_CHECK_MODULES(GTHREAD, gthread-2.0 >= 2.16, dummy=yes,
++                            AC_MSG_ERROR(GThread >= 2.16 is required))
++    PKG_CHECK_MODULES(GLIB, glib-2.0 >= 2.16, dummy=yes,
++                            AC_MSG_ERROR(GLib >= 2.16 is required))
++    GLIB_CFLAGS="$GLIB_CFLAGS $GTHREAD_CFLAGS"
++    GLIB_LIBS="$GLIB_LIBS $GTHREAD_LIBS"
++
++    AC_SUBST(GLIB_CFLAGS)
++    AC_SUBST(GLIB_LIBS)
++fi
++AM_CONDITIONAL(USE_GLIB, test "x${with_glib}" = "xyes")
++
++# Checks for typedefs, structures, and compiler characteristics.
++AC_HEADER_STDBOOL
++AC_HEADER_STDC
++AC_C_INLINE
++AC_TYPE_INT64_T
++AC_TYPE_PID_T
++AC_TYPE_SIZE_T
++AC_TYPE_SSIZE_T
++AC_TYPE_UINT16_T
++AC_TYPE_UINT32_T
++AC_TYPE_UINT8_T
++
++# Checks for library functions.
++AC_FUNC_ERROR_AT_LINE
++AC_FUNC_FORK
++AC_FUNC_MALLOC
++
++AC_CONFIG_FILES([ \
++        Makefile
++        ])
++AC_OUTPUT
+diff --git a/hardware.c b/hardware.c
+index 9651f4c..5a86734 100644
+--- a/hardware.c
++++ b/hardware.c
+@@ -23,6 +23,8 @@
+ #include <pthread.h>
+ #include <errno.h>
+ #include <limits.h>
++#include <glib.h>
++#include <stddef.h>
+ 
+ #define LOG_TAG "HAL"
+ #include <utils/Log.h>
+@@ -30,6 +32,17 @@
+ /** Base path of the hal modules */
+ #define HAL_LIBRARY_PATH1 "/system/lib/hw"
+ #define HAL_LIBRARY_PATH2 "/vendor/lib/hw"
++#define HAL_LIBRARY_PATH3 "/usr/lib"
++
++#define strlcpy g_strlcpy
++
++#include <string.h>
++#include <syslog.h>
++
++#define ALOGE(fmt, args...) syslog(LOG_ERR, fmt, ##args)
++#define ALOGV(fmt, args...) syslog(LOG_INFO, fmt, ##args)
++#define ALOGI(fmt, args...) syslog(LOG_INFO, fmt, ##args)
++#define ALOGD(fmt, args...) syslog(LOG_DEBUG, fmt, ##args)
+ 
+ /**
+  * There are a set of variant filename for modules. The form of the filename
+@@ -139,6 +152,7 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
+      * We also assume that dlopen() is thread-safe.
+      */
+ 
++#ifdef __ANDROID__
+     /* Loop through the configuration variants looking for a module */
+     for (i=0 ; i<HAL_VARIANT_KEYS_COUNT+1 ; i++) {
+         if (i < HAL_VARIANT_KEYS_COUNT) {
+@@ -162,6 +176,13 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
+             if (access(path, R_OK) == 0) break;
+         }
+     }
++#else
++    snprintf(path, sizeof(path), "%s/lib%s.so",
++             HAL_LIBRARY_PATH3, name);
++    if (access(path, R_OK) != 0) {
++        ALOGE("Failed to load module: %s", path);
++    }
++#endif
+ 
+     status = -ENOENT;
+     if (i < HAL_VARIANT_KEYS_COUNT+1) {
+diff --git a/include/hardware/hardware.h b/include/hardware/hardware.h
+index 416ae39..5123870 100644
+--- a/include/hardware/hardware.h
++++ b/include/hardware/hardware.h
+@@ -21,7 +21,9 @@
+ #include <sys/cdefs.h>
+ 
+ #include <cutils/native_handle.h>
++#ifdef __ANDROID__
+ #include <system/graphics.h>
++#endif
+ 
+ __BEGIN_DECLS
+ 
+-- 
+2.4.2
+
