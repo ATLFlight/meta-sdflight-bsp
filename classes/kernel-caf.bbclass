@@ -13,6 +13,15 @@ def get_machine_tag(d, default):
 	    
     return default
 
+do_patch_prepend() {
+    # Avoid issues with createme/configme scripts
+    # in multiple runs
+    kver=${S}/.meta/cfg/kernel-cache/kver
+    if [ -f $kver ]; then
+        exit 0
+    fi
+}
+
 do_kernel_checkout() {
 	set +e
 

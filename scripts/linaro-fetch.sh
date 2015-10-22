@@ -1,10 +1,10 @@
 #!/bin/bash
 ###############################################################################
 ## Author: Rahul Anand (ranand@codeaurora.org)
-## 
+##
 ## This scripts fetches a pre-built Linaro gcc toolchain
-## 
-## Copyright (c) 2014, The Linux Foundation.
+##
+## Copyright (c) 2014-2015, The Linux Foundation.
 ## All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 ## WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 ## OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 ## IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-## 
+##
 ###############################################################################
 
 # Create this file after tweaking meta-linaro, and don't do anything if it exists
@@ -66,18 +66,20 @@ modify-meta-linaro () {
    # We need to cherry-pick this commit onto our daisy branch
    COMMIT_TO_PICK="ab3610aefa2786e3172e751c0ae5e5f560e37444"
    (
-      cd meta-linaro; 
+      cd meta-linaro;
       # Check if need to do this again
       if [[ -e ${QRL_BREAD_CRUMB} ]]
       then
          echo "[INFO] Nothing to do in meta-linaro"
-	     return
+         return
       fi
 
       # First we need to cherry-pick a commit
       echo "[INFO] Cherry-picking commit to meta-linaro"
       git cherry-pick ${COMMIT_TO_PICK}
       touch ${QRL_BREAD_CRUMB}
+      git add ${QRL_BREAD_CRUMB}
+      git commit -m "Add breadcrumb file"
       return
 
       # We also needed to modify the recipes themselves for the newer gcc4.8 (2014.04)
@@ -97,7 +99,6 @@ modify-meta-linaro () {
 	     echo "[INFO] Patching $f"
 	     sed -i -e 's/PKGV_${PN} .*/PKGV_${PN} = "${QRL_ELT_VER_LIBC}"/' ${f}
       fi
-      
    )
 }
 
