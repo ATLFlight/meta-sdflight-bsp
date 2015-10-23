@@ -52,7 +52,7 @@ GCC_URL_4_7=https://launchpad.net/linaro-toolchain-binaries/trunk/2013.04/+downl
 
 # gcc4.8 version that works on Ubuntu 14.04
 GCC_4_8=gcc-linaro-arm-linux-gnueabihf-4.8-2013.08_linux
-GCC_URL_4_8=http://releases.linaro.org/13.08/components/toolchain/binaries
+GCC_URL_4_8=http://releases.linaro.org/archive/13.08/components/toolchain/binaries
 
 # We are now using gcc4.8
 GCC=${GCC_4_8}
