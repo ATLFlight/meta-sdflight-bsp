@@ -79,7 +79,10 @@ modify-meta-linaro () {
       git cherry-pick ${COMMIT_TO_PICK}
       touch ${QRL_BREAD_CRUMB}
       git add ${QRL_BREAD_CRUMB}
-      git commit -m "Add breadcrumb file"
+      # Modify recipe to download from archive
+      sed -i 's/org\/${MMYY}/org\/archive\/${MMYY}/g' meta-linaro-toolchain/recipes-devtools/gdb/gdb-linaro-7.6.1.inc
+      git add meta-linaro-toolchain/recipes-devtools/gdb/gdb-linaro-7.6.1.inc
+      git commit -m "QRL changes to meta-linaro"
       return
 
       # We also needed to modify the recipes themselves for the newer gcc4.8 (2014.04)
