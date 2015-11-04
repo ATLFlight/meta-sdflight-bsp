@@ -1,9 +1,5 @@
 # This file was derived from oe-core/meta-qr-linux/meta-som8064/recipes-kernel/linux/linux-qr-som8064.bb
 
-KTAG_${MACHINE} = "LNX.LA.3.5.2-09410-8x74.0"
-KBRANCH_${MACHINE} = "linux-${MACHINE}"
-KBRANCH_DEFAULT = "linux-${MACHINE}"
-
 require include/linux-caf.inc
 
 FILESPATH =+ "${WORKSPACE}:"
