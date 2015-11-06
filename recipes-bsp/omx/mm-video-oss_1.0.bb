@@ -28,6 +28,8 @@ INSANE_SKIP_${PN} = "dev-so"
 INSANE_SKIP_${PN} += "installed-vs-shipped"
 
 EXTRA_OECONF = "--with-sanitized-headers=${STAGING_INCDIR}/linux-headers/usr/include"
+CPPFLAGS_append += "-I${WORKSPACE}/hardware/qcom/display/libcopybit"
+CPPFLAGS_append += "-I${WORKSPACE}/hardware/qcom/display/libgralloc"
 
 do_install_append() {
     dest=/etc/udev/rules.d
