@@ -306,6 +306,7 @@ check_pkgs_schroot() {
 image_sudo() {
    cd ${LINARO_IMG_NAME}
    check_pkgs_sudo
+   ./configure
    set +e
    make
    set -e
@@ -318,6 +319,9 @@ image_schroot() {
    schroot=$1
    cd ${LINARO_IMG_NAME}
    check_pkgs_schroot ${schroot}
+   cmd="schroot -c ${schroot} -u root -p -d `pwd` -- ./configure"
+   bbnote "${cmd}"
+   eval ${cmd}
    cmd="schroot -c ${schroot} -u root -p -d `pwd` -- make"
    bbnote "${cmd}"
    eval ${cmd}
@@ -341,10 +345,6 @@ image_clean_schroot() {
 ######################################################################
 # Tasks
 ######################################################################
-do_configure() {
-   cd ${LINARO_IMG_NAME}
-   ./configure
-}
 
 do_image() {
    # Find the chroot name
@@ -355,14 +355,15 @@ do_image() {
    schroot=${rawName}
    if [ ${schroot} == "NO_CHROOT" ]
    then
+       bbnote "do_image using sudo-based method"
        image_sudo
    else
+       bbnote "do_image using schroot-based method"
        image_schroot ${schroot}
    fi
 }
 
 do_image_clean() {
-   bbwarn "===========in do_image_clean"
    cd ${LINARO_IMG_NAME}
    rawName=$(get_schroot_name)
    rawName=${rawName##*Found:}
