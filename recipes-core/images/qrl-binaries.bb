@@ -34,6 +34,7 @@ DEPENDS += " \
     signapk-java \
     live555 \
     libjpeg-turbo \
+    libopenh264 \
     frameworks-av \
     post-boot \
     qrl-scripts \
@@ -64,6 +65,7 @@ PKGLIST_OS = " \
     recovery-script \
     live555 \
     libjpeg-turbo \
+    libopenh264 \
     frameworks-av \
     post-boot \
     qrl-scripts \
@@ -105,6 +107,8 @@ copy_package() {
         foundPkg=true
         install -m 644 ${DEPLOY_DIR}/deb/${TUNE_ARCH}/${pkg}_*${DPKG_ARCH}.deb ${IMAGE_ROOTFS}/${dest}
     fi
+
+
 
     # Nothing found at all
     if ( ! $foundPkg ); then

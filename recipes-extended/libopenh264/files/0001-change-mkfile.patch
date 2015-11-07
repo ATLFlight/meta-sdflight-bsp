@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index 44d73f4..da008c7 100755
+--- a/Makefile
++++ b/Makefile
+@@ -8,7 +8,7 @@ vpath %.rc $(SRC_PATH)
+ vpath %.pc.in $(SRC_PATH)
+ 
+ OS=$(shell uname | tr A-Z a-z | tr -d \\-[:digit:]. | sed -E 's/^(net|open|free)bsd/bsd/')
+-ARCH=$(shell uname -m)
++ARCH=armv7l
+ LIBPREFIX=lib
+ LIBSUFFIX=a
+ CCAS=$(CC)
