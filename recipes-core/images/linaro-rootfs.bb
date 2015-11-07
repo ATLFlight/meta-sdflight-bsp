@@ -12,6 +12,7 @@ SRC_URI += "file://fstab"
 SRC_URI += "file://qrlConfig.conf"
 SRC_URI += "file://qrlNetwork.conf"
 SRC_URI += "file://interfaces"
+SRC_URI += "file://10-hook_config_syslog.chroot"
 
 SRCREV = "${AUTOREV}"
 LINARO_IMG_NAME = "trusty-armhf-developer"
@@ -69,11 +70,17 @@ PARTITION_USERDATA_SIZE = "8G"
 do_unpack_append() {
     import shutil
     import os
+    import glob
     s = d.getVar('S', True)
     wd = d.getVar('WORKDIR',True)
+    li = d.getVar('LINARO_IMG_NAME',True)
     if os.path.exists(s):
         shutil.rmtree(s)
     shutil.move(wd+'/git', s)
+    # Copy all the hook files 1*-hook*chroot to the customizations directory
+    for hook in glob.glob(wd+"/1*-hook*chroot"):
+        bb.note(hook)
+        shutil.copy(hook, s+'/'+li+'/customization/hooks')
 }
 
 create_image_sudo() {
