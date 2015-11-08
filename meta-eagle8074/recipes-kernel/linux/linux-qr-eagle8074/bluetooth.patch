@@ -1,8 +1,8 @@
 diff --git a/drivers/bluetooth/Kconfig b/drivers/bluetooth/Kconfig
-index 5ccf142..1d06844 100644
+index e9f203e..ef9080f 100644
 --- a/drivers/bluetooth/Kconfig
 +++ b/drivers/bluetooth/Kconfig
-@@ -104,6 +104,14 @@ config BT_HCIBPA10X
+@@ -116,6 +116,14 @@ config BT_HCIBPA10X
  	  Say Y here to compile support for HCI BPA10x devices into the
  	  kernel or say M to compile it as module (bpa10x).
  
@@ -17,7 +17,7 @@ index 5ccf142..1d06844 100644
  config BT_HCIBFUSB
  	tristate "HCI BlueFRITZ! USB driver"
  	depends on USB
-@@ -207,6 +215,14 @@ config BT_MRVL_SDIO
+@@ -219,6 +227,14 @@ config BT_MRVL_SDIO
  	  Say Y here to compile support for Marvell BT-over-SDIO driver
  	  into the kernel or say M to compile it as module.
  
@@ -33,25 +33,30 @@ index 5ccf142..1d06844 100644
  	tristate "Atheros firmware download driver"
  	depends on BT_HCIBTUSB
 diff --git a/drivers/bluetooth/Makefile b/drivers/bluetooth/Makefile
-index f4460f4..f1c2ae2 100644
+index 4afae20..a639a0e 100644
 --- a/drivers/bluetooth/Makefile
 +++ b/drivers/bluetooth/Makefile
-@@ -29,3 +29,6 @@ hci_uart-$(CONFIG_BT_HCIUART_BCSP)	+= hci_bcsp.o
- hci_uart-$(CONFIG_BT_HCIUART_LL)	+= hci_ll.o
+@@ -30,3 +30,6 @@ hci_uart-$(CONFIG_BT_HCIUART_LL)	+= hci_ll.o
  hci_uart-$(CONFIG_BT_HCIUART_ATH3K)	+= hci_ath.o
+ hci_uart-$(CONFIG_BT_HCIUART_3WIRE)	+= hci_h5.o
  hci_uart-objs				:= $(hci_uart-y)
 +obj-$(CONFIG_BT_MSM_SLEEP)              += msm_bt_sleep.o
 +msm_bt_sleep-objs                       := bluesleep.o
 +obj-$(CONFIG_MSM_BT_POWER)		+= bluetooth-power.o
-diff --git a/net/bluetooth/hci_event.c b/net/bluetooth/hci_event.c
-index 1e6347c..271cb1e 100644
---- a/net/bluetooth/hci_event.c
-+++ b/net/bluetooth/hci_event.c
-@@ -1645,6 +1645,7 @@ static void hci_cs_le_create_conn(struct hci_dev *hdev, __u8 status)
- 			if (conn) {
- 				conn->dst_type = cp->peer_addr_type;
- 				conn->out = true;
-+				conn->link_mode |= HCI_LM_MASTER;
- 			} else {
- 				BT_ERR("No memory for new connection");
- 			}
+\ No newline at end of file
+diff --git a/net/bluetooth/bnep/core.c b/net/bluetooth/bnep/core.c
+index 4a6620b..c265667 100644
+--- a/net/bluetooth/bnep/core.c
++++ b/net/bluetooth/bnep/core.c
+@@ -45,6 +45,11 @@ static bool compress_dst = true;
+ static LIST_HEAD(bnep_session_list);
+ static DECLARE_RWSEM(bnep_session_sem);
+ 
++static inline bool ether_addr_equal(const u8 *addr1, const u8 *addr2)
++{
++        return !compare_ether_addr(addr1, addr2);
++}
++
+ static struct bnep_session *__bnep_get_session(u8 *dst)
+ {
+ 	struct bnep_session *s;
