@@ -188,7 +188,7 @@ check_inst_pkg_sudo() {
    installCmd=''
    if [ "${dir}" == '' ]
    then
-       installCmd="sudo apt-get install ${pkg}"
+       installCmd="sudo apt-get install --no-upgrade ${pkg}"
    else
        installCmd="sudo /usr/bin/dpkg --admindir=/var/lib/dpkg --install ${dir}/${pkg}*"
    fi
@@ -292,12 +292,18 @@ check_inst_pkg_schroot() {
 }
    
 check_pkgs_sudo() {
+   set -x
+   check_inst_pkg_sudo 'debootstrap' '' ''
+   set +x
    check_inst_pkg_sudo 'live-build' '3.0.5-1linaro1' '../packages'
    check_inst_pkg_sudo 'qemu-user-static' '' '../packages'
 }
 
 check_pkgs_schroot() {
    schroot=$1
+   set -x
+   check_inst_pkg_schroot ${schroot} 'debootstrap' '' ''
+   set +x
    check_inst_pkg_schroot ${schroot} 'live-build' '3.0.5-1linaro1' '../packages'
    check_inst_pkg_schroot ${schroot} 'qemu-user-static' '1.3.0-2012.12-0ubuntu1~linaro1' '../packages'
    check_inst_pkg_schroot ${schroot} 'sudo' '' ''
