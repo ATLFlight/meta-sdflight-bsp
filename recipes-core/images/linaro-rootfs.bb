@@ -348,7 +348,7 @@ check_inst_debootstrap_sudo() {
    
 check_pkgs_sudo() {
    set -x
-   check_inst_debootstrap_sudo 'debootstrap' '1.0.40~ubuntu0.8' 'http://mirrors.kernel.org/ubuntu/pool/main/'
+   check_inst_debootstrap_sudo 'debootstrap' '1.0.40~ubuntu0.9' 'http://mirrors.kernel.org/ubuntu/pool/main/'
    set +x
    check_inst_pkg_sudo 'live-build' '3.0.5-1linaro1' '../packages'
    check_inst_pkg_sudo 'qemu-user-static' '' '../packages'
