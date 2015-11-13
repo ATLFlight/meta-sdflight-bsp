@@ -195,7 +195,7 @@ check_inst_pkg_sudo() {
    installCmd=''
    if [ "${dir}" == '' ]
    then
-       installCmd="sudo apt-get install --no-upgrade ${pkg}"
+       installCmd="sudo apt-get install --no-upgrade -y --allow-unauthenticated ${pkg}"
    else
        installCmd="sudo /usr/bin/dpkg --admindir=/var/lib/dpkg --install ${dir}/${pkg}*"
    fi
@@ -251,7 +251,7 @@ check_inst_pkg_schroot() {
    installCmd=''
    if [ "${dir}" == '' ]
    then
-       installCmd="schroot -c ${schroot} -u root -d `pwd` -- apt-get install ${pkg}"
+       installCmd="schroot -c ${schroot} -u root -d `pwd` -- apt-get install -y --allow-unauthenticated ${pkg}"
    else
        installCmd="schroot -c ${schroot} -u root -d `pwd` -- dpkg --install ${dir}/${pkg}*"
    fi
@@ -297,23 +297,73 @@ check_inst_pkg_schroot() {
    bbnote "Installing package using: ${installCmd}"
    eval ${installCmd}
 }
+
+check_inst_debootstrap_sudo() {
+   pkg=$1
+   ver=$2
+   dir=$3
+   installCmd=''
+
+   . /etc/lsb-release
+   if [ ${DISTRIB_CODENAME} == "precise" ]
+   then
+       # On precise, we will just download the right version of debootstrap and use dpkg --install
+       getCmd="wget --quiet ${dir}/d/${pkg}/${pkg}_${ver}_all.deb"
+       bbnote "On precise, getting debootstrap using: ${getCmd}"
+       eval ${getCmd}
+       installCmd="sudo /usr/bin/dpkg --admindir=/var/lib/dpkg --install ./${pkg}*"
+   else
+       # On others, we will use apt-get install
+       installCmd="sudo apt-get install -y --allow-unauthenticated ${pkg}"
+   fi
+   # We expect the following command to fail
+   set +e
+   instVer=$(/usr/bin/dpkg-query --show --showformat='${Version}' --admindir=/var/lib/dpkg ${pkg})
+   set -e
+
+   case "${instVer}" in
+       *${ver}*)
+           # Right version is intalled
+           return 0
+	   ;;
+       '')
+           # No version is intalled, so install the right version
+           # Don't return. Go on to install the package
+	   :
+	   ;;
+       *)
+           # Some other version is intalled. If on precise, that's a problem, else not
+           if [ ${DISTRIB_CODENAME} == "precise" ]
+	   then
+	       return 1
+	   else
+	       return 0
+	   fi
+           ;;
+   esac
+   bbnote "Installing package using: ${installCmd}"
+   set -e
+   eval ${installCmd}
+}
    
 check_pkgs_sudo() {
    set -x
-   check_inst_pkg_sudo 'debootstrap' '' ''
+   check_inst_debootstrap_sudo 'debootstrap' '1.0.40~ubuntu0.8' 'http://mirrors.kernel.org/ubuntu/pool/main/'
    set +x
    check_inst_pkg_sudo 'live-build' '3.0.5-1linaro1' '../packages'
    check_inst_pkg_sudo 'qemu-user-static' '' '../packages'
+   check_inst_pkg_sudo 'binfmt-support' '' ''
 }
 
 check_pkgs_schroot() {
    schroot=$1
    set -x
-   check_inst_pkg_schroot ${schroot} 'debootstrap' '' ''
+   check_inst_pkg_schroot 'debootstrap' '' ''
    set +x
    check_inst_pkg_schroot ${schroot} 'live-build' '3.0.5-1linaro1' '../packages'
    check_inst_pkg_schroot ${schroot} 'qemu-user-static' '1.3.0-2012.12-0ubuntu1~linaro1' '../packages'
    check_inst_pkg_schroot ${schroot} 'sudo' '' ''
+   check_inst_pkg_sudo 'binfmt-support' '' ''
 }
 
 image_sudo() {
