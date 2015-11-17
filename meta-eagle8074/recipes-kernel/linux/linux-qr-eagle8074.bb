@@ -29,24 +29,24 @@ PROVIDES += "kernel-module-cfg80211"
 
 python do_rem_old_linux () {
     import os
-    os.system("rm -rf %s/linux-v3.6.9" % d.getVar('DL_DIR', True))
+    os.system("rm -rf %s/linux-v4.2.6" % d.getVar('DL_DIR', True))
 }
 
 do_after_unpack() {
     rm -f ${WORKDIR}/bluetooth.patch.done
 }
 
-# Override BT kernel driver files with the ones from upstream kernel v3.6.9
+# Override BT kernel driver files with the ones from upstream kernel v4.2.6
 # in order to support the bluez BT protocol stack
 do_override_bluetooth_files() {
-    btsrc=${DL_DIR}/linux-v3.6.9
+    btsrc=${DL_DIR}/linux-v4.2.6
     btdst=${WORKDIR}/linux
 
-    # If the 3.6.9 kernel tree hasn't been cloned yet, do so now.
+    # If the 4.2.6 kernel tree hasn't been cloned yet, do so now.
     if [ ! -d ${btsrc} ]; then
-        git clone -b v3.6.9 --depth 1 git://codeaurora.org/quic/la/kernel/msm.git ${btsrc}
+        git clone -b v4.2.6 --depth 1 git://codeaurora.org/quic/la/kernel/msm.git ${btsrc}
         cd ${btsrc}
-        git checkout v3.6.9
+        git checkout v4.2.6
         cd -
     fi
 
