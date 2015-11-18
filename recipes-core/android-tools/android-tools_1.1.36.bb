@@ -18,7 +18,7 @@ DEPENDS += "openssl"
 DEPENDS += "zlib"
 DEPENDS += "libselinux"
 DEPENDS += "ext4-utils"
-DEPENDS_append_class-native = " pseudo-native"
+DEPENDS += "pseudo"
 
 PACKAGES = "${PN}"
 
