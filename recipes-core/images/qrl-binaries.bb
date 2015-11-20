@@ -75,7 +75,6 @@ PKGLIST_OS = " \
 "
 
 PKGLIST_KERNEL = " \
-    kernel-image-3.4.0-${MACHINE} \
     kernel-3.4.0-${MACHINE} \
     kernel-module-wlan \
     depmodwrapper-cross \
