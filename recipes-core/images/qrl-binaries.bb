@@ -229,7 +229,8 @@ S = "${WORKDIR}/build/"
 
 SRC_URI += "file://build/ \
     file://device/qcom/common/releasetools.py \
-    file://device/qcom/msm8974/radio/filesmap"
+    file://device/qcom/msm8974/radio/filesmap \
+    file://debiff"
 
 do_target_files() {
     target_files=${MACHINE}-target_files
