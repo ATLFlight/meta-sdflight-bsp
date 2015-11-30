@@ -45,9 +45,9 @@ do_override_bluetooth_files() {
     # If the 3.6.9 kernel tree hasn't been cloned yet, do so now.
     if [ ! -d ${btsrc} ]; then
         git clone -b v3.6.9 --depth 1 git://codeaurora.org/quic/la/kernel/msm.git ${btsrc}
-        pushd ${btsrc}
+        cd ${btsrc}
         git checkout v3.6.9
-        popd
+        cd -
     fi
 
     # If we haven't already replaced and patched the BT kernel driver
@@ -59,10 +59,10 @@ do_override_bluetooth_files() {
         /bin/cp -fr ${btsrc}/include/net/bluetooth/* ${btdst}/include/net/bluetooth
         /bin/cp -fr ${btsrc}/drivers/bluetooth/* ${btdst}/drivers/bluetooth
 
-        pushd ${btdst}
+        cd ${btdst}
         patch -p1 < ${WORKDIR}/bluetooth.patch
         touch ${WORKDIR}/bluetooth.patch.done
-        popd
+        cd -
     fi
 }
 
