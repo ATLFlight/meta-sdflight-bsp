@@ -17,23 +17,23 @@ inherit autotools
 # Need the kernel headers
 DEPENDS += "virtual/kernel"
 DEPENDS += "android-tools"
-DEPENDS += "mm-video-oss"
 DEPENDS += "libhardware-headers"
 DEPENDS += "libhardware"
 DEPENDS += "power-hal"
 DEPENDS += "system-headers"
 DEPENDS += "frameworks-headers"
 DEPENDS += "frameworks-av"
+DEPENDS += "mm-video-oss-headers"
 
 CFLAGS += "-I./mm-camera-interface"
 CFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include"
 CFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include/media"
-CFLAGS += "-I${STAGING_INCDIR}/mm-core"
-CFLAGS += "-I${STAGING_INCDIR}/omx/inc"
+CFLAGS += "-I${STAGING_INCDIR}/omx"
 
 CXXFLAGS += "-I${STAGING_INCDIR}/linux-headers/usr/include"
 CXXFLAGS += "-I${STAGING_INCDIR}/glib-2.0"
 CXXFLAGS += "-I${STAGING_LIBDIR}/glib-2.0/include"
+CXXFLAGS += "-I${STAGING_INCDIR}/omx"
 
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_INCDIR}/linux-headers/include"
 EXTRA_OECONF_append = " --enable-target=msm8974"

@@ -10,7 +10,7 @@ SRC_URI += "file://venus_v4l2.rules"
 
 PACKAGES = "${PN}"
 
-DEPENDS += "glib-2.0 android-tools virtual/kernel live555"
+DEPENDS += "glib-2.0 android-tools virtual/kernel live555 camera-hal"
 
 PR = "r1"
 
