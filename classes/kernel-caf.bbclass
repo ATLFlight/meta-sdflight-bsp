@@ -1,5 +1,8 @@
 inherit kernel-yocto
 
+# Do not package the kernel image in the rootfs
+RDEPENDS_kernel-base = ""
+
 # find the master/machine source tag. In the same way that the fetcher proceses
 # git repositories in the SRC_URI we take the first repo found, first tag.
 def get_machine_tag(d, default):
