@@ -140,6 +140,19 @@ copy_packages_aux() {
     mv qrlPackages_${type}.tgz ${DEPLOY_DIR_IMAGE}/out
 }
 
+# Parses the build version file to return the date and version of the
+# current build
+get_build_version() {
+    version_file=${COREBASE}/.qrlBuildVersion
+    if [ -f ${version_file} ]; then
+        build_date=`sed -n '2p' ${version_file}`
+        build_version=$(head -n 1 ${version_file})
+        return 0
+    else
+        return -1
+    fi
+}
+
 # System image is created by taking all the qrlPackage*tgz files from the out directory,
 # untarring them in system_rootfs directory, and then creating an image out of it,
 # placing it in the out dir. It contains all the QRL packages we need to install on
@@ -153,14 +166,7 @@ create_system_image() {
     done
 
     # Create build.prop based on .qrlBuildVersion
-    version_file=${COREBASE}/.qrlBuildVersion
-    if [ -f ${version_file} ]; then
-        build_date=`sed -n '2p' ${version_file}`
-        build_version=$(head -n 1 ${version_file})
-    else
-        build_date=`date +"%Y-%m-%d %H:%M:%S"`
-        build_version=${MACHINE}-`date +%F-%H%M%S`
-    fi
+    get_build_version
     build_utc=`date -d "${build_date}" +%s`
     manufacturer="qcom"
     fingerprint="${manufacturer}/${MACHINE}/${build_version}/${build_date}"
@@ -299,6 +305,10 @@ target_files_extension() {
 
 do_update_package() {
     set -x
+    get_build_version
+    if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip
+    fi
     if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip ]; then
         rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip
     fi
@@ -307,7 +317,56 @@ do_update_package() {
         -p ${STAGING_BINDIR_NATIVE} \
         --signapk_path signapk.jar -k ${PRODUCT_KEY} \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
-        ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota.zip
+        ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${build_version}-ota.zip
+    ln -s ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip
+
+    set +x
+}
+
+# This task needs to be run by itself from the shell.
+# It requires the OLD_LOCATION env variable, bitbake needs to accept it:
+# export BB_ENV_EXTRAWHITE="$BB_ENV_EXTRAWHITE OLD_LOCATION UPDATE_RECOVERY_FIRST"
+# If the UPDATE_RECOVERY_FIRST env variable is set to 1 then the 2 step option
+# will be used which will force the recovery partition to be updated before 
+# the rest of the incremental update. This is required for devices which have
+# never before done an incremental update. After a device has done at least one
+# incremental update, then this option is no longer necessary
+# OLD_LOCATION=/path/to/old/target_files bitbake -c incremental_update_package qrl-binaries
+do_incremental_update_package() {
+    # Install debiff
+    install -m 0755 ${WORKDIR}/debiff ${STAGING_BINDIR_NATIVE}/debiff
+    set -x
+    # Get the old build version
+    old_version=`unzip -p ${OLD_LOCATION}/${MACHINE}-target_files.zip \
+        SYSTEM/build.prop | head -1 | cut -d"=" -f2`
+    # Get the new build version
+    get_build_version
+    if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-${old_version}-${build_version}-ota.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-${old_version}-${build_version}-ota.zip
+    fi
+    if [ -f ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota-incr.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota-incr.zip
+    fi
+    if [ ${UPDATE_RECOVERY_FIRST} -eq 1 ]; then
+        ${WORKDIR}/build/tools/releasetools/ota_from_target_files -2 \
+            -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py -v \
+            -p ${STAGING_BINDIR_NATIVE} \
+            --signapk_path signapk.jar -k ${PRODUCT_KEY} \
+            -i ${OLD_LOCATION}/${MACHINE}-target_files.zip \
+            ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
+            ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip
+    else
+        ${WORKDIR}/build/tools/releasetools/ota_from_target_files \
+            -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py -v \
+            -p ${STAGING_BINDIR_NATIVE} \
+            --signapk_path signapk.jar -k ${PRODUCT_KEY} \
+            -i ${OLD_LOCATION}/${MACHINE}-target_files.zip \
+            ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
+            ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip
+    fi
+    ln -s ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip \
+          ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota-incr.zip
+
     set +x
 }
 
@@ -346,3 +405,4 @@ addtask image after do_build
 addtask target_files after do_image
 addtask update_package after do_target_files
 addtask factory_image after do_update_package
+addtask incremental_update_package after do_target_files
