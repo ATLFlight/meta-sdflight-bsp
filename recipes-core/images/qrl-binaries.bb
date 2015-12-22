@@ -44,6 +44,8 @@ DEPENDS += " \
     libhardware \
     power-hal \
     xz \
+    libqmi \
+    openvpn \
 "
 
 PKGLIST_OS = " \
@@ -76,6 +78,10 @@ PKGLIST_OS = " \
     libhardware \
     power-hal \
     xz \
+    libqmi \
+    openvpn \
+    libselinux0 \
+    libpcre1 \
 "
 
 PKGLIST_KERNEL = " \
