@@ -1,0 +1,39 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          ueventd
+# Required-Start:
+# Required-Stop:
+# Default-Start:     S
+# Default-Stop:
+# Short-Description:
+# Description:
+### END INIT INFO
+
+
+#[ -f /etc/default/rcS ] && . /etc/default/rcS
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+PROGRAM=/usr/bin/ueventd
+
+test -x $PROGRAM || exit 0
+
+case "$1" in
+  start)
+    echo -n "Starting ueventd: "
+	start-stop-daemon -S --exec /usr/bin/ueventd  -b ueventd
+	;;
+  stop)
+    echo -n "Stopping ueventd: "
+	echo "" > /sys/class/android_usb/f_mass_storage/lun/file
+	start-stop-daemon -K -n ueventd
+	;;
+  restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	echo "Usage adbd { start | stop | restart}" >&2
+	exit 1
+esac
+
+exit 0
