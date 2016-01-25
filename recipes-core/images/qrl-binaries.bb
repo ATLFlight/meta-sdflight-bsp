@@ -28,6 +28,7 @@ DEPENDS += " \
     dnsmasq \
     setup-softap \
     sdcard-automount \
+    ueventd \
     recovery \
     recovery-image \
     recovery-script \
@@ -62,6 +63,7 @@ PKGLIST_OS = " \
     dnsmasq \
     setup-softap \
     sdcard-automount \
+    ueventd \
     recovery-script \
     live555 \
     libjpeg-turbo \
