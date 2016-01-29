@@ -15,7 +15,7 @@ SRC_URI += "http://releases.linaro.org/14.09/ubuntu/ifc6410/initrd.img-3.4.0-lin
 SRC_URI[initrd.md5sum] = "d92fb01531698e30615f26efa2999c6c"
 SRC_URI[initrd.sha256sum] = "d177ba515258df5fda6d34043261d694026c9e27f1ef8ec16674fa479c5b47fb"
 
-DEPENDS += "virtual/kernel recovery dumpkey-java"
+DEPENDS += "virtual/kernel recovery dumpkey-java dpkg xz reboot2fastboot"
 
 inherit base
 
@@ -36,6 +36,8 @@ copy_libraries() {
     install -m 644 ${STAGING_LIBDIR}/libselinux.so.0.0.0 ${initrd_libdir}
     install -m 644 ${STAGING_LIBDIR}/libpcre.so.1.2.2 ${initrd_libdir}
     install -m 644 ${STAGING_LIBDIR}/libbz2.so.0.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/liblzma.so.5.0.99 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libdl-2.17-2013.07-2.so ${initrd_libdir}
 
     # Strip libraries
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libstdc++.so.6.0.18
@@ -45,6 +47,8 @@ copy_libraries() {
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libselinux.so.0.0.0
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libpcre.so.1.2.2
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libbz2.so.0.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libdl-2.17-2013.07-2.so
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/liblzma.so.5.0.99
 
     # Create symlinks
     cd ${initrd_libdir}
@@ -54,7 +58,22 @@ copy_libraries() {
     ln -sf libselinux.so.0.0.0 libselinux.so.0
     ln -sf libpcre.so.1.2.2 libpcre.so.1
     ln -sf libbz2.so.0.0.0 libbz2.so.0
+    ln -sf liblzma.so.5.0.99 liblzma.so.5
+    ln -sf liblzma.so.5.0.99 liblzma.so
+    ln -sf libdl-2.17-2013.07-2.so libdl.so.2
     cd -
+}
+
+copy_binaries() {
+    initrd_bindir=${WORKDIR}/initrd/bin
+
+    install -m 0755 ${STAGING_BINDIR}/dpkg-deb ${initrd_bindir}
+    install -m 0755 ${STAGING_DIR}/${MACHINE}/linaro-rootfs/usr/bin/xz ${initrd_bindir}
+    install -m 0755 ${STAGING_BINDIR}/reboot2fastboot ${initrd_bindir}
+
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/dpkg-deb
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/xz
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/reboot2fastboot
 }
 
 do_compile() {
@@ -72,6 +91,8 @@ do_compile() {
 
     # Copy libraries for recovery
     copy_libraries
+    # Copy binaries for recovery
+    copy_binaries
 
     # Create build.prop only with machine name
     echo "ro.product.device=${MACHINE}" > ${WORKDIR}/initrd/build.prop

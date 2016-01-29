@@ -43,6 +43,7 @@ DEPENDS += " \
     ath3k-bluez \
     libhardware \
     power-hal \
+    xz \
 "
 
 PKGLIST_OS = " \
@@ -74,6 +75,7 @@ PKGLIST_OS = " \
     ath3k-bluez \
     libhardware \
     power-hal \
+    xz \
 "
 
 PKGLIST_KERNEL = " \
