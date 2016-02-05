@@ -34,6 +34,14 @@ FILES_${PN} = "	\
 
 do_compile_prepend() {
     export BUILD_ATH6KL_VER_35=1
+    #select wifi module based on the value set in local.conf
+    if [ ${WIFI_MODULE} == "qca6234" ]; then
+	export BUILD_ATH6KL_VER_35_SDIO=1
+    elif [ ${WIFI_MODULE} == "qca9375" ]; then
+	export BUILD_ATH6KL_VER_35_USB=1
+    else
+	export BUILD_ATH6KL_VER_35_SDIO=1
+    fi
     export HAVE_CFG80211_KERNEL3_4=1
 }
 
