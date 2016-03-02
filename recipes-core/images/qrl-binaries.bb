@@ -308,11 +308,11 @@ target_files_extension() {
 do_update_package() {
     set -x
     get_build_version
-    if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip ]; then
-        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip
+    if [ -f ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota.zip
     fi
-    if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip ]; then
-        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip
+    if [ -f ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${build_version}-ota.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${build_version}-ota.zip
     fi
     ${WORKDIR}/build/tools/releasetools/ota_from_target_files \
         -n -d MMC -s ${WORKDIR}/device/qcom/common/releasetools.py -v \
@@ -320,7 +320,10 @@ do_update_package() {
         --signapk_path signapk.jar -k ${PRODUCT_KEY} \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
         ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${build_version}-ota.zip
-    ln -s ${DEPLOY_DIR_IMAGE}/${MACHINE}-${build_version}-ota.zip ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota.zip
+
+    cd ${DEPLOY_DIR_IMAGE}/out/
+    ln -s ${MACHINE}-${build_version}-ota.zip ${MACHINE}-ota.zip
+    cd -
 
     set +x
 }
@@ -343,11 +346,11 @@ do_incremental_update_package() {
         SYSTEM/build.prop | head -1 | cut -d"=" -f2`
     # Get the new build version
     get_build_version
-    if [ -f ${DEPLOY_DIR_IMAGE}/${MACHINE}-${old_version}-${build_version}-ota.zip ]; then
-        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-${old_version}-${build_version}-ota.zip
-    fi
     if [ -f ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota-incr.zip ]; then
-        rm ${DEPLOY_DIR_IMAGE}/${MACHINE}-ota-incr.zip
+        rm ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota-incr.zip
+    fi
+    if [ -f ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip ]; then
+        rm ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip
     fi
     if [ ${UPDATE_RECOVERY_FIRST} -eq 1 ]; then
         ${WORKDIR}/build/tools/releasetools/ota_from_target_files -2 \
@@ -366,8 +369,10 @@ do_incremental_update_package() {
             ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-target_files.zip \
             ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip
     fi
-    ln -s ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-${old_version}-${build_version}-ota.zip \
-          ${DEPLOY_DIR_IMAGE}/out/${MACHINE}-ota-incr.zip
+
+    cd ${DEPLOY_DIR_IMAGE}/out/
+    ln -s ${MACHINE}-${old_version}-${build_version}-ota.zip ${MACHINE}-ota-incr.zip
+    cd -
 
     set +x
 }
