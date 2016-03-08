@@ -50,7 +50,7 @@ QRL_SDK_TARBALL_NAME ?= "qrlSDK.tgz"
 # The name used for the sysroots tarball
 QRL_SDK_SYSROOTS_TARBALL_NAME ?= "qrlSysroots.tgz"
 
-QRL_GCC_URL ?= "http://releases.linaro.org/archive/13.08/components/toolchain/binaries"
+QRL_GCC_URL ?= "https://releases.linaro.org/archive/13.08/components/toolchain/binaries"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 

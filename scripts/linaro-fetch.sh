@@ -52,7 +52,7 @@ GCC_URL_4_7=https://launchpad.net/linaro-toolchain-binaries/trunk/2013.04/+downl
 
 # gcc4.8 version that works on Ubuntu 14.04
 GCC_4_8=gcc-linaro-arm-linux-gnueabihf-4.8-2013.08_linux
-GCC_URL_4_8=http://releases.linaro.org/archive/13.08/components/toolchain/binaries
+GCC_URL_4_8=https://releases.linaro.org/archive/13.08/components/toolchain/binaries
 
 # We are now using gcc4.8
 GCC=${GCC_4_8}
@@ -82,6 +82,10 @@ modify-meta-linaro () {
       # Modify recipe to download from archive
       sed -i 's/org\/${MMYY}/org\/archive\/${MMYY}/g' meta-linaro-toolchain/recipes-devtools/gdb/gdb-linaro-7.6.1.inc
       git add meta-linaro-toolchain/recipes-devtools/gdb/gdb-linaro-7.6.1.inc
+      sed -i 's/http/https/g' meta-linaro-toolchain/recipes-devtools/binutils/binutils-linaro-2.24.inc
+      sed -i 's/http/https/g' meta-linaro/recipes-extra/powerdebug/powerdebug_0.7.1.bb
+      git add meta-linaro-toolchain/recipes-devtools/binutils/binutils-linaro-2.24.inc
+      git add meta-linaro/recipes-extra/powerdebug/powerdebug_0.7.1.bb
       git commit -m "QRL changes to meta-linaro"
       return
 
