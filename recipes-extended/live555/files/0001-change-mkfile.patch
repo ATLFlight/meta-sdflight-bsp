@@ -1,18 +1,18 @@
-From 406eb26e028453da3dc05e9a9948eadb83d43976 Mon Sep 17 00:00:00 2001
-From: "U-AP\\xiaoyiz" <xiaoyiz@codeaurora.org>
-Date: Fri, 24 Jul 2015 18:32:09 +0800
-Subject: [PATCH] first try
+From ac4235c8bebbfc361b5b8f773228aec8058c18a7 Mon Sep 17 00:00:00 2001
+From: huimiaol <huimiaol@codeaurora.org>
+Date: Tue, 15 Mar 2016 13:23:47 +0800
+Subject: [PATCH] change mkfile
 
 ---
- BasicUsageEnvironment/Makefile.tail |    4 ++--
- UsageEnvironment/Makefile.tail      |    4 ++--
- config.linux-with-shared-libraries  |   12 ++++++------
- groupsock/Makefile.tail             |    4 ++--
- liveMedia/Makefile.tail             |    4 ++--
- 5 files changed, 14 insertions(+), 14 deletions(-)
+ BasicUsageEnvironment/Makefile.tail |  4 ++--
+ UsageEnvironment/Makefile.tail      |  4 ++--
+ config.linux-with-shared-libraries  | 14 +++++++-------
+ groupsock/Makefile.tail             |  4 ++--
+ liveMedia/Makefile.tail             |  4 ++--
+ 5 files changed, 15 insertions(+), 15 deletions(-)
 
 diff --git a/BasicUsageEnvironment/Makefile.tail b/BasicUsageEnvironment/Makefile.tail
-index 9b2f6dc..3ae1ce1 100755
+index 9b2f6dc..3ae1ce1 100644
 --- a/BasicUsageEnvironment/Makefile.tail
 +++ b/BasicUsageEnvironment/Makefile.tail
 @@ -13,10 +13,10 @@ libBasicUsageEnvironment.$(LIB_SUFFIX): $(OBJS)
@@ -29,7 +29,7 @@ index 9b2f6dc..3ae1ce1 100755
  
  BasicUsageEnvironment0.$(CPP):	include/BasicUsageEnvironment0.hh
 diff --git a/UsageEnvironment/Makefile.tail b/UsageEnvironment/Makefile.tail
-index a7c23df..78fcb02 100755
+index a7c23df..78fcb02 100644
 --- a/UsageEnvironment/Makefile.tail
 +++ b/UsageEnvironment/Makefile.tail
 @@ -10,10 +10,10 @@ OBJS = UsageEnvironment.$(OBJ) HashTable.$(OBJ) strDup.$(OBJ)
@@ -46,15 +46,17 @@ index a7c23df..78fcb02 100755
  
  UsageEnvironment.$(CPP):	include/UsageEnvironment.hh
 diff --git a/config.linux-with-shared-libraries b/config.linux-with-shared-libraries
-index 34c76e9..c97ed95 100755
+index 474ef6a..1d12a6f 100644
 --- a/config.linux-with-shared-libraries
 +++ b/config.linux-with-shared-libraries
-@@ -25,17 +25,17 @@ libgroupsock_LIB_SUFFIX=so.$(shell expr $(libgroupsock_VERSION_CURRENT) - $(libg
+@@ -24,18 +24,18 @@ libgroupsock_VERSION_AGE=0
+ libgroupsock_LIB_SUFFIX=so.$(shell expr $(libgroupsock_VERSION_CURRENT) - $(libgroupsock_VERSION_AGE)).$(libgroupsock_VERSION_AGE).$(libgroupsock_VERSION_REVISION)
  #####
  
- COMPILE_OPTS =		$(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -fPIC
+-COMPILE_OPTS =		$(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -fPIC
 -C =			c
 -C_COMPILER =		cc
++COMPILE_OPTS =		$(INCLUDES) -I. -O2 -DSOCKLEN_T=socklen_t -D_LARGEFILE_SOURCE=1 -D_FILE_OFFSET_BITS=64 -DALLOW_SERVER_PORT_REUSE -fPIC
 +CFILE =			c
 +C_COMPILER =		$(CC)
  C_FLAGS =		$(COMPILE_OPTS) $(CPPFLAGS) $(CFLAGS)
@@ -74,7 +76,7 @@ index 34c76e9..c97ed95 100755
  LIB_SUFFIX =	 	$(SHORT_LIB_SUFFIX).$($(NAME)_VERSION_AGE).$($(NAME)_VERSION_REVISION)
  LIBRARY_LINK_OPTS =	-shared -Wl,-soname,$(NAME).$(SHORT_LIB_SUFFIX) $(LDFLAGS)
 diff --git a/groupsock/Makefile.tail b/groupsock/Makefile.tail
-index 89a8593..4c71a9a 100755
+index 89a8593..4c71a9a 100644
 --- a/groupsock/Makefile.tail
 +++ b/groupsock/Makefile.tail
 @@ -4,9 +4,9 @@ NAME = libgroupsock
@@ -90,7 +92,7 @@ index 89a8593..4c71a9a 100755
  
  GROUPSOCK_LIB_OBJS = GroupsockHelper.$(OBJ) GroupEId.$(OBJ) inet.$(OBJ) Groupsock.$(OBJ) NetInterface.$(OBJ) NetAddress.$(OBJ) IOHandlers.$(OBJ)
 diff --git a/liveMedia/Makefile.tail b/liveMedia/Makefile.tail
-index bdd3632..283848f 100755
+index 82568eb..fc809c8 100644
 --- a/liveMedia/Makefile.tail
 +++ b/liveMedia/Makefile.tail
 @@ -5,9 +5,9 @@ LIVEMEDIA_LIB = $(NAME).$(LIB_SUFFIX)
@@ -106,5 +108,5 @@ index bdd3632..283848f 100755
  
  MP3_SOURCE_OBJS = MP3FileSource.$(OBJ) MP3Transcoder.$(OBJ) MP3ADU.$(OBJ) MP3ADUdescriptor.$(OBJ) MP3ADUinterleaving.$(OBJ) MP3ADUTranscoder.$(OBJ) MP3StreamState.$(OBJ) MP3Internals.$(OBJ) MP3InternalsHuffman.$(OBJ) MP3InternalsHuffmanTable.$(OBJ) MP3ADURTPSource.$(OBJ)
 -- 
-1.7.9
+1.8.2.1
 
