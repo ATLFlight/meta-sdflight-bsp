@@ -5,6 +5,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=68ad62c64cc6c620126241fd429e68fe"
 SRC_URI = "git://github.com/hackeron/live555"
 SRCREV = "35c375c6b15403869a27047f67a0d2d4fd0a16e2"
 SRC_URI += "file://0001-change-mkfile.patch"
+SRC_URI += "file://0001-live555-Move-method-bodies-out-of-MPEGVideoStreamPar.patch"
 PV = "1.0"
 PR = "r0"
 

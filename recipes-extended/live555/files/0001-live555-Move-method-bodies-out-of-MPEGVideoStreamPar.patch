@@ -1,0 +1,171 @@
+From 84355a46c939863f226a78b1908c375ca61ae3f4 Mon Sep 17 00:00:00 2001
+From: Emilian Peev <epeevs@codeaurora.org>
+Date: Mon, 15 Feb 2016 09:46:47 +0200
+Subject: [PATCH] live555: Move method bodies out of MPEGVideoStreamParser.hh
+
+Change-Id: Iddcec68f917f88d3837596625b8816e8b7f6bd15
+---
+ liveMedia/MPEGVideoStreamParser.cpp | 63 +++++++++++++++++++++++++++++++++++++
+ liveMedia/MPEGVideoStreamParser.hh  | 59 +++++-----------------------------
+ 2 files changed, 70 insertions(+), 52 deletions(-)
+
+diff --git a/liveMedia/MPEGVideoStreamParser.cpp b/liveMedia/MPEGVideoStreamParser.cpp
+index 15c7d7d..ffc11e5 100644
+--- a/liveMedia/MPEGVideoStreamParser.cpp
++++ b/liveMedia/MPEGVideoStreamParser.cpp
+@@ -43,3 +43,66 @@ void MPEGVideoStreamParser::registerReadInterest(unsigned char* to,
+   fLimit = to + maxSize;
+   fNumTruncatedBytes = fSavedNumTruncatedBytes = 0;
+ }
++
++void MPEGVideoStreamParser::setParseState() {
++  fSavedTo = fTo;
++  fSavedNumTruncatedBytes = fNumTruncatedBytes;
++  saveParserState();
++}
++
++void MPEGVideoStreamParser::saveByte(u_int8_t byte) {
++  if (fTo >= fLimit) { // there's no space left
++    ++fNumTruncatedBytes;
++    return;
++  }
++
++  *fTo++ = byte;
++}
++
++void MPEGVideoStreamParser::save4Bytes(u_int32_t word) {
++  if (fTo+4 > fLimit) { // there's no space left
++    fNumTruncatedBytes += 4;
++    return;
++  }
++
++  *fTo++ = word>>24; *fTo++ = word>>16; *fTo++ = word>>8; *fTo++ = word;
++}
++
++void MPEGVideoStreamParser::saveToNextCode(u_int32_t& curWord) {
++  saveByte(curWord>>24);
++  curWord = (curWord<<8)|get1Byte();
++  while ((curWord&0xFFFFFF00) != 0x00000100) {
++    if ((unsigned)(curWord&0xFF) > 1) {
++  // a sync word definitely doesn't begin anywhere in "curWord"
++  save4Bytes(curWord);
++  curWord = get4Bytes();
++    } else {
++  // a sync word might begin in "curWord", although not at its start
++  saveByte(curWord>>24);
++  unsigned char newByte = get1Byte();
++  curWord = (curWord<<8)|newByte;
++    }
++  }
++}
++
++void MPEGVideoStreamParser::skipToNextCode(u_int32_t& curWord) {
++  curWord = (curWord<<8)|get1Byte();
++  while ((curWord&0xFFFFFF00) != 0x00000100) {
++    if ((unsigned)(curWord&0xFF) > 1) {
++  // a sync word definitely doesn't begin anywhere in "curWord"
++  curWord = get4Bytes();
++    } else {
++  // a sync word might begin in "curWord", although not at its start
++  unsigned char newByte = get1Byte();
++  curWord = (curWord<<8)|newByte;
++    }
++  }
++}
++
++unsigned MPEGVideoStreamParser::curFrameSize() {
++  return fTo - fStartOfFrame;
++}
++
++unsigned MPEGVideoStreamParser::numTruncatedBytes() const {
++  return fNumTruncatedBytes;
++}
+diff --git a/liveMedia/MPEGVideoStreamParser.hh b/liveMedia/MPEGVideoStreamParser.hh
+index 0eee206..522fb67 100644
+--- a/liveMedia/MPEGVideoStreamParser.hh
++++ b/liveMedia/MPEGVideoStreamParser.hh
+@@ -42,66 +42,21 @@ public:
+   virtual unsigned parse() = 0;
+       // returns the size of the frame that was acquired, or 0 if none was
+       // The number of truncated bytes (if any) is given by:
+-  unsigned numTruncatedBytes() const { return fNumTruncatedBytes; }
++  unsigned numTruncatedBytes() const;
+ 
+ protected:
+-  void setParseState() {
+-    fSavedTo = fTo;
+-    fSavedNumTruncatedBytes = fNumTruncatedBytes;
+-    saveParserState();
+-  }
++  void setParseState();
+ 
+   // Record "byte" in the current output frame:
+-  void saveByte(u_int8_t byte) {
+-    if (fTo >= fLimit) { // there's no space left
+-      ++fNumTruncatedBytes;
+-      return;
+-    }
++  void saveByte(u_int8_t byte);
+ 
+-    *fTo++ = byte;
+-  }
+-
+-  void save4Bytes(u_int32_t word) {
+-    if (fTo+4 > fLimit) { // there's no space left
+-      fNumTruncatedBytes += 4;
+-      return;
+-    }
+-
+-    *fTo++ = word>>24; *fTo++ = word>>16; *fTo++ = word>>8; *fTo++ = word;
+-  }
++  void save4Bytes(u_int32_t word);
+ 
+   // Save data until we see a sync word (0x000001xx):
+-  void saveToNextCode(u_int32_t& curWord) {
+-    saveByte(curWord>>24);
+-    curWord = (curWord<<8)|get1Byte();
+-    while ((curWord&0xFFFFFF00) != 0x00000100) {
+-      if ((unsigned)(curWord&0xFF) > 1) {
+-	// a sync word definitely doesn't begin anywhere in "curWord"
+-	save4Bytes(curWord);
+-	curWord = get4Bytes();
+-      } else {
+-	// a sync word might begin in "curWord", although not at its start
+-	saveByte(curWord>>24);
+-	unsigned char newByte = get1Byte();
+-	curWord = (curWord<<8)|newByte;
+-      }
+-    }
+-  }
++  void saveToNextCode(u_int32_t& curWord);
+ 
+   // Skip data until we see a sync word (0x000001xx):
+-  void skipToNextCode(u_int32_t& curWord) {
+-    curWord = (curWord<<8)|get1Byte();
+-    while ((curWord&0xFFFFFF00) != 0x00000100) {
+-      if ((unsigned)(curWord&0xFF) > 1) {
+-	// a sync word definitely doesn't begin anywhere in "curWord"
+-	curWord = get4Bytes();
+-      } else {
+-	// a sync word might begin in "curWord", although not at its start
+-	unsigned char newByte = get1Byte();
+-	curWord = (curWord<<8)|newByte;
+-      }
+-    }
+-  }
++  void skipToNextCode(u_int32_t& curWord);
+ 
+ protected:
+   MPEGVideoStreamFramer* fUsingSource;
+@@ -111,7 +66,7 @@ protected:
+   unsigned char* fTo;
+   unsigned char* fLimit;
+   unsigned fNumTruncatedBytes;
+-  unsigned curFrameSize() { return fTo - fStartOfFrame; }
++  unsigned curFrameSize();
+   unsigned char* fSavedTo;
+   unsigned fSavedNumTruncatedBytes;
+ 
+-- 
+2.7.4
+
