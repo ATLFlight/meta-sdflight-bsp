@@ -27,6 +27,7 @@ do_unpack_append() {
     ws = d.getVar('WORKSPACE',True)
     s = d.getVar('S',True)
     old = ws+'/device/qcom/common/recovery/oem-recovery'
+    shutil.rmtree(s+'/oem-recovery', ignore_errors=True)
     shutil.copytree(old, s+'/oem-recovery')
 }
 
