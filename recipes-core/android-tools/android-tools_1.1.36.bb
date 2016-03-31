@@ -30,8 +30,7 @@ S = "${WORKDIR}/system/core"
 SRC_URI = "file://system/core/"
 SRC_URI_append_arm = " file://adb.conf"
 
-EXTRA_OECONF_arm = "--disable-shared \
-    --with-host-os=${HOST_OS} \
+EXTRA_OECONF_arm = "--with-host-os=${HOST_OS} \
     --with-sanitized-headers=${STAGING_INCDIR}/linux-headers/usr/include"
 
 INSANE_SKIP_${PN} = "installed-vs-shipped"
