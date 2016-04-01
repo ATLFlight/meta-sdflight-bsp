@@ -38,6 +38,8 @@ copy_libraries() {
     install -m 644 ${STAGING_LIBDIR}/libbz2.so.0.0.0 ${initrd_libdir}
     install -m 644 ${STAGING_LIBDIR}/liblzma.so.5.0.99 ${initrd_libdir}
     install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libdl-2.17-2013.07-2.so ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/libcutils.so.0.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_LIBDIR}/liblog.so.0.0.0 ${initrd_libdir}
 
     # Strip libraries
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libstdc++.so.6.0.18
@@ -49,6 +51,8 @@ copy_libraries() {
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libbz2.so.0.0.0
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libdl-2.17-2013.07-2.so
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/liblzma.so.5.0.99
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libcutils.so.0.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/liblog.so.0.0.0
 
     # Create symlinks
     cd ${initrd_libdir}
@@ -61,6 +65,8 @@ copy_libraries() {
     ln -sf liblzma.so.5.0.99 liblzma.so.5
     ln -sf liblzma.so.5.0.99 liblzma.so
     ln -sf libdl-2.17-2013.07-2.so libdl.so.2
+    ln -sf libcutils.so.0.0.0 libcutils.so.0
+    ln -sf liblog.so.0.0.0 liblog.so.0
     cd -
 }
 
