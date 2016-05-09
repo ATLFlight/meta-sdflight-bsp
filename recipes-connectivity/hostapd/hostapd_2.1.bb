@@ -80,7 +80,8 @@ do_install() {
     install -m 755 ${S}/hostapd/hostapd_cli                  ${D}${sbindir}
     install -m 644 ${S}/hostapd/hostapd.conf                 ${D}${sysconfdir}/hostapd.conf.template
     install -m 644 ${DL_DIR}/hostapd.default                 ${D}${sysconfdir}/default/hostapd
-    install -m 755 ${DL_DIR}/hostapd.ifupdown                ${D}${sysconfdir}/hostapd/ifupdown.sh
+    sed -n "/HOSTAPD_CONF$/" | sed "s/HOSTAPD_CONF/HOSTAPD_CONF -e entropy.dat/g" ${DL_DIR}/hostapd.ifupdown > ${DL_DIR}/hostapd.ifupdown.tmp 
+    install -m 755 ${DL_DIR}/hostapd.ifupdown.tmp                ${D}${sysconfdir}/hostapd/ifupdown.sh
     install -m 755 ${DL_DIR}/hostapd.init                    ${D}${sysconfdir}/init.d/hostapd
 }
 
