@@ -9,6 +9,7 @@ FILESPATH =+ "${WORKSPACE}:"
 
 SRC_URI += "file://build/ \
     file://init \
+    file://init_adbd \
     file://recovery.fstab"
 
 SRC_URI += "https://releases.linaro.org/14.09/ubuntu/ifc6410/initrd.img-3.4.0-linaro-ifc6410;downloadfilename=initrd.img;name=initrd"
@@ -16,6 +17,7 @@ SRC_URI[initrd.md5sum] = "d92fb01531698e30615f26efa2999c6c"
 SRC_URI[initrd.sha256sum] = "d177ba515258df5fda6d34043261d694026c9e27f1ef8ec16674fa479c5b47fb"
 
 DEPENDS += "virtual/kernel recovery dumpkey-java dpkg xz reboot2fastboot"
+DEPENDS += "android-tools"
 
 inherit base
 
@@ -31,6 +33,12 @@ copy_libraries() {
     # Install libraries
     install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libstdc++.so.6.0.18 ${initrd_libdir}
     install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libm-2.17-2013.07-2.so ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libresolv.so.2 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/usr/lib/libssl.so.1.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libcrypto.so.1.0.0 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/usr/lib/libgthread-2.0.so.0 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/usr/lib/libglib-2.0.so.0 ${initrd_libdir}
+    install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libtinfo.so.5 ${initrd_libdir}
     install -m 644 ${STAGING_DIR}/${MACHINE}/lib/libgcc_s.so.1 ${initrd_libdir}
     install -m 644 ${STAGING_LIBDIR}/libsparse.so.0.0.0 ${initrd_libdir}
     install -m 644 ${STAGING_LIBDIR}/libselinux.so.0.0.0 ${initrd_libdir}
@@ -51,6 +59,12 @@ copy_libraries() {
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libbz2.so.0.0.0
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libdl-2.17-2013.07-2.so
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/liblzma.so.5.0.99
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libresolv.so.2
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libssl.so.1.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libcrypto.so.1.0.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libgthread-2.0.so.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libglib-2.0.so.0
+    arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libtinfo.so.5
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/libcutils.so.0.0.0
     arm-linux-gnueabihf-strip --strip-all ${initrd_libdir}/liblog.so.0.0.0
 
@@ -66,6 +80,12 @@ copy_libraries() {
     ln -sf liblzma.so.5.0.99 liblzma.so
     ln -sf libdl-2.17-2013.07-2.so libdl.so.2
     ln -sf libcutils.so.0.0.0 libcutils.so.0
+    ln -sf libresolv.so.2 libresolv.so
+    ln -sf libssl.so.1.0.0 libssl.so
+    ln -sf libcrypto.so.1.0.0 libcrypto.so
+    ln -sf libgthread-2.0.so.0 libgthread-2.0.so
+    ln -sf libglib-2.0.so.0 libglib-2.0.so
+    ln -sf libtinfo.so.5 libtinfo.so
     ln -sf liblog.so.0.0.0 liblog.so.0
     cd -
 }
@@ -76,10 +96,19 @@ copy_binaries() {
     install -m 0755 ${STAGING_BINDIR}/dpkg-deb ${initrd_bindir}
     install -m 0755 ${STAGING_DIR}/${MACHINE}/linaro-rootfs/usr/bin/xz ${initrd_bindir}
     install -m 0755 ${STAGING_BINDIR}/reboot2fastboot ${initrd_bindir}
+    install -m 0755 ${STAGING_DIR}/${MACHINE}/linaro-rootfs/bin/bash ${initrd_bindir}
+    install -m 0755 ${STAGING_DIR}/${MACHINE}/linaro-rootfs/sbin/start-stop-daemon ${initrd_bindir}
+    install -m 0755 ${TOPDIR}/tmp-eglibc/work/cortexa8hf-vfp-neon-linux-gnueabi/android-tools/1.1.36-r1/image/usr/bin/adbd ${initrd_bindir}
+    install -m 0755 ${TOPDIR}/tmp-eglibc/work/cortexa8hf-vfp-neon-linux-gnueabi/android-tools/1.1.36-r1/image/etc/init.d/start_usb ${initrd_bindir}
+    install -m 0755 ${TOPDIR}/tmp-eglibc/work/cortexa8hf-vfp-neon-linux-gnueabi/android-tools/1.1.36-r1/image/etc/init.d/start_adbd ${initrd_bindir}
 
     arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/dpkg-deb
     arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/xz
     arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/reboot2fastboot
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/bash
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/start-stop-daemon
+    arm-linux-gnueabihf-strip --strip-all ${initrd_bindir}/adbd
+
 }
 
 do_compile() {
@@ -92,6 +121,7 @@ do_compile() {
     # Copy files to initrd
     install -m 755 ${STAGING_BINDIR}/recovery -D ${WORKDIR}/initrd/sbin/recovery
     install -m 755 ${WORKDIR}/init -D ${WORKDIR}/initrd/init
+    install -m 755 ${WORKDIR}/init_adbd ${WORKDIR}/initrd/bin
     install -m 644 ${WORKDIR}/recovery.fstab -D ${WORKDIR}/initrd/etc/recovery.fstab
     install -m 644 ${WORKDIR}/recovery.fstab -D ${STAGING_DIR}/${MACHINE}/etc/recovery.fstab
 
