@@ -76,11 +76,17 @@ do_compile() {
 do_install() {
     install -d ${D}${sbindir} ${D}${sysconfdir}/init.d ${D}/${sysconfdir}/default ${D}/${sysconfdir}/hostapd
     install -d ${D}/${sysconfdir}/network/if-pre-up.d ${D}/${sysconfdir}/network/if-post-down.d
+    install -m 755 ${S}/hostapd/entropy.dat                      ${D}${sysconfdir}
     install -m 755 ${S}/hostapd/hostapd                      ${D}${sbindir}
     install -m 755 ${S}/hostapd/hostapd_cli                  ${D}${sbindir}
     install -m 644 ${S}/hostapd/hostapd.conf                 ${D}${sysconfdir}/hostapd.conf.template
     install -m 644 ${DL_DIR}/hostapd.default                 ${D}${sysconfdir}/default/hostapd
-    install -m 755 ${DL_DIR}/hostapd.ifupdown                ${D}${sysconfdir}/hostapd/ifupdown.sh
+    sed -n "/HOSTAPD_CONF$/" | sed "s/HOSTAPD_CONF/HOSTAPD_CONF -e \/etc\/entropy.dat/g" ${DL_DIR}/hostapd.ifupdown > ${DL_DIR}/hostapd.ifupdown.tmp
+    
+    #sed "/HOSTAPD_CONF$/" | sed "s/HOSTAPD_CONF/HOSTAPD_CONF -e entropy.dat/g" ${DL_DIR}/hostapd.ifupdown > ${DL_DIR}/hostapd.ifupdown.tmp
+    sed -n "/IF_HOSTAPD$/" | sed "s/ -e \/etc\/entropy.dat=\"$IF_HOSTAPD/=\"$IF_HOSTAPD/g" ${DL_DIR}/hostapd.ifupdown.tmp > ${DL_DIR}/hostapd.ifupdown.complete
+    #sed "/IF_HOSTAPD$/" | sed "s/-e \/etc\/entropy.dat=\"$IF_HOSTAPD/=\"$IF_HOSTAPD/g" ${DL_DIR}/hostapd.ifupdown.tmp > ${DL_DIR}/hostapd.ifupdown.complete
+    install -m 755 ${DL_DIR}/hostapd.ifupdown.complete                ${D}${sysconfdir}/hostapd/ifupdown.sh
     install -m 755 ${DL_DIR}/hostapd.init                    ${D}${sysconfdir}/init.d/hostapd
 }
 
