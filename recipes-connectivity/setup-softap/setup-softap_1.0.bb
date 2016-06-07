@@ -92,7 +92,7 @@ pkg_postinst_${PN}() {
     # configured prior.
     if ( ! grep interface=wlan0 /etc/dnsmasq.conf > /dev/null ); then
         echo "interface=wlan0"                               >> /etc/dnsmasq.conf
-        echo "dhcp-range=192.168.1.10,192.168.1.20,infinite" >> /etc/dnsmasq.conf
+        echo "dhcp-range=192.168.1.10,192.168.1.254,1hr" >> /etc/dnsmasq.conf
     fi
 
     # Lastly, turn off wpa-supplicant and enable hostapd on wlan0. If the qca6234.cfg.lnk exists
