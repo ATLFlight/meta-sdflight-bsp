@@ -54,4 +54,19 @@ ACTION=="remove", KERNEL=="mmcblk1p1", \
     RUN+="/usr/bin/unlink /media/sdcard" \
     RUN+="/bin/umount /mnt/sdcard" 
     
- 
+
+##########################################
+## USB storage
+##########################################
+
+# When devices plugin, mount device into /mnt/USBStorage
+ACTION=="add", KERNEL=="sd[a-z][0-9]", \
+    RUN+="/bin/mkdir -p /mnt/USBStorage", \
+    RUN+="/bin/mount -t vfat /dev/%k /mnt/USBStorage", \
+    RUN+= "sync"
+
+# When device plugout, unmount devides from /mnt/USBStorage
+ACTION=="remove", KERNEL=="sd[a-z][0-9]", \
+    RUN+="sync", \
+    RUN+="/bin/umount /mnt/USBStorage", \
+    RUN+="/bin/rm -rf /mnt/USBStorage" 
