@@ -46,11 +46,21 @@ do_lk_mkimage() {
   kernel_workdir=${WORKDIR}/linux-${MACHINE}-standard-build
   kernel_imgdir=${kernel_workdir}/arch/arm/boot
   kernel_image=${kernel_imgdir}/zImage
-  cmd_line="console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}"
+  if [ -d "${WORKDIR}/deploy-linux-qr-eagle8074-perf" ]; then
+      cmd_line="root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}"
+  elif [ -d "${WORKDIR}/deploy-linux-qr-eagle8074" ]; then
+      cmd_line="console=${serialport},${baudrate},n8 root=${LK_ROOT_DEV} rw rootwait ${LK_CMDLINE_OPTIONS}"
+  fi
 
   # Build final boot image
   # We depend on an initrd.img file being present in the WORKDIR. This will
   # usually be downloaded by the recipe
+
+  if [ -d "${WORKDIR}/deploy-linux-qr-eagle8074-perf" ]; then
+      image_name="perf-boot-${MACHINE}.img"
+  elif [ -d "${WORKDIR}/deploy-linux-qr-eagle8074" ]; then
+      image_name="boot-${MACHINE}.img"
+  fi
 
   # Build with device tree
   set -x
@@ -69,8 +79,10 @@ do_lk_mkimage() {
        --ramdisk_offset 0x02D00000 \
        --cmdline "${cmd_line}" \
        --pagesize 2048 \
-       --output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
-     cp ${master_dt_image} ${DEPLOY_DIR_IMAGE}/
+       --output ${DEPLOY_DIR_IMAGE}/${image_name}
+     if [ -d "${WORKDIR}/deploy-linux-qr-eagle8074" ]; then
+         cp ${master_dt_image} ${DEPLOY_DIR_IMAGE}/
+     fi
   else
      ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${kernel_image} \
        --base 0x80200000 \
@@ -78,10 +90,14 @@ do_lk_mkimage() {
        --ramdisk_offset 0x02D00000 \
        --cmdline "${cmd_line}" \
        --pagesize 2048 \
-       --output ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img
+       --output ${DEPLOY_DIR_IMAGE}/${image_name}
   fi
   install -d ${DEPLOY_DIR_IMAGE}/out
-  cp ${DEPLOY_DIR_IMAGE}/boot-${MACHINE}.img ${DEPLOY_DIR_IMAGE}/out/boot.img
+  if [ -d "${DEPLOY_DIR_IMAGE}/out" ] && [ -d "${WORKDIR}/deploy-linux-qr-eagle8074" ]; then
+      cp ${DEPLOY_DIR_IMAGE}/${image_name} ${DEPLOY_DIR_IMAGE}/out/boot.img
+  elif [ -d "${DEPLOY_DIR_IMAGE}/out" ] && [ -d "${WORKDIR}/deploy-linux-qr-eagle8074-perf" ]; then
+      cp ${DEPLOY_DIR_IMAGE}/${image_name} ${DEPLOY_DIR_IMAGE}/out/perf-boot.img
+  fi
   set +x
 }
 

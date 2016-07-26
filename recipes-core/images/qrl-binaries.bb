@@ -18,6 +18,7 @@ DEPENDS += " \
     glib-2.0 \
     android-tools \
     virtual/kernel \
+    perf-bootimg \
     compat-wireless-${MACHINE} \
     qrl-networking \
     camera-hal \
