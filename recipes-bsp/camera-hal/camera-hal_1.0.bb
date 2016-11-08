@@ -41,6 +41,8 @@ EXTRA_OECONF_append = " --enable-target=msm8974"
 
 FILES_${PN}_append += "/usr/lib/hw/*"
 FILES_${PN} += "/usr/lib/*.so"
+FILES_${PN} += "/usr/include/mm_camera_interface"
+FILES_${PN} += "/usr/include/*.h"
 
 INSANE_SKIP_${PN} = "dev-so"
 INSANE_SKIP_${PN} += "installed-vs-shipped"
