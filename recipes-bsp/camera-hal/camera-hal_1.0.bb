@@ -5,6 +5,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/${LICENSE};md5=550794465ba0ec53
 FILESPATH =+ "${WORKSPACE}:"
 
 SRC_URI = "file://hardware/qcom/camera/"
+SRC_URI += "file://camera-server.conf"
 
 S = "${WORKDIR}/hardware/qcom/camera"
 PR = "r1"
@@ -47,3 +48,7 @@ FILES_${PN} += "/usr/include/*.h"
 INSANE_SKIP_${PN} = "dev-so"
 INSANE_SKIP_${PN} += "installed-vs-shipped"
 INSANE_SKIP_${PN} += "staticdev"
+
+do_install_append() {
+   install -m 0644 ${WORKDIR}/camera-server.conf -D ${D}${sysconfdir}/init/camera-server.conf
+}
