@@ -50,7 +50,9 @@ QRL_SDK_TARBALL_NAME ?= "qrlSDK.tgz"
 # The name used for the sysroots tarball
 QRL_SDK_SYSROOTS_TARBALL_NAME ?= "qrlSysroots.tgz"
 
-QRL_GCC_URL ?= "https://releases.linaro.org/archive/13.08/components/toolchain/binaries"
+# Download this gcc from the specified URL
+QRL_GCC_NAME ?= "gcc-linaro-arm-linux-gnueabihf-4.8-2013.08_linux"
+QRL_GCC_URL  ?= "https://releases.linaro.org/archive/13.08/components/toolchain/binaries"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
@@ -59,6 +61,7 @@ SRC_URI += "file://hello.c"
 SRC_URI += "file://Makefile"
 SRC_URI += "file://${QRL_SDK_INSTALL_SCRIPT}"
 
+#########################################
 ##
 ## Ugh. We need to find a better way to copy sample app files from the
 ## "files" location to a subdir under S. Enumerating each file can get tedious
@@ -80,22 +83,7 @@ do_unpack_append() {
     shutil.copy(src+"/Makefile", dest)
 }
 
-##
-## Function used to normalize the PATH variable. It removes absolute paths
-## referring to the build tree, and makes them point to $SDK_DIR variable
-## 
-normalizeWholePath () {
-   path=$1
-   # Replace all references to build tree with SDK_DIR
-   path=`echo ${path} | awk 'gsub ( "${TMPDIR}", "$\{SDK_DIR\}" )'`
-   path=`echo ${path} | awk 'gsub ( "${QRL_OECORE}", "$\{SDK_DIR\}" )'`
-   path=`echo ${path} | awk 'gsub ( "\\\\${SDK_DIR}/scripts:", "" )'`
-   path=`echo ${path} | awk 'gsub ( "\\\\${SDK_DIR}/bitbake/bin:", "" )'`
-   path=`echo ${path} | awk 'gsub ( "\\\\${SDK_DIR}/build/..", "$\{SDK_DIR\}" )'`
-   # echo ${path} | tr ':' '\n'
-   echo ${path}
-}
-
+#########################################
 ##
 ## Function used to replace $TMPDIR with $SDK_DIR
 ## 
@@ -105,6 +93,7 @@ normalizePath_TMPDIR () {
    echo ${path}
 }
 
+#########################################
 ##
 ## Function used to replace refs. to build tree with $SDK_DIR, specifically for
 ## XXXFLAG variables, e.g. CC_FLAGS
@@ -116,20 +105,31 @@ normalizePath_FLAGS () {
    echo ${path}
 }
 
+#########################################
+##
+## Function used to modify the PATH variable, to add gcc and other native binaries.
+## 
+modifyPath () {
+    newPath="\${SDK_DIR}/${QRL_GCC_NAME}/bin:\$PATH:\${SDK_DIR}/sysroots/x86_64-linux/usr/sbin:\${SDK_DIR}/sysroots/x86_64-linux/usr/bin:\${SDK_DIR}/sysroots/x86_64-linux/sbin:\${SDK_DIR}/sysroots/x86_64-linux/bin"
+    echo ${newPath}
+}
+
+#########################################
 create_environment_script () {
 	script=${S}/environment-setup-${REAL_MULTIMACH_TARGET_SYS}
 	rm -f $script
 	touch $script
 	# For some reason I need to call these functions here, else they aren't
 	# available inside the echo commands below
-	x=$(normalizeWholePath ${PATH})
         x=$(normalizePath_TMPDIR ${PKG_CONFIG_SYSROOT_DIR})
+        x=$(modifyPath)
 	
 	echo 'SDK_DIR=' >> $script
-	echo "export PATH=\"$(normalizeWholePath ${PATH})\"" >> $script
+	echo -n "export PATH=\"" >> $script
+	echo -n $(modifyPath) >> $script
+	echo "\"" >> $script
 	echo "export PKG_CONFIG_SYSROOT_DIR=\"$(normalizePath_TMPDIR ${PKG_CONFIG_SYSROOT_DIR})\"" >> $script
 	echo "export PKG_CONFIG_PATH=\"$(normalizePath_TMPDIR ${PKG_CONFIG_PATH})\"" >> $script
-#	echo 'export CONFIG_SITE="${@siteinfo_get_files(d)}"' >> $script
 	echo "export SDKTARGETSYSROOT=\"$(normalizePath_TMPDIR ${STAGING_DIR_TARGET})\"" >> $script
 	echo "export OECORE_NATIVE_SYSROOT=\"$(normalizePath_TMPDIR ${STAGING_DIR_NATIVE})\"" >> $script
 	echo "export OECORE_TARGET_SYSROOT=\"$(normalizePath_TMPDIR ${STAGING_DIR_TARGET})\"" >> $script
@@ -138,6 +138,7 @@ create_environment_script () {
 	create_toolchain_shared_env_script
 }
 
+#########################################
 create_toolchain_shared_env_script () {
 	echo 'export CC="${TARGET_PREFIX}gcc ${TARGET_CC_ARCH} --sysroot=$SDKTARGETSYSROOT"' >> $script
 	echo 'export CXX="${TARGET_PREFIX}g++ ${TARGET_CC_ARCH} --sysroot=$SDKTARGETSYSROOT"' >> $script
@@ -166,6 +167,7 @@ create_toolchain_shared_env_script () {
 	echo 'export CROSS_COMPILE=${TARGET_PREFIX}' >> $script
 }
 
+#########################################
 ##
 ## Creates the installer script
 ## 
@@ -183,14 +185,95 @@ update_installer_script () {
 }
 
 #########################################
+setup_linux_headers_and_src () {
+    sysrootDir=${1}
+
+    # To create a properly named linux-headers-uname-r link we need the linux version.
+    # There isn't a good OE way of finding the version in this recipe, so just try
+    # to find the directory under lib/modules instead.
+    linux_ver="UNKNOWN"
+    for f in ${sysrootDir}/lib/modules/*${MACHINE}*
+    do
+	linux_ver=$(basename $f)
+    done
+
+    # Ok, now we can create a symlink in the sysroot for /usr/src/linux-headers-<linux_ver>
+    # to point to /usr/include/linux-headers.
+    # Similarly create a symlink /lib/modules/linux-ver/build to point to /usr/src/linux-headers-<linux_ver>
+    # However, these links have to be relative, so cd to the appropriate directory before making the links
+    (
+	if [[ ${linux_ver} != "UNKNOWN" ]]
+	then
+	    cd ${sysrootDir}/usr/src
+	    ln -sf ../include/linux-headers linux-headers-${linux_ver}
+	    cd ${sysrootDir}/lib/modules/${linux_ver}
+	    ln -sf ../../../usr/src/linux-headers-${linux_ver} build
+	else
+	    bbwarn "Error creating link for linux-headers-${linux_ver} in the sysroot because linux version wasn't found"
+	fi
+    )
+}
+
+#########################################
+setup_sysroots () {
+        # We create a new sysroot for packaging:
+        #    - First create the ARM sysroot
+        #       - First bring in the appropriate directories from our open-embedded build
+        #       - Layer in the missing stuff from the Linaro rootfs we've built earlier
+        #       - Do some cleanup and setup for the linux headers
+        #       - Remove some of the directories that are problematic or not needed
+        #    - Next create the native (x86_64) sysroot, in case something is needed from it
+
+        # Create a new location for assembling the sysroot
+	sysrootDir=${WORKDIR}/${1}/${MACHINE}
+	sysrootDirNative=${WORKDIR}/${1}/x86_64-linux
+        mkdir -p ${sysrootDir}
+        mkdir -p ${sysrootDirNative}
+        
+	dirsFromLinaroRootFS="lib usr/lib usr/include"
+	dirsFromOE="lib usr/lib usr/include usr/src usr/share"
+
+	# First copy OE directories
+	for d in ${dirsFromOE}
+	do
+	    # If 'd' contains 'usr', add '/usr' to the destination dir
+	    destDir=${sysrootDir}
+	    if [[ ${d} == *usr* ]]; then destDir=${sysrootDir}/usr; fi
+	    rsync --links --recursive  ${STAGING_DIR_HOST}/${d} ${destDir}
+	done
+
+	for d in ${dirsFromLinaroRootFS}
+
+	# Now layer in Linaro. Notice the --ignore-existing option
+	do
+	    destDir=${sysrootDir}
+	    # If 'd' contains 'usr', add '/usr' to the destination dir
+	    if [[ ${d} == *usr* ]]; then destDir=${sysrootDir}/usr; fi
+	    rsync --links --recursive --ignore-existing ${STAGING_DIR_HOST}/linaro-rootfs/${d} ${destDir}
+	done
+
+	setup_linux_headers_and_src ${sysrootDir}
+
+	# Now do some other cleanup
+	dirsToRemove="usr/lib/arm-linux-gnueabihf lib/terminfo lib/firmware lib/systemd lib/modules/*linaro*"
+	for d in ${dirsToRemove}
+	do
+	    rm -rf ${sysrootDir}/${d}
+	done
+
+	# Finally, the native sysroot
+        rsync --links --recursive  ${STAGING_DIR_NATIVE}/ ${sysrootDirNative}
+}
+	
+#########################################
 create_package () {
-        sleep 2 # Delay to allow sysroots dir to settle
-        tar -zcf ${S}/${QRL_SDK_SYSROOTS_TARBALL_NAME} -C ${TMPDIR} sysroots 
+	sdkSysrootLocation=sysroots
+        setup_sysroots ${sdkSysrootLocation}
+        tar -zcf ${S}/${QRL_SDK_SYSROOTS_TARBALL_NAME} -C ${WORKDIR} ${sdkSysrootLocation}
         tar -zcf ${S}/${QRL_SDK_TARBALL_NAME} -C ${S} README ${QRL_SDK_SYSROOTS_TARBALL_NAME} ${QRL_SDK_INSTALL_SCRIPT} environment-setup-${REAL_MULTIMACH_TARGET_SYS} sample
         deployDir="${DEPLOY_DIR}/sdk"
         mkdir -p $deployDir
-        mv ${S}/${QRL_SDK_TARBALL_NAME} $deployDir
-        rm ${S}/${QRL_SDK_SYSROOTS_TARBALL_NAME}
+        cp ${S}/${QRL_SDK_TARBALL_NAME} $deployDir
 }
 
 #########################################
