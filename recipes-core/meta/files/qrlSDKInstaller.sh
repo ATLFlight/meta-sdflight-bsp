@@ -133,18 +133,23 @@ installSysroots () {
 ## getToolchain
 ################################################################################
 getToolchain () {
-   GCC=%PATTERN_GCC%
-   GCC_URL=%PATTERN_GCC_URL%
+   GCC_4_8="%PATTERN_GCC48%"
+   GCC_4_9="%PATTERN_GCC49%"
+   GCC_URL_4_8="%PATTERN_GCC_URL48%"
+   GCC_URL_4_9="%PATTERN_GCC_URL49%"
    GCC_TAR_EXT=tar.xz
 
    # Check if a newer file exists, and download it
-   echo "[INFO] Check and download toolchain"
+   echo "[INFO] Check gcc4.8 and gcc4.9 toolchains and download if necessary"
    (
       cd ${optSDKDir}
-      wget -N ${GCC_URL}/${GCC}.${GCC_TAR_EXT}
+      wget -N ${GCC_URL_4_8}/${GCC_4_8}.${GCC_TAR_EXT}
+      wget -N ${GCC_URL_4_9}/${GCC_4_9}.${GCC_TAR_EXT}
       # Remove the existing untarred files, and do a fresh untar every time
-      test -e ${GCC} && rm -rf ${GCC}
-      tar xf ${GCC}.${GCC_TAR_EXT}
+      test -e ${GCC_4_8} && rm -rf ${GCC_4_8}
+      test -e ${GCC_4_9} && rm -rf ${GCC_4_9}
+      tar xf ${GCC_4_8}.${GCC_TAR_EXT}
+      tar xf ${GCC_4_9}.${GCC_TAR_EXT}
    )
 }
 

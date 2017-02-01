@@ -28,7 +28,7 @@ How to compile and run the sample app:
 -------------------------------------
 A sample app is included in the SDK tarball. To compile the included sample app:
 > cd /dir/to/extract/sdk/sample
-> source /dir/to/install/sdk/environment-setup-<target>
+> source /dir/to/install/sdk/environment-setup-cortexa8hf-vfp-neon-linux-gnueabi
 > make
 You can now use "adb push" to push the app to target and run it.
 
@@ -40,3 +40,24 @@ environment variables provide $CC, $CFLAGS, etc. variables to the Makefile,
 making it simple to compile/link your code. The environment setup also includes 
 passing --sysroot=xxx to gcc, such that include file and libraries used on the
 target can be linked with your code.
+
+How to choose the gcc version:
+------------------------------
+The environment-setup-cortexa8hf-vfp-neon-linux-gnueabi takes as argument the
+gcc version to be used. It supports gcc4.8 and gcc4.9 only, and gcc4.8 is the 
+default.
+
+E.g to use environment-setup-cortexa8hf-vfp-neon-linux-gnueabi
+> source environment-setup-cortexa8hf-vfp-neon-linux-gnueabi -h
+                                                            ^^^^
+[INFO] environment-setup-cortexa8hf-vfp-neon-linux-gnueabi takes one optional 
+argument, the desired gcc version. You can specify either "gcc4.8" (default) 
+or "gcc4.9"
+
+E.g. to use gcc 4.8
+> source environment-setup-cortexa8hf-vfp-neon-linux-gnueabi
+or
+> source environment-setup-cortexa8hf-vfp-neon-linux-gnueabi gcc4.8
+
+E.g. to use gcc 4.9
+> source environment-setup-cortexa8hf-vfp-neon-linux-gnueabi gcc4.9

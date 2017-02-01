@@ -51,9 +51,10 @@ QRL_SDK_TARBALL_NAME ?= "qrlSDK.tgz"
 QRL_SDK_SYSROOTS_TARBALL_NAME ?= "qrlSysroots.tgz"
 
 # Download this gcc from the specified URL
-QRL_GCC_NAME ?= "gcc-linaro-arm-linux-gnueabihf-4.8-2013.08_linux"
-QRL_GCC_URL  ?= "https://releases.linaro.org/archive/13.08/components/toolchain/binaries"
-
+QRL_GCC_NAME_4_8 ?= "gcc-linaro-arm-linux-gnueabihf-4.8-2013.08_linux"
+QRL_GCC_URL_4_8  ?= "https://releases.linaro.org/archive/13.08/components/toolchain/binaries"
+QRL_GCC_NAME_4_9 ?= "gcc-linaro-4.9-2014.11-x86_64_arm-linux-gnueabihf"
+QRL_GCC_URL_4_9  ?= "https://releases.linaro.org/archive/14.11/components/toolchain/binaries/arm-linux-gnueabihf/"
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
 SRC_URI += "file://README"
@@ -101,8 +102,9 @@ normalizePath_TMPDIR () {
 normalizePath_FLAGS () {
    path=$1
    # Replace all references to build tree with SDK_DIR
-   path=`echo ${path} | awk 'gsub ( "${QRL_OECORE}/build/..", "$\{SDK_DIR\}" )'`
-   echo ${path}
+   path=`echo "${path}" | awk 'sub ( "${QRL_OECORE}/build/../${QRL_GCC_NAME_4_8}/", "\$\{SDK_DIR\}/\$\{GCC_VER\}/" )'`
+   shift
+   echo "${path} $@"
 }
 
 #########################################
@@ -110,7 +112,7 @@ normalizePath_FLAGS () {
 ## Function used to modify the PATH variable, to add gcc and other native binaries.
 ## 
 modifyPath () {
-    newPath="\${SDK_DIR}/${QRL_GCC_NAME}/bin:\$PATH:\${SDK_DIR}/sysroots/x86_64-linux/usr/sbin:\${SDK_DIR}/sysroots/x86_64-linux/usr/bin:\${SDK_DIR}/sysroots/x86_64-linux/sbin:\${SDK_DIR}/sysroots/x86_64-linux/bin"
+    newPath="\${SDK_DIR}/\${GCC_VER}/bin:\$PATH:\${SDK_DIR}/sysroots/x86_64-linux/usr/sbin:\${SDK_DIR}/sysroots/x86_64-linux/usr/bin:\${SDK_DIR}/sysroots/x86_64-linux/sbin:\${SDK_DIR}/sysroots/x86_64-linux/bin"
     echo ${newPath}
 }
 
@@ -123,7 +125,36 @@ create_environment_script () {
 	# available inside the echo commands below
         x=$(normalizePath_TMPDIR ${PKG_CONFIG_SYSROOT_DIR})
         x=$(modifyPath)
-	
+	# The preamble of the script checks if it was invoked with an argument, and if that argument
+	# is "gcc4.8" or "gcc4.9". It uses these to set up the SDK for use with the right gcc version.
+	# The default is gcc4.8
+	cat <<EOF >> $script
+GCC_4_8=${QRL_GCC_NAME_4_8}
+GCC_4_9=${QRL_GCC_NAME_4_9}
+GCC_VER=\${GCC_4_8}
+if [[ \$# -eq 1 ]]; then
+case \${1} in
+   gcc4.8)
+      GCC_VER=\${GCC_4_8}
+      ;;
+   gcc4.9)
+      GCC_VER=\${GCC_4_9}
+      ;;
+   h|help|-h|-help)
+      echo "[INFO] \$0 takes one optional argument, the desired gcc version. You can specify either \"gcc4.8\" (default) or \"gcc4.9\""
+      return
+      ;;
+   *)
+      echo "[ERROR] Unknown argument or unsupported gcc version: \${1}"
+      return
+      ;;
+esac
+elif [[ \$# -gt 1 ]]; then
+   echo "[ERROR] Only one argument is supported"
+   return
+fi
+GCC_DIR=\${SDK_DIR}/\${GCC_VER}
+EOF
 	echo 'SDK_DIR=' >> $script
 	echo -n "export PATH=\"" >> $script
 	echo -n $(modifyPath) >> $script
@@ -157,7 +188,7 @@ create_toolchain_shared_env_script () {
 	echo 'export CONFIGURE_FLAGS="--target=${TARGET_SYS} --host=${TARGET_SYS} --build=${SDK_ARCH}-linux --with-libtool-sysroot=$SDKTARGETSYSROOT"' >> $script
         # Again, need to call this out here, before I can use in echo further down
         x=$(normalizePath_FLAGS ${TARGET_CFLAGS})
- 	echo "export CFLAGS=\"$(normalizePath_FLAGS ${TARGET_CFLAGS})\"" >> $script
+	echo "export CFLAGS=\"$(normalizePath_FLAGS ${TARGET_CFLAGS})\"" >> $script
 	echo "export CXXFLAGS=\"$(normalizePath_FLAGS ${TARGET_CXXFLAGS})\"" >> $script
 	echo "export LDFLAGS=\"$(normalizePath_FLAGS ${TARGET_LDFLAGS})\"" >> $script
 	echo "export CPPFLAGS=\"$(normalizePath_FLAGS ${TARGET_CPPFLAGS})\"" >> $script
@@ -174,12 +205,13 @@ create_toolchain_shared_env_script () {
 update_installer_script () {
 	script=${S}/${QRL_SDK_INSTALL_SCRIPT}
         envFile=environment-setup-${REAL_MULTIMACH_TARGET_SYS}
-        tc=`basename ${EXTERNAL_TOOLCHAIN}`
         sed -i "s|%PATTERN_SDK_DIR%|${SDK_DIR}|" $script
         sed -i "s|%PATTERN_ENV_FILE%|${envFile}|" $script
         sed -i "s|%PATTERN_SYSROOTS_TGZ%|${QRL_SDK_SYSROOTS_TARBALL_NAME}|" $script
-        sed -i "s|%PATTERN_GCC%|${tc}|" $script
-        sed -i "s|%PATTERN_GCC_URL%|${QRL_GCC_URL}|" $script
+        sed -i "s|%PATTERN_GCC48%|${QRL_GCC_NAME_4_8}|" $script
+        sed -i "s|%PATTERN_GCC_URL48%|${QRL_GCC_URL_4_8}|" $script
+        sed -i "s|%PATTERN_GCC49%|${QRL_GCC_NAME_4_9}|" $script
+        sed -i "s|%PATTERN_GCC_URL49%|${QRL_GCC_URL_4_9}|" $script
 	chmod +x $script
 
 }
