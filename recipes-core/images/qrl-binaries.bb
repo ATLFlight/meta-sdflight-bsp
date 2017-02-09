@@ -47,6 +47,7 @@ DEPENDS += " \
     xz \
     libqmi \
     openvpn \
+    gtk+\
 "
 
 PKGLIST_OS = " \
@@ -83,6 +84,7 @@ PKGLIST_OS = " \
     openvpn \
     libselinux0 \
     libpcre1 \
+    libgtk-2.0\
 "
 
 PKGLIST_KERNEL = " \
