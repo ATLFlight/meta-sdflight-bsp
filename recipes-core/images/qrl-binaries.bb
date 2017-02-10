@@ -47,7 +47,21 @@ DEPENDS += " \
     xz \
     libqmi \
     openvpn \
-    gtk+\
+    libxcomposite \
+    libxcursor \
+    libxfixes \
+    libxrandr \
+    libxrender\
+    atk \
+    cairo \
+    fontconfig \
+    freetype \
+    gdk-pixbuf \
+    harfbuzz \
+    pango \
+    pixman \
+    libpng \
+    libxcb \
 "
 
 PKGLIST_OS = " \
@@ -84,7 +98,22 @@ PKGLIST_OS = " \
     openvpn \
     libselinux0 \
     libpcre1 \
-    libgtk-2.0\
+    libxcomposite1 \
+    libxcursor1 \
+    libxfixes3 \
+    libxrandr2 \
+    libxrender1 \
+    libatk-1.0-0 \
+    libcairo2 \
+    libcairo-gobject2 \
+    libfontconfig1 \
+    libfreetype6 \
+    gdk-pixbuf \
+    libharfbuzz0 \
+    pango \
+    libpixman-1-0 \
+    libpng16-16 \
+    libxcb1 \
 "
 
 PKGLIST_KERNEL = " \
