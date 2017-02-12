@@ -47,6 +47,7 @@ DEPENDS += " \
     xz \
     libqmi \
     openvpn \
+    gtk+ \
     libxcomposite \
     libxcursor \
     libxfixes \
@@ -62,6 +63,7 @@ DEPENDS += " \
     pixman \
     libpng \
     libxcb \
+    xdamage \
 "
 
 PKGLIST_OS = " \
@@ -93,9 +95,9 @@ PKGLIST_OS = " \
     ath3k-bluez \
     libhardware \
     power-hal \
-    xz \
     libqmi \
     openvpn \
+    libgtk-2.0 \
     libselinux0 \
     libpcre1 \
     libxcomposite1 \
@@ -114,6 +116,10 @@ PKGLIST_OS = " \
     libpixman-1-0 \
     libpng16-16 \
     libxcb1 \
+    libxft2 \
+    libxcb-render0 \
+    libxcb-shm0 \
+    libxdamage1 \
 "
 
 PKGLIST_KERNEL = " \
