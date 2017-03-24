@@ -3,7 +3,7 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${S}/power.c;endline=28;md5=2652078bff9af7c723ce4b0a48945106"
 
 FILESPATH =+ "${WORKSPACE}:"
-S = "${WORKDIR}/device/qcom/power"
+S = "${WORKDIR}/device/qcom/common/power"
 SRC_URI = "file://device/qcom/common/power"
 PR = "r1"
 

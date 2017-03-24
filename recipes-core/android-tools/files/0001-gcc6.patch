@@ -1,0 +1,50 @@
+diff --git a/include/arch/linux-arm/OEConfig.h b/include/arch/linux-arm/OEConfig.h
+index ac71d02..58edf77 100644
+--- a/include/arch/linux-arm/OEConfig.h
++++ b/include/arch/linux-arm/OEConfig.h
+@@ -39,7 +39,7 @@
+  * HAVE_WIN32_THREADS - use Win32 thread primitives.
+  *  -- combine HAVE_CREATETHREAD, HAVE_CREATEMUTEX, and HAVE__BEGINTHREADEX
+  */
+-#define HAVE_PTHREADS
++//#define HAVE_PTHREADS
+ 
+ /*
+  * Do we have pthread_setname_np()?
+@@ -207,7 +207,7 @@
+ /*
+  * Add any extra platform-specific defines here.
+  */
+-#define __linux__
++//#define __linux__
+ 
+ /*
+  * Define if we have <malloc.h> header
+diff --git a/include/utils/Unicode.h b/include/utils/Unicode.h
+index c8c87c3..885757c 100644
+--- a/include/utils/Unicode.h
++++ b/include/utils/Unicode.h
+@@ -22,8 +22,8 @@
+ 
+ extern "C" {
+ 
+-typedef uint32_t char32_t;
+-typedef uint16_t char16_t;
++//typedef uint32_t char32_t;
++//typedef uint16_t char16_t;
+ 
+ // Standard string functions on char16_t strings.
+ int strcmp16(const char16_t *, const char16_t *);
+diff --git a/libutils/Unicode.cpp b/libutils/Unicode.cpp
+index a66e3bb..bed7338 100644
+--- a/libutils/Unicode.cpp
++++ b/libutils/Unicode.cpp
+@@ -576,7 +576,7 @@ void utf8_to_utf16(const uint8_t* u8str, size_t u8len, char16_t* u16str) {
+ char16_t* utf8_to_utf16_n(const uint8_t* src, size_t srcLen, char16_t* dst, size_t dstLen) {
+     const uint8_t* const u8end = src + srcLen;
+     const uint8_t* u8cur = src;
+-    const uint16_t* const u16end = dst + dstLen;
++    const char16_t* u16end = dst + dstLen;
+     char16_t* u16cur = dst;
+ 
+     while (u8cur < u8end && u16cur < u16end) {

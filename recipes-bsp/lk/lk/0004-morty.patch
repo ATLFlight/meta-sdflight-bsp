@@ -1,0 +1,54 @@
+diff --git a/arch/arm/rules.mk b/arch/arm/rules.mk
+index 783d24f..7748021 100644
+--- a/arch/arm/rules.mk
++++ b/arch/arm/rules.mk
+@@ -122,7 +122,7 @@ ifeq ($(MEMVARS_SET),0)
+ $(error missing MEMBASE or MEMSIZE variable, please set in target rules.mk)
+ endif
+ 
+-LIBGCC := $(shell $(TOOLCHAIN_PREFIX)gcc $(CFLAGS) $(THUMBCFLAGS) -print-libgcc-file-name)
++LIBGCC := $(shell $(CC) $(CFLAGS) $(THUMBCFLAGS) -print-libgcc-file-name)
+ #$(info LIBGCC = $(LIBGCC))
+ 
+ # potentially generated files that should be cleaned out with clean make rule
+diff --git a/lib/openssl/crypto/des/Imakefile b/lib/openssl/crypto/des/Imakefile
+index 1b9b562..871ba2d 100644
+--- a/lib/openssl/crypto/des/Imakefile
++++ b/lib/openssl/crypto/des/Imakefile
+@@ -25,7 +25,7 @@ SRCDIR=$(SRCTOP)/lib/des
+ 
+ DBG= -O
+ INCLUDE= -I$(SRCDIR)
+-CC= cc
++#CC= cc
+ 
+ library_obj_rule()
+ 
+diff --git a/lib/openssl/ssl/Makefile b/lib/openssl/ssl/Makefile
+index 2b275fa..090bc71 100644
+--- a/lib/openssl/ssl/Makefile
++++ b/lib/openssl/ssl/Makefile
+@@ -4,7 +4,7 @@
+ 
+ DIR=	ssl
+ TOP=	..
+-CC=	cc
++#CC=	cc
+ INCLUDES= -I../crypto -I$(TOP) -I../include $(KRB5_INCLUDES)
+ CFLAG=-g
+ MAKEFILE=	Makefile
+diff --git a/makefile b/makefile
+index c093d3e..44054c8 100644
+--- a/makefile
++++ b/makefile
+@@ -149,8 +149,8 @@ DEPS := $(ALLOBJS:%o=%d)
+ 
+ # default to no ccache
+ CCACHE ?= 
+-CC := $(CCACHE) $(TOOLCHAIN_PREFIX)gcc
+-LD := $(TOOLCHAIN_PREFIX)ld
++CC ?= $(CCACHE) $(TOOLCHAIN_PREFIX)gcc
++LD ?= $(TOOLCHAIN_PREFIX)ld
+ OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
+ OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
+ CPPFILT := $(TOOLCHAIN_PREFIX)c++filt

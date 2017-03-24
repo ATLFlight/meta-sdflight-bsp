@@ -1,1 +1,0 @@
-EXTRA_OECONF += "'CPPFLAGS=-I${STAGING_INCDIR}/freetype2'"

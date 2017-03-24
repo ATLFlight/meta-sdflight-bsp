@@ -1,0 +1,41 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          sdcard-mount-check
+# Required-Start:    $udev
+# Required-Stop:     
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Run sdcard-mount-check
+# Description: The purpose of this script is to check that the sd-card 
+#              was successfully mounted, else remove the mount point
+### END INIT INFO
+
+#Check if sdcard is mounted else remove the symlink folder /media/sdcard
+check_sdcard() {
+	if [ "$(mountpoint /mnt/sdcard)" != "/media/sdcard is a mountpoint" ]; then			
+		if [ -L /media/sdcard ]; then
+		  unlink /media/sdcard
+		  echo "SDCARD not inserted. Remove old link"		  
+		fi  		
+	fi
+}
+    
+end script
+case "$1" in
+  start)
+    check_sdcard
+    ;;
+  stop|restart|force-reload|reload)
+	# nothing to do
+    :
+    ;;
+  status)
+    exit 4
+    ;;
+  *)
+    echo "Usage: /etc/init.d/sdcard-mount-check {start|stop|restart|force-reload|reload}"
+    exit 2
+    ;;
+esac
+
+exit 0

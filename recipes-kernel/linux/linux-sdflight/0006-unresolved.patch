@@ -1,0 +1,68 @@
+diff --git a/drivers/gpu/msm/kgsl_iommu.c b/drivers/gpu/msm/kgsl_iommu.c
+index fcbaa9c..4734915 100644
+--- a/drivers/gpu/msm/kgsl_iommu.c
++++ b/drivers/gpu/msm/kgsl_iommu.c
+@@ -1024,7 +1024,7 @@ static int kgsl_iommu_init_sync_lock(struct kgsl_mmu *mmu)
+  *
+  * Return - int - number of commands.
+  */
+-inline unsigned int kgsl_iommu_sync_lock(struct kgsl_mmu *mmu,
++static unsigned int kgsl_iommu_sync_lock(struct kgsl_mmu *mmu,
+ 						unsigned int *cmds)
+ {
+ 	struct kgsl_device *device = mmu->device;
+@@ -1094,7 +1094,7 @@ inline unsigned int kgsl_iommu_sync_lock(struct kgsl_mmu *mmu,
+  *
+  * Return - int - number of commands.
+  */
+-inline unsigned int kgsl_iommu_sync_unlock(struct kgsl_mmu *mmu,
++static unsigned int kgsl_iommu_sync_unlock(struct kgsl_mmu *mmu,
+ 					unsigned int *cmds)
+ {
+ 	struct kgsl_device *device = mmu->device;
+diff --git a/drivers/input/mouse/psmouse-base.c b/drivers/input/mouse/psmouse-base.c
+index 22fe254..a48980d 100644
+--- a/drivers/input/mouse/psmouse-base.c
++++ b/drivers/input/mouse/psmouse-base.c
+@@ -705,6 +705,7 @@ static int psmouse_extensions(struct psmouse *psmouse,
+ {
+ 	bool synaptics_hardware = false;
+ 
++#ifdef CONFIG_MOUSE_PS2_LIFEBOOK
+ /*
+  * We always check for lifebook because it does not disturb mouse
+  * (it only checks DMI information).
+@@ -715,6 +716,7 @@ static int psmouse_extensions(struct psmouse *psmouse,
+ 				return PSMOUSE_LIFEBOOK;
+ 		}
+ 	}
++#endif
+ 
+ /*
+  * Try Kensington ThinkingMouse (we try first, because synaptics probe
+@@ -818,6 +820,7 @@ static int psmouse_extensions(struct psmouse *psmouse,
+ 			return PSMOUSE_TOUCHKIT_PS2;
+ 	}
+ 
++#ifdef CONFIG_MOUSE_PS2_SENTELIC
+ /*
+  * Try Finger Sensing Pad. We do it here because its probe upsets
+  * Trackpoint devices (causing TP_READ_ID command to time out).
+@@ -833,6 +836,7 @@ static int psmouse_extensions(struct psmouse *psmouse,
+ 			max_proto = PSMOUSE_IMEX;
+ 		}
+ 	}
++#endif
+ 
+ /*
+  * Reset to defaults in case the device got confused by extended
+@@ -1790,7 +1794,9 @@ static int __init psmouse_init(void)
+ {
+ 	int err;
+ 
++#ifdef CONFIG_MOUSE_PS2_LIFEBOOK
+ 	lifebook_module_init();
++#endif
+ 	synaptics_module_init();
+ 	hgpk_module_init();
+ 

@@ -1,2 +1,0 @@
-/dev/mmcblk0p15 /lib/firmware ext4 defaults 0 0
-/dev/mmcblk0p14 /mnt/persist ext4 defaults 0 0

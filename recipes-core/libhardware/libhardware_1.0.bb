@@ -1,9 +1,11 @@
+inherit autotools pkgconfig
+
 DESCRIPTION = "Dynamic library loader for hardware modules"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${S}/NOTICE;md5=9645f39e9db895a4aa6e02cb57294595"
 
 FILESPATH =+ "${WORKSPACE}:"
-S = "${WORKDIR}/libhardware"
+S = "${WORKDIR}/hardware/libhardware"
 SRC_URI = "file://hardware/libhardware"
 SRC_URI += "file://0001-Port-libhardware-to-Linux.patch"
 
@@ -12,12 +14,11 @@ PR = "r0"
 
 PACKAGES = "${PN}"
 
-inherit autotools
-
 DEPENDS += "android-tools"
 DEPENDS += "libhardware-headers"
 DEPENDS += "system-headers"
 DEPENDS += "glib-2.0"
+DEPENDS += "pkgconfig-native"
 
 DEBIAN_NOAUTONAME_${PN} = "1"
 

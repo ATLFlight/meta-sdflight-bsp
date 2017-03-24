@@ -1,4 +1,4 @@
-inherit autotools gettext
+inherit autotools gettext pkgconfig
 
 DESCRIPTION = "Tools and libraries from Android"
 LICENSE = "Apache-2.0 & BSD"
@@ -19,22 +19,29 @@ DEPENDS += "zlib"
 DEPENDS += "libselinux"
 DEPENDS += "ext4-utils"
 DEPENDS += "pseudo"
+DEPENDS += "pkgconfig-native"
 
 PACKAGES = "${PN}"
 
 BBCLASSEXTEND = "native"
 
 FILESPATH =+ "${WORKSPACE}:"
+
 S = "${WORKDIR}/system/core"
+B = "${S}"
 
 SRC_URI = "file://system/core/"
-SRC_URI_append_arm = " file://adb.conf"
+SRC_URI += "file://0001-gcc6.patch"
+SRC_URI += "file://0002-HAVE_SYS_UIO_H.patch"
 
-EXTRA_OECONF_arm = "--with-host-os=${HOST_OS} \
-    --with-sanitized-headers=${STAGING_INCDIR}/linux-headers/usr/include"
+EXTRA_OECONF_arm = "--disable-shared \
+    --with-host-os=${HOST_OS} \
+    --with-sanitized-headers=${STAGING_DIR_TARGET}/usr/src/${MACHINE}/include"
 
 INSANE_SKIP_${PN} = "installed-vs-shipped"
 FILES_${PN}-dev += "${includedir}/cutils"
+
+CXXFLAGS_append = " -std=gnu++11"
 
 do_install_append() {
 	install -m 0644 ${S}/include/private/android_filesystem_capability.h -D ${D}${includedir}/private/android_filesystem_capability.h
@@ -42,7 +49,6 @@ do_install_append() {
 }
 
 do_install_append_arm() {
-	install -m 0644 ${WORKDIR}/adb.conf -D ${D}${sysconfdir}/init/adb.conf
 	for h in ${S}/include/cutils/*
 	do
 	  install -m 0644 ${S}/include/cutils/`basename ${h}` -D ${D}${includedir}/cutils/`basename ${h}`

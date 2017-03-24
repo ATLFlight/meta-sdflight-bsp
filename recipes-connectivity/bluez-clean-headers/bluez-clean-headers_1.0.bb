@@ -14,11 +14,11 @@ PACKAGES = "${PN}"
 INSANE_SKIP_${PN} = "installed-vs-shipped"
 
 do_install() {
-    install -d ${D}${includedir}/bluetooth
-    install -m 644 ${S}/bluetooth/bluetooth.h ${D}${includedir}/bluetooth/bluetooth.h
-    install -m 644 ${S}/bluetooth/hci.h ${D}${includedir}/bluetooth/hci.h
-    install -m 644 ${S}/bluetooth/hci_lib.h ${D}${includedir}/bluetooth/hci_lib.h
-    install -m 644 ${S}/bluetooth/l2cap.h ${D}${includedir}/bluetooth/l2cap.h
-    install -m 644 ${S}/bluetooth/rfcomm.h ${D}${includedir}/bluetooth/rfcomm.h
-    install -m 644 ${S}/bluetooth/sco.h ${D}${includedir}/bluetooth/sco.h
+    install -d ${D}${includedir}/bluetooth-clean
+    install -m 644 ${S}/bluetooth/bluetooth.h ${D}${includedir}/bluetooth-clean/bluetooth.h
+    install -m 644 ${S}/bluetooth/hci.h ${D}${includedir}/bluetooth-clean/hci.h
+    install -m 644 ${S}/bluetooth/hci_lib.h ${D}${includedir}/bluetooth-clean/hci_lib.h
+    install -m 644 ${S}/bluetooth/l2cap.h ${D}${includedir}/bluetooth-clean/l2cap.h
+    install -m 644 ${S}/bluetooth/rfcomm.h ${D}${includedir}/bluetooth-clean/rfcomm.h
+    install -m 644 ${S}/bluetooth/sco.h ${D}${includedir}/bluetooth-clean/sco.h
 }

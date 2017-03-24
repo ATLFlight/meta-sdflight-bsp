@@ -1,5 +1,17 @@
-Common targets are:
-    core-image-qrl
-    core-image-qrl-xslim
-    core-image-qrl-xubuntu
+
+============== BUILDING EAGLE8074 COMPLETE IMAGE: ==================
+
+build-sdflight
+
+Builds the Eagle partitions and LK signed image.
+
+===============================================================
+
+Targets to build:
+
+boot-image     - Boot partition
+cache-image    - Firmware partition
+persist-image  - Persist partition
+userdata-image - Rootfs
+lk             - LK signed image
 

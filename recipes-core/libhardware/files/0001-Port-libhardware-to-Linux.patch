@@ -117,12 +117,19 @@ diff --git a/hardware.c b/hardware.c
 index 9651f4c..5a86734 100644
 --- a/hardware.c
 +++ b/hardware.c
-@@ -23,6 +23,8 @@
+@@ -14,6 +14,7 @@
+  * limitations under the License.
+  */
+ 
++#include <stddef.h>
+ #include <hardware/hardware.h>
+ 
+ #include <cutils/properties.h>
+@@ -23,6 +24,7 @@
  #include <pthread.h>
  #include <errno.h>
  #include <limits.h>
 +#include <glib.h>
-+#include <stddef.h>
  
  #define LOG_TAG "HAL"
  #include <utils/Log.h>
@@ -144,7 +151,7 @@ index 9651f4c..5a86734 100644
  
  /**
   * There are a set of variant filename for modules. The form of the filename
-@@ -139,6 +152,7 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
+@@ -139,6 +152,7 @@
       * We also assume that dlopen() is thread-safe.
       */
  
@@ -152,7 +159,7 @@ index 9651f4c..5a86734 100644
      /* Loop through the configuration variants looking for a module */
      for (i=0 ; i<HAL_VARIANT_KEYS_COUNT+1 ; i++) {
          if (i < HAL_VARIANT_KEYS_COUNT) {
-@@ -162,6 +176,13 @@ int hw_get_module_by_class(const char *class_id, const char *inst,
+@@ -162,6 +176,13 @@
              if (access(path, R_OK) == 0) break;
          }
      }

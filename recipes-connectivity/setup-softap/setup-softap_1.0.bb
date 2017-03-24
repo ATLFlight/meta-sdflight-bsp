@@ -1,6 +1,6 @@
 DESCRIPTION = "Common networking scripts"
 LICENSE = "BSD-3-Clause-Clear"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-qr-linux/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-sdflight-bsp/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
 
 RDEPENDS_${PN} = "dnsmasq hostapd"
 
@@ -40,7 +40,9 @@ do_install() {
 }
 
 # Save the user modified conf file
-pkg_prerm_${PN}() {
+
+# FIXME - doesn't work in Morty
+fixme_pkg_prerm_${PN}() {
     file_md5sum() {
         pn=$1
         fn=$2
@@ -54,7 +56,8 @@ pkg_prerm_${PN}() {
     fi
 }
 
-pkg_postinst_${PN}() {
+# FIXME - doesn't work in Morty
+fixme_pkg_postinst_${PN}() {
     install_conf() {
         # Set SSID and install the "live" hostapd.conf
         rand=`od -An -N2 -tu2 /dev/urandom | sed -e 's/ //g'`
@@ -77,6 +80,8 @@ pkg_postinst_${PN}() {
         install_conf
     fi
 
+    # FIXME!! change the hostapd via bbappend
+    #
     # Update the default hostapd file to point to the hostapd.conf in the
     # sysconfdir (e.g /etc) and the set the launch options to be "-dd"
     # Since the /etc/default/hostapd file is added by the hostapd package, we want to first
@@ -87,12 +92,15 @@ pkg_postinst_${PN}() {
         install -m 644 /tmp/hostapd.tmp /etc/default/hostapd
     fi
 
+
+    # FIXME!! This needs to be in a bbappend for dnsmasq-base
+    #
     # Append the dhcp address range to the dnsmasq.conf file. Since the /etc/dnsmasq.conf file is
     # added by the dnsmasq-base package, we want to ensure that it's hasn't already been 
     # configured prior.
     if ( ! grep interface=wlan0 /etc/dnsmasq.conf > /dev/null ); then
         echo "interface=wlan0"                               >> /etc/dnsmasq.conf
-        echo "dhcp-range=192.168.1.10,192.168.1.254,1h" >> /etc/dnsmasq.conf
+        echo "dhcp-range=192.168.1.10,192.168.1.20,infinite" >> /etc/dnsmasq.conf
     fi
 
     # Lastly, turn off wpa-supplicant and enable hostapd on wlan0. If the qca6234.cfg.lnk exists

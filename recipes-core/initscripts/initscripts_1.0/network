@@ -1,0 +1,6 @@
+bringUpNetworking() {
+    ifup eth0 || true
+    ifup wlan0 || true
+    return 0
+}
+

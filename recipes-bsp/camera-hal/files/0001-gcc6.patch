@@ -1,0 +1,30 @@
+diff --git a/libcamera/src/camera_log.h b/libcamera/src/camera_log.h
+index e290eb8..9f830f3 100644
+--- a/libcamera/src/camera_log.h
++++ b/libcamera/src/camera_log.h
+@@ -34,20 +34,20 @@
+ #include <stdio.h>
+ 
+ #define CAM_ERR(fmt, args...) do { \
+-    syslog(LOG_ERR, "%s:%d ERROR: "fmt, __func__, __LINE__, ##args); \
++    syslog(LOG_ERR, "%s:%d ERROR: " fmt, __func__, __LINE__, ##args); \
+ } while (0)
+ 
+ #define CAM_DBG(fmt, args...) do { \
+-    syslog(LOG_DEBUG, "%s:%d DEBUG: "fmt, __func__, __LINE__, ##args); \
++    syslog(LOG_DEBUG, "%s:%d DEBUG: " fmt, __func__, __LINE__, ##args); \
+ } while (0)
+ 
+ #define CAM_INFO(fmt, args...) do { \
+-    syslog(LOG_INFO, "%s:%d INFO: "fmt, __func__, __LINE__, ##args); \
++    syslog(LOG_INFO, "%s:%d INFO: " fmt, __func__, __LINE__, ##args); \
+ } while (0)
+ 
+ #define CAM_PRINT(fmt, args...) do { \
+-    fprintf(stderr, "%s:%d, "fmt "\n", __func__, __LINE__, ##args); \
+-    syslog(LOG_INFO, "%s:%d PRINT: "fmt, __func__, __LINE__, ##args); \
++    fprintf(stderr, "%s:%d, "  fmt "\n", __func__, __LINE__, ##args); \
++    syslog(LOG_INFO, "%s:%d PRINT: " fmt, __func__, __LINE__, ##args); \
+ } while (0)
+ 
+ #endif

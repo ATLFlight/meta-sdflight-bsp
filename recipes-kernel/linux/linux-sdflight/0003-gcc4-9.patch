@@ -1,0 +1,157 @@
+diff --git a/arch/arm/mach-msm/smd_init_dt.c b/arch/arm/mach-msm/smd_init_dt.c
+index 640656c..046f447 100644
+--- a/arch/arm/mach-msm/smd_init_dt.c
++++ b/arch/arm/mach-msm/smd_init_dt.c
+@@ -21,7 +21,7 @@
+ #include <linux/io.h>
+ 
+ #include <mach/msm_ipc_logging.h>
+-#include <smd_private.h>
++#include "smd_private.h"
+ 
+ #define MODULE_NAME "msm_smd"
+ #define IPC_LOG(level, x...) do { \
+diff --git a/drivers/char/mem.c b/drivers/char/mem.c
+index b8028be..8e0ac81 100644
+--- a/drivers/char/mem.c
++++ b/drivers/char/mem.c
+@@ -92,7 +92,7 @@ void __weak unxlate_dev_mem_ptr(unsigned long phys, void *addr)
+ {
+ }
+ 
+-static int get_lock()
++static int get_lock(void)
+ {
+ 	if(atomic_cmpxchg(mem_lock, 1, 0))
+ 		return 0;
+@@ -101,10 +101,9 @@ static int get_lock()
+ 	return -1;
+ }
+ 
+-static void release_lock()
++static void release_lock(void)
+ {
+ 	atomic_set(mem_lock, 1);
+-	return 0;
+ }
+ 
+ #define LOCK_MEM	1
+diff --git a/drivers/cpufreq/cpufreq_interactive.c b/drivers/cpufreq/cpufreq_interactive.c
+index 3a964a5..9e628a8 100644
+--- a/drivers/cpufreq/cpufreq_interactive.c
++++ b/drivers/cpufreq/cpufreq_interactive.c
+@@ -801,7 +801,8 @@ static ssize_t show_target_loads(
+ 		ret += sprintf(buf + ret, "%u%s", target_loads[i],
+ 			       i & 0x1 ? ":" : " ");
+ 
+-	ret += sprintf(buf + --ret, "\n");
++	--ret;
++	ret += sprintf(buf + ret, "\n");
+ 	spin_unlock_irqrestore(&target_loads_lock, flags);
+ 	return ret;
+ }
+@@ -844,7 +845,8 @@ static ssize_t show_above_hispeed_delay(
+ 		ret += sprintf(buf + ret, "%u%s", above_hispeed_delay[i],
+ 			       i & 0x1 ? ":" : " ");
+ 
+-	ret += sprintf(buf + --ret, "\n");
++	--ret;
++	ret += sprintf(buf + ret, "\n");
+ 	spin_unlock_irqrestore(&above_hispeed_delay_lock, flags);
+ 	return ret;
+ }
+diff --git a/drivers/media/platform/msm/camera_v2/sensor/csid/msm_csid.c b/drivers/media/platform/msm/camera_v2/sensor/csid/msm_csid.c
+index 38f609a..cd97d55 100644
+--- a/drivers/media/platform/msm/camera_v2/sensor/csid/msm_csid.c
++++ b/drivers/media/platform/msm/camera_v2/sensor/csid/msm_csid.c
+@@ -38,13 +38,6 @@
+ #define CDBG(fmt, args...) do { } while (0)
+ #endif
+ 
+-static uint32_t default_csid_irq_cnt_mod = 10000;
+-static uint32_t csid_vir_base_array[4] = {0};
+-static uint32_t csid_irq_cnt_array[4] = {0};
+-
+-static uint32_t csid_vir_base = 0;
+-static uint8_t csid_instance = 0;
+-
+ static struct msm_cam_clk_info csid_8960_clk_info[] = {
+ 	{"csi_src_clk", 177780000},
+ 	{"csi_clk", -1},
+@@ -222,6 +215,7 @@ clk_enable_failed:
+ 			csid_vreg_info, ARRAY_SIZE(csid_vreg_info),
+ 			NULL, 0, &csid_dev->csi_vdd, 0);
+ 	}
++	goto vreg_enable_failed;
+ vreg_enable_failed:
+ 	if (CSID_VERSION < CSID_VERSION_V30) {
+ 		msm_camera_config_vreg(&csid_dev->pdev->dev,
+@@ -371,7 +365,7 @@ static int msm_csid_init(struct csid_device *csid_dev, uint32_t *csid_version)
+ 			goto clk_enable_failed;
+ 		}
+ 	}
+-		CDBG("%s:%d called\n", __func__, __LINE__);
++	CDBG("%s:%d called\n", __func__, __LINE__);
+ 	csid_dev->hw_version =
+ 		msm_camera_io_r(csid_dev->base + CSID_HW_VERSION_ADDR);
+ 	CDBG("%s:%d called csid_dev->hw_version %x\n", __func__, __LINE__,
+@@ -396,6 +390,7 @@ clk_enable_failed:
+ 			csid_vreg_info, ARRAY_SIZE(csid_vreg_info),
+ 			NULL, 0, &csid_dev->csi_vdd, 0);
+ 	}
++	goto vreg_enable_failed;
+ vreg_enable_failed:
+ 	if (CSID_VERSION < CSID_VERSION_V30) {
+ 		msm_camera_config_vreg(&csid_dev->pdev->dev,
+diff --git a/drivers/usb/gadget/u_serial.c b/drivers/usb/gadget/u_serial.c
+index 2c2bce1..e73b128 100644
+--- a/drivers/usb/gadget/u_serial.c
++++ b/drivers/usb/gadget/u_serial.c
+@@ -1293,7 +1293,7 @@ static void usb_debugfs_init(struct gs_port *ui_dev, int port_num)
+ 	char buf[48];
+ 
+ 	if (!ui_dev)
+-	return -EINVAL;
++	return;
+ 	
+ 	snprintf(buf, 48, "usb_serial%d", port_num);
+ 	gs_dent = debugfs_create_dir(buf, 0);
+diff --git a/drivers/video/msm/mdss/mdss_mdp_trace.h b/drivers/video/msm/mdss/mdss_mdp_trace.h
+index 33fe3a4..730b7ff 100644
+--- a/drivers/video/msm/mdss/mdss_mdp_trace.h
++++ b/drivers/video/msm/mdss/mdss_mdp_trace.h
+@@ -17,7 +17,7 @@
+ #undef TRACE_SYSTEM
+ #define TRACE_SYSTEM mdss
+ #undef TRACE_INCLUDE_PATH
+-#define TRACE_INCLUDE_PATH .
++#define TRACE_INCLUDE_PATH ../../drivers/video/msm/mdss
+ #undef TRACE_INCLUDE_FILE
+ #define TRACE_INCLUDE_FILE mdss_mdp_trace
+ 
+diff --git a/kernel/timeconst.pl b/kernel/timeconst.pl
+index eb51d76..0461239 100644
+--- a/kernel/timeconst.pl
++++ b/kernel/timeconst.pl
+@@ -370,7 +370,7 @@ if ($hz eq '--can') {
+ 	}
+ 
+ 	@val = @{$canned_values{$hz}};
+-	if (!defined(@val)) {
++	if (!@val) {
+ 		@val = compute_values($hz);
+ 	}
+ 	output($hz, @val);
+diff --git a/sound/soc/msm/qdsp6v2/rtac.c b/sound/soc/msm/qdsp6v2/rtac.c
+index 3fd18b3..98031f5 100644
+--- a/sound/soc/msm/qdsp6v2/rtac.c
++++ b/sound/soc/msm/qdsp6v2/rtac.c
+@@ -25,7 +25,7 @@
+ #include <sound/q6asm-v2.h>
+ #include <sound/q6afe-v2.h>
+ #include <sound/apr_audio-v2.h>
+-#include <q6voice.h>
++#include "q6voice.h"
+ #include "audio_acdb.h"
+ 
+ 

@@ -1,0 +1,46 @@
+diff --git a/libcamera/test/camera_test.cpp b/libcamera/test/camera_test.cpp
+index a11b622..24ec666 100755
+--- a/libcamera/test/camera_test.cpp
++++ b/libcamera/test/camera_test.cpp
+@@ -435,7 +435,6 @@ int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
+     printf("st=%d, sc=%d\n", stride, scanlines);
+ 
+     uint8_t *yPlane, *cbPlane, *crPlane;
+-    uint8_t* planes[3];
+     int strides[3];
+ 
+     yPlane = frame->data;
+@@ -460,9 +459,7 @@ int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
+             count--;
+         }
+     }
+-    planes[0] = yPlane;
+-    planes[1] = cbPlane;
+-    planes[2] = crPlane;
++    const unsigned char* planes[3] = { yPlane, cbPlane, crPlane };
+     strides[0] = stride;
+     strides[1] = 0;
+     strides[2] = 0;
+diff --git a/cameraserver/src/server_test.cpp b/cameraserver/src/server_test.cpp
+index 75a799f..99bb14e 100644
+--- a/cameraserver/src/server_test.cpp
++++ b/cameraserver/src/server_test.cpp
+@@ -496,7 +496,7 @@ int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
+     printf("st=%d, sc=%d\n", stride, scanlines);
+ 
+     uint8_t *yPlane, *cbPlane, *crPlane;
+-    uint8_t* planes[3];
++    const uint8_t* planes[3] = { yPlane, cbPlane, crPlane };
+     int strides[3];
+ 
+     yPlane = frame->data;
+@@ -521,9 +521,6 @@ int CameraTest::compressJpegAndSave(ICameraFrame *frame, char* name)
+             count--;
+         }
+     }
+-    planes[0] = yPlane;
+-    planes[1] = cbPlane;
+-    planes[2] = crPlane;
+     strides[0] = stride;
+     strides[1] = 0;
+     strides[2] = 0;

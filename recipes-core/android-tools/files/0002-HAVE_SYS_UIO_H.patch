@@ -1,0 +1,24 @@
+diff --git a/liblog/Makefile.am b/liblog/Makefile.am
+index 7859bd3..106c7a8 100644
+--- a/liblog/Makefile.am
++++ b/liblog/Makefile.am
+@@ -4,7 +4,6 @@ lib_LTLIBRARIES := liblog.la
+ 
+ liblog_a_CPPFLAGS := -I../include
+ liblog_a_CPPFLAGS += -DHAVE_PTHREADS
+-liblog_a_CPPFLAGS += -DHAVE_SYS_UIO_H
+ liblog_a_CPPFLAGS += -include ../include/arch/linux-arm/OEConfig.h
+ liblog_la_CPPFLAGS = $(liblog_a_CPPFLAGS)
+ 
+diff --git a/logcat/Makefile.am b/logcat/Makefile.am
+index d987907..fea73c0 100644
+--- a/logcat/Makefile.am
++++ b/logcat/Makefile.am
+@@ -10,7 +10,6 @@ logcat_CPPFLAGS = -O2 \
+ 	-D_XOPEN_SOURCE \
+ 	-D_GNU_SOURCE \
+ 	-DHAVE_IOCTL \
+-	-DHAVE_SYS_UIO_H \
+ 	-I../include \
+ 	-include ../include/arch/linux-arm/OEConfig.h
+ 

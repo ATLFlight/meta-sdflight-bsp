@@ -5,18 +5,15 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/${LICENSE};md5=550794465ba0ec53
 PR = "r0"
 PV = "1.0"
 
-SRC_URI = "file://post-boot.conf"
+SRC_URI = "file://post-boot.init"
 
 PACKAGES = "${PN}"
-FILES_${PN} = "/etc/init/post-boot.conf"
+FILES_${PN} = "/etc/init.d/post-boot"
 
 do_install() {
-    dest=/etc/init
+    dest=${sysconfdir}/init.d
     install -d ${D}${dest}
-    install -m 644 ${WORKDIR}/post-boot.conf ${D}${dest}
+    install -m 0755 ${WORKDIR}/post-boot.init ${D}${dest}/post-boot
 }
 
-pkg_postinst_${PN} () {
-    update-rc.d ondemand disable
-    update-rc.d cpufrequtils disable
-}
+# TODO - disable ondemand init script if present

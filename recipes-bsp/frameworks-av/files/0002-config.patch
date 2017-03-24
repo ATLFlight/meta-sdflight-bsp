@@ -1,0 +1,31 @@
+diff --git a/configure.ac b/configure.ac
+index 433e541..f5e5844 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -46,6 +46,7 @@ AC_ARG_WITH([additional-include-directives],
+ 	[additional -I include paths for the C pre-processor])],
+         [CPPFLAGS="$CPPFLAGS -I$withval"])
+ 
++AC_SUBST([MTP_EXTRA_CPPFLAGS])
+ 
+ AC_OUTPUT([ \
+   Makefile \
+diff --git a/media/mtp/Makefile.am b/media/mtp/Makefile.am
+index 4a38d95..5af637f 100644
+--- a/media/mtp/Makefile.am
++++ b/media/mtp/Makefile.am
+@@ -3,13 +3,12 @@ ACLOCAL_AMFLAGS = -I m4
+ bin_PROGRAMS = mtpserver
+ 
+ mtpserver_CPPFLAGS = -Wno-all -Wno-error -Wno-unused-parameter -g -O2
+-mtpserver_CPPFLAGS += -I$(WORKSPACE)/system/core/include -I$(WORKSPACE)/frameworks/av/media/mtp
+-mtpserver_CPPFLAGS += -I$(WORKSPACE)/linux/include
+ mtpserver_CPPFLAGS += -DMTP_DEVICE
+ mtpserver_CPPFLAGS += -DLINUX_ENABLED
+ mtpserver_CPPFLAGS += -DHAVE_PTHREADS
+ mtpserver_CPPFLAGS += -DANDROID_SMP=0
+ mtpserver_CPPFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE=1 -D_LARGEFILE_SOURCE=1
++mtpserver_CPPFLAGS += $(MTP_EXTRA_CPPFLAGS)
+ 
+ mtpserver_LDADD = -lpthread -lutils -lcutils
+ 

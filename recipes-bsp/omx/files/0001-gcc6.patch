@@ -1,0 +1,121 @@
+diff --git a/camera-daemon/src/qcamvid_session.cpp b/camera-daemon/src/qcamvid_session.cpp
+index d9ca2fa..d3d7d23 100644
+--- a/camera-daemon/src/qcamvid_session.cpp
++++ b/camera-daemon/src/qcamvid_session.cpp
+@@ -66,61 +66,61 @@ class VSession : public ISession {
+ protected:
+     /* General VSession Vars */
+     SessionConfig mConfig;
+-    omx::video::encoder::EncoderConfigType encoderConfig_ = {
+-        .eCodec = OMX_VIDEO_CodingAVC,
+-        .eCodecProfile = omx::video::encoder::AVCProfileHigh,
+-        .eCodecLevel = omx::video::encoder::DefaultLevel,
+-        .eControlRate = OMX_Video_ControlRateVariable,
+-        .nResyncMarkerSpacing = 0,
+-        .eResyncMarkerType = omx::video::encoder::RESYNC_MARKER_NONE,
+-        .nIntraRefreshMBCount = 0,
+-        .nFrameWidth = CAMERA_RESOLUTION_DEFAULT_WIDTH,
+-        .nFrameHeight = CAMERA_RESOLUTION_DEFAULT_HEIGHT,
+-        .nOutputFrameWidth = CAMERA_RESOLUTION_DEFAULT_WIDTH,
+-        .nOutputFrameHeight = CAMERA_RESOLUTION_DEFAULT_HEIGHT,
+-        .nDVSXOffset = 0,
+-        .nDVSYOffset = 0,
+-        .nBitrate = ENCODER_DEFAULT_BITRATE,
+-        .nFramerate = ENCODER_DEFAULT_FRAMERATE,
+-        .nRotation = 0,
+-        .nInBufferCount = ENCODER_INPUT_BUF_COUNT,
+-        .nOutBufferCount = ENCODER_OUTPUT_BUF_COUNT,
+-        .cInFileName = "",
+-        .cOutFileName = "",
+-        .nFrames = 30,
+-        .nIntraPeriod = ENCODER_DEFAULT_FRAMERATE * 2,
+-        .nMinQp = 2,
+-        .nMaxQp = 31,
+-        .bProfileMode = OMX_FALSE,
+-        .bExtradata = OMX_FALSE,
+-        .nIDRPeriod = 0,
+-        .nHierPNumLayers = 0,
+-        .nHECInterval = 0,
+-        .nTimeIncRes = 30,
+-        .bEnableShortHeader = OMX_FALSE,
+-        .bCABAC = OMX_TRUE,
+-        .nDeblocker = 1,
+-        .id = 0,
+-        .cancel_flag = 1,
+-        .type = 0,
+-        .quincunx_sampling_flag = 0,
+-        .content_interpretation_type = 0,
+-        .spatial_flipping_flag = 0,
+-        .frame0_flipped_flag = 0,
+-        .field_views_flag = 0,
+-        .current_frame_is_frame0_flag = 0,
+-        .frame0_self_contained_flag = 0,
+-        .frame1_self_contained_flag = 0,
+-        .frame0_grid_position_x = 0,
+-        .frame0_grid_position_y = 0,
+-        .frame1_grid_position_x = 0,
+-        .frame1_grid_position_y = 0,
+-        .reserved_byte = 0,
+-        .repetition_period = 0,
+-        .extension_flag = 0,
+-        .nLTRMode = 0,
+-        .nLTRCount = 0,
+-        .nLTRPeriod = 0,
++    omx::video::encoder::EncoderConfigType encoderConfig_ {
++        OMX_VIDEO_CodingAVC,			// eCodec
++        omx::video::encoder::AVCProfileHigh,	// eCodecProfile
++        omx::video::encoder::DefaultLevel,	// eCodecLevel
++        OMX_Video_ControlRateVariable,		// eControlRate
++        0,					// nResyncMarkerSpacing
++        omx::video::encoder::RESYNC_MARKER_NONE,// eResyncMarkerType
++        0,					// nIntraRefreshMBCount
++        CAMERA_RESOLUTION_DEFAULT_WIDTH,	// nFrameWidth
++        CAMERA_RESOLUTION_DEFAULT_HEIGHT,	// nFrameHeight
++        CAMERA_RESOLUTION_DEFAULT_WIDTH,	// nOutputFrameWidth
++        CAMERA_RESOLUTION_DEFAULT_HEIGHT,	// nOutputFrameHeight
++        0,				// nDVSXOffset
++        0,				// nDVSYOffset
++        ENCODER_DEFAULT_BITRATE,	// nBitrate
++        ENCODER_DEFAULT_FRAMERATE,	// nFramerate
++        0,				// nRotation
++        ENCODER_INPUT_BUF_COUNT, 	// nInBufferCount
++        ENCODER_OUTPUT_BUF_COUNT,	// nOutBufferCount
++        0,				// cInFileName
++        0,				// cOutFileName
++        30,				// nFrames
++        ENCODER_DEFAULT_FRAMERATE * 2,	// nIntraPeriod
++        2,		// nMinQp
++        31,		// nMaxQp
++        OMX_FALSE,	// bProfileMode
++        OMX_FALSE,	// bExtradata
++        0,		// nIDRPeriod
++        0,		// nHierPNumLayers
++        0,		// nHECInterval
++        30,		// nTimeIncRes
++        OMX_FALSE, 	// bEnableShortHeader
++        OMX_TRUE,	// bCABAC
++        1,	// nDeblocker
++        0,	// id
++        1,	// cancel_flag
++        0,	// type
++        0,	// quincunx_sampling_flag
++        0,	// content_interpretation_type
++        0,	// spatial_flipping_flag
++        0,	// frame0_flipped_flag
++        0,	// field_views_flag
++        0,	// current_frame_is_frame0_flag
++        0,	// frame0_self_contained_flag
++        0,	// frame1_self_contained_flag
++        0,	// frame0_grid_position_x
++        0,	// frame0_grid_position_y
++        0,	// frame1_grid_position_x
++        0,	// frame1_grid_position_y
++        0,	// reserved_byte
++        0,	// repetition_period
++        0, 	// extension_flag
++        0,	// nLTRMode
++        0,	// nLTRCount
++        0,	// nLTRPeriod
+     };
+ 
+     /* Encoder Vars */
