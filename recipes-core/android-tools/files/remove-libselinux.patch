@@ -1,0 +1,31 @@
+The following changes were done to trim down the recipe size:
+* removed adbd support
+* removed android-tools-conf
+
+The main idea is to keep only what is strictly needed for make_ext4fs tool.
+
+Signed-off-by: Nicolas Dechesne <nicolas.dechesne at linaro.org>
+---
+ .../android-tools/disable-selinux-support.patch    | 137 +++++++++++++++++++++
+ .../android-tools/reboot-syscall.patch             |  25 ++++
+ .../android-tools/remove-libselinux.patch          |  13 ++
+ .../android-tools/android-tools_4.2.2.bb           |  51 ++++++++
+ 4 files changed, 226 insertions(+)
+ create mode 100644 meta/recipes-devtools/android-tools/android-tools/disable-selinux-support.patch
+ create mode 100644 meta/recipes-devtools/android-tools/android-tools/reboot-syscall.patch
+ create mode 100644 meta/recipes-devtools/android-tools/android-tools/remove-libselinux.patch
+ create mode 100644 meta/recipes-devtools/android-tools/android-tools_4.2.2.bb
+
+diff --git a/debian/makefiles/ext4_utils.mk b/debian/makefiles/ext4_utils.mk
+index cb64916..60e81d6 100644
+--- a/debian/makefiles/ext4_utils.mk
++++ b/debian/makefiles/ext4_utils.mk
+@@ -36,7 +36,7 @@ CPPFLAGS+= -I/usr/include
+ CPPFLAGS+= -I../../core/include
+ CPPFLAGS+= -I../../core/libsparse/include/
+ 
+-LIBS+= -lz -lselinux
++LIBS+= -lz
+ 
+ OBJS= $(SRCS:.c=.o)
+ 

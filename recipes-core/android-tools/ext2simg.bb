@@ -24,10 +24,6 @@ SRC_URI = " \
     file://disable-selinux-support.patch \
     file://remove-libselinux.patch;patchdir=.. \
 "
-# file://adbd-disable-client-authentication.patch 
-# file://add_adbd.patch 
-# file://reboot-syscall.patch 
-# file://android-tools-adbd.service 
 
 S = "${WORKDIR}/android-tools"
 
