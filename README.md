@@ -13,3 +13,5 @@ The meta-sdflight-bsp layer depends on:
 
 License scanning with the [LiD](https://source.codeaurora.org/external/qostg/lid) 
 scanner is enabled with the [meta-srcmap](https://github.qualcomm.com/mcharleb/meta-srcmap) layer.
+
+# THIS IS IN DEVELOPMENT AND IS NOT YET TESTED. THE SW IS PRE-ALPHA.
