@@ -4,7 +4,7 @@
 
 The meta-sdflight-bsp layer depends on:
 
-- [meta-qti-repackage](https://github.com/ATLFlight/meta-qti-repackage) 
+- [meta-qti-repackage](https://github.com/ATLFlight/meta-qti-repackage) (depends on proprietary packages)
 - [meta-repackage](https://github.com/ATLFlight/meta-repackage)
 - [meta-openembedded/meta-oe](http://git.openembedded.org/meta-openembedded/tree/?h=morty)
 - [meta-yocto](https://git.yoctoproject.org/cgit/cgit.cgi/poky/tree/?h=morty)
