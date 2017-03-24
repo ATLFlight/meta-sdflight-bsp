@@ -50,10 +50,6 @@ do_install_append() {
     dest=/usr/bin
     install -d ${D}${dest}
     install -m 0755 ${S}/flight_controller/krait/apps/* -D ${D}${dest}
-
-    dest=/usr/share/sdk_add_on/${PV}
-    install -d ${D}${dest}
-    install ${WORKDIR}/${QTI_LICENSE} ${D}${dest}/${QTI_LICENSE}
 }
 
 INSANE_SKIP_${PN}-firmware += "arch"
