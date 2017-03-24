@@ -25,12 +25,15 @@ WS=$(readlink -f $scriptdir/../..)
 
 export TEMPLATECONF=${WS}/meta-sdflight-bsp/conf 
 
+# Generate build config for creating proprietary packages
 if [ "$1" = "--prebuild" ]; then
 build-prebuilts(){
     bitbake packagegroup-qti-prebuilt
 }
     source ${WS}/oe-init-build-env build &&  \
     sed -i 's/meta-qti-repackage/meta-qti/' conf/bblayers.conf
+
+# Generate build config that uses prebuilt packages
 else
     source ${WS}/oe-init-build-env build
 fi
