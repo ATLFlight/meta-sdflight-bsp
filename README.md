@@ -1,4 +1,4 @@
-# meta-sdflight-bsp layer for Snapdragon Flight Eagle board
+# meta-sdflight-bsp layer for Snapdragon Flight board
 
 ## Layer dependencies
 
