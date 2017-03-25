@@ -61,10 +61,10 @@ IMAGE_INSTALL += "adreno200"
 IMAGE_INSTALL += "math-cl"
 
 #IMAGE_INSTALL += "ath3k-bluez"
-IMAGE_INSTALL += "qrl-scripts"
+IMAGE_INSTALL += "sdflight-scripts"
 #IMAGE_INSTALL += "recovery"
 #IMAGE_INSTALL += "recovery-image"
-IMAGE_INSTALL += "recovery-script"
+#IMAGE_INSTALL += "recovery-script"
 #IMAGE_INSTALL += "signapk-java"
 
 # Nodejs
