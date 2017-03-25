@@ -2,7 +2,7 @@ inherit autotools pkgconfig
 
 DESCRIPTION = "ext4-utils library"
 LICENSE = "Apache-2.0"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta-sdflight/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta-sdflight-bsp/COPYING;md5=7b4fa59a65c2beb4b3795e2b3fbb8551"
 
 DEPENDS += "libsparse zlib libselinux pkgconfig-native"
 
